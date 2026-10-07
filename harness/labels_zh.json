@@ -190,5 +190,48 @@
     "metrics": "指标快照 metrics.csv",
     "run": "运行设定 run.json",
     "report": "最终报告"
+  },
+  "report": {
+    "weekly_title": "每周明细（{group}，各次重复均值）",
+    "weekly_cols": [
+      "周",
+      "完成项数",
+      "每项成本（美元）",
+      "平均输入 token",
+      "平均调试次数",
+      "维护花费占比"
+    ],
+    "cum_title": "8 周累计完成项数",
+    "ratio_title": "后期（第 6–8 周）与前期（第 1–3 周）每项成本比值",
+    "rep_col": "第 {rep} 次",
+    "group_col": "组别",
+    "mean_col": "均值",
+    "range_col": "范围",
+    "corr_title": "指标与每项成本的相关性（周初指标 vs 当周每项成本，合并各次重复）",
+    "corr_cols": [
+      "组别",
+      "指标",
+      "样本数",
+      "Pearson",
+      "Spearman"
+    ],
+    "forecast_title": "周初预计与周末实际完成项数的误差",
+    "forecast_cols": [
+      "组别",
+      "平均误差（预计 − 实际）",
+      "平均绝对误差",
+      "周数"
+    ],
+    "overspend_title": "超支与维护触发",
+    "overspend_cols": [
+      "组别",
+      "单项超支次数",
+      "周超支次数",
+      "维护花费占比",
+      "维护任务次数",
+      "维护任务回滚次数"
+    ],
+    "inf": "∞（后期无完成项）",
+    "na": "–"
   }
 }

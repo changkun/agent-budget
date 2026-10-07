@@ -36,8 +36,10 @@ docs/data/         raw logs: <phase>/<hypothesis>/{tasks,weeks,metrics}.csv and 
 site/              website used in the real run
 backlog/           backlog items and calibration items for the real run
 acceptance/        acceptance tests, kept outside the working copies
-work/              working copies for the real run (not committed)
 ```
+
+Working copies for the real run live outside the repository (`/home/user/agent-work`, see
+`config/real.toml`) and are never committed; only logs and end-of-week metrics are.
 
 ## Usage
 
@@ -48,6 +50,11 @@ python3 -m harness sim all        # run both simulated hypotheses and rebuild th
 python3 -m harness dashboard      # rebuild docs/index.html from docs/data/
 python3 -m harness report         # print summary tables
 python3 -m unittest discover -s tests
+
+python3 -m harness real calibrate # real phase: 6 calibration tasks, budget and cap
+python3 -m harness real run-all   # real phase: all series (resumable at week boundaries)
+python3 -m harness real status
+python3 -m harness build-report   # regenerate REPORT.md tables from docs/report_template.md
 ```
 
 Open `docs/index.html` directly in a browser, or serve `docs/` with GitHub Pages.

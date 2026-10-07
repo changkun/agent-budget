@@ -25,6 +25,7 @@ def main(argv: list[str] | None = None) -> int:
                        choices=[*config.HYPOTHESES, "all"])
     p_sim.add_argument("--no-dashboard", action="store_true")
     sub.add_parser("dashboard")
+    sub.add_parser("build-report")
     p_rep = sub.add_parser("report")
     p_rep.add_argument("--phase", default="sim")
     p_real = sub.add_parser("real")
@@ -52,6 +53,9 @@ def main(argv: list[str] | None = None) -> int:
         if not args.no_dashboard:
             from . import dashboard
             print(dashboard.build())
+    elif args.cmd == "build-report":
+        from . import report
+        print(report.build())
     elif args.cmd == "dashboard":
         from . import dashboard
         print(dashboard.build())
