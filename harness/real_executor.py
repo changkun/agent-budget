@@ -174,19 +174,22 @@ def run_session(prompt: str, cwd: Path, model: str, guard_usd: float, timeout_s:
         transcript.parent.mkdir(parents=True, exist_ok=True)
         transcript.write_text("".join(lines), encoding="utf-8")
 
-    result, per_message = None, {}
+    results, per_message = [], {}
     for line in lines:
         try:
             ev = json.loads(line)
         except ValueError:
             continue
         if ev.get("type") == "result":
-            result = ev
+            results.append(ev)
         elif ev.get("type") == "assistant":
             msg = ev.get("message") or {}
             if msg.get("usage") and msg.get("id"):
                 per_message[msg["id"]] = (msg.get("model", model), msg["usage"])
-    return {"result": result, "per_message": per_message, "timed_out": timed_out,
+    # A session that starts background tasks can emit several result events. Each one's
+    # `usage` covers only its own turn; `modelUsage` and `total_cost_usd` are cumulative.
+    return {"result": results[-1] if results else None, "results": results,
+            "per_message": per_message, "timed_out": timed_out,
             "returncode": proc.returncode, "stderr": stderr[-2000:],
             "duration_s": time.time() - started}
 
@@ -204,13 +207,34 @@ def _split(usage: dict) -> dict:
 
 
 def usage_by_model(session: dict, default_model: str) -> dict[str, dict]:
-    """Token counts per model. Prefer the final result event; fall back to per-message usage."""
-    res = session["result"]
-    if res and res.get("usage"):
+    """Token counts per model for the whole session.
+
+    Sums `usage` over all result events (each covers one turn) and checks the sum against the
+    cumulative `modelUsage` of the last result. Falls back to per-message usage only when the
+    session produced no result event (killed at the timeout); stream events can under-count
+    output tokens, so such sessions are flagged in the log (forced_stop).
+    """
+    results = session.get("results") or ([session["result"]] if session.get("result") else [])
+    results = [r for r in results if r.get("usage")]
+    if results:
+        res = results[-1]
         models = res.get("modelUsage") or {}
         if len(models) <= 1:
             name = next(iter(models), default_model)
-            return {name: _split(res["usage"])}
+            summed = {"input": 0, "cw5": 0, "cw1": 0, "read": 0, "output": 0}
+            for r in results:
+                for k, v in _split(r["usage"]).items():
+                    summed[k] += v
+            mu = models.get(name)
+            if mu:
+                expected = (mu.get("inputTokens", 0), mu.get("cacheReadInputTokens", 0),
+                            mu.get("cacheCreationInputTokens", 0), mu.get("outputTokens", 0))
+                got = (summed["input"], summed["read"], summed["cw5"] + summed["cw1"],
+                       summed["output"])
+                if expected != got:
+                    raise UsageUnavailable(f"per-turn usage {got} does not add up to the "
+                                           f"cumulative modelUsage {expected}")
+            return {name: summed}
         out = {}
         for name, mu in models.items():
             out[name] = {"input": mu.get("inputTokens", 0), "cw5": 0,
