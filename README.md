@@ -13,7 +13,7 @@ weekly budget:
 Questions: does the per-item implementation cost of `nomaint` rise week over week, and does
 `maint` deliver more items over 8 weeks?
 
-The plan (in Chinese) is in [PLAN.md](PLAN.md); the final report will be in `REPORT.md`.
+The plan (in Chinese) is in [PLAN.md](PLAN.md); the final report (in Chinese) is in [REPORT.md](REPORT.md).
 
 ## Phases
 
