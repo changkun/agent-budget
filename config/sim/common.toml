@@ -1,0 +1,66 @@
+# Simulation coefficients shared by all hypotheses.
+# EVERY VALUE IN THIS FILE IS AN ASSUMPTION, not a measurement.
+# Hypothesis files (strong.toml, weak.toml) override the [effects] section.
+
+[initial]                      # week-0 codebase state
+loc = 3000                     # ASSUMPTION: non-blank source lines
+dup_ratio = 0.03               # ASSUMPTION: duplicated-line share
+coverage = 0.80                # ASSUMPTION: line coverage
+max_file_lines = 300           # ASSUMPTION: largest source file
+vulns = 0                      # ASSUMPTION
+outdated_deps = 0              # ASSUMPTION
+context_factor = 1.0           # ASSUMPTION: K, staleness of project knowledge (not observable)
+
+[drift]                        # applied once per accepted backlog item
+loc_added_mean = 120           # ASSUMPTION: lines added per item, Normal(mean, sd)
+loc_added_sd = 30              # ASSUMPTION
+loc_added_min = 30             # ASSUMPTION: truncation floor
+dup_ratio_step = 0.0015        # ASSUMPTION: dup ratio increase per item
+new_code_coverage = 0.65       # ASSUMPTION: coverage of newly added lines
+hot_file_share = 0.15          # ASSUMPTION: share of new lines landing in the largest file
+
+[weekly_events]                # drawn once per week, identical for both groups
+p_new_vuln = 0.15              # ASSUMPTION
+p_new_outdated = 0.30          # ASSUMPTION
+
+[tokens]
+fixed_input = 100000           # ASSUMPTION: per-session input independent of the codebase
+explore_input = 500000         # ASSUMPTION: baseline input spent reading code and iterating
+debug_input_ratio = 0.5        # ASSUMPTION: debug session input relative to an impl session
+impl_output = 8000             # ASSUMPTION
+debug_output = 3000            # ASSUMPTION
+cache_read_share = 0.85        # ASSUMPTION (feasibility probe showed ~85-87%)
+cache_write_share = 0.14       # ASSUMPTION; priced as 1h cache writes, as the CLI uses
+noise_sigma = 0.5              # ASSUMPTION: log-sd of the right-skewed factor (mean 1)
+
+[acceptance]
+p_impl = 0.85                  # ASSUMPTION: first-attempt pass rate at baseline
+p_debug = 0.60                 # ASSUMPTION: debug-attempt pass rate at baseline
+
+# Maintenance agents: input = base_input * (1 + xL)^loc_exponent * noise.
+[maint.security]
+base_input = 300000            # ASSUMPTION
+loc_exponent = 0.0             # ASSUMPTION
+output = 4000                  # ASSUMPTION
+p_success = 0.90               # ASSUMPTION: build and existing tests still pass
+
+[maint.tests]
+base_input = 700000            # ASSUMPTION
+loc_exponent = 0.5             # ASSUMPTION
+output = 20000                 # ASSUMPTION
+p_success = 0.85               # ASSUMPTION
+coverage_after_gap = 0.01      # ASSUMPTION: coverage restored to C0 - gap
+
+[maint.refactor]
+base_input = 900000            # ASSUMPTION
+loc_exponent = 0.5             # ASSUMPTION
+output = 25000                 # ASSUMPTION
+p_success = 0.80               # ASSUMPTION
+dup_after_factor = 1.1         # ASSUMPTION: dup ratio restored to D0 * factor
+max_file_after_factor = 1.2    # ASSUMPTION: largest file capped at M0 * factor
+
+[maint.knowledge]
+base_input = 500000            # ASSUMPTION
+loc_exponent = 0.5             # ASSUMPTION
+output = 6000                  # ASSUMPTION
+p_success = 0.95               # ASSUMPTION

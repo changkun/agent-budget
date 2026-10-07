@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+# Working copies for the real phase are never committed.
+work/
+node_modules/
+site/coverage/
+site/dist/

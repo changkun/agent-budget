@@ -1,0 +1,14 @@
+# Maintenance triggers, relative to the week-0 baseline. Fixed before any run.
+
+[security]
+vulns_gt = 0                          # trigger when vulnerability count > this
+
+[tests]
+coverage_rel_drop_gt = 0.05           # (C0 - C) / C0 > this
+
+[refactor]
+dup_rel_rise_gt = 0.30                # (D - D0) / D0 > this
+max_file_rel_rise_gt = 0.50           # (M - M0) / M0 > this
+
+[knowledge]
+avg_input_tokens_rel_rise_gt = 0.20   # (T - T0) / T0 > this

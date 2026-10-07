@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Budget</title>
+<style>
+:root {
+  --bg: #fafaf8; --card: #ffffff; --fg: #1d1d1f; --muted: #6b6b70; --line: #e3e3e0;
+  --grid: #ececea; --warn-bg: #fff6e0; --warn-fg: #7a5200; --accent: #0072B2;
+  --tip-bg: #1d1d1f; --tip-fg: #ffffff; --threshold: #8a8a8a; --budget: #1d1d1f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141416; --card: #1c1c1f; --fg: #ececee; --muted: #a0a0a8; --line: #2e2e33;
+    --grid: #26262b; --warn-bg: #3a2e12; --warn-fg: #ffd98a; --accent: #5fb3ec;
+    --tip-bg: #f2f2f4; --tip-fg: #141416; --threshold: #9a9aa2; --budget: #ececee;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141416; --card: #1c1c1f; --fg: #ececee; --muted: #a0a0a8; --line: #2e2e33;
+  --grid: #26262b; --warn-bg: #3a2e12; --warn-fg: #ffd98a; --accent: #5fb3ec;
+  --tip-bg: #f2f2f4; --tip-fg: #141416; --threshold: #9a9aa2; --budget: #ececee;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--fg); font: 14px/1.55 -apple-system, BlinkMacSystemFont,
+  "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 20px 16px 48px; }
+h1 { font-size: 22px; margin: 0 0 4px; line-height: 1.3; }
+h2 { font-size: 18px; margin: 32px 0 12px; }
+h3 { font-size: 15px; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 0 0 12px; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--card); font-size: 13px; }
+.badge.src-sim { border-color: #b8860b; color: #b8860b; font-weight: 600; }
+.badge.src-real { border-color: #2e8b57; color: #2e8b57; font-weight: 600; }
+.warn { background: var(--warn-bg); color: var(--warn-fg); padding: 8px 12px; border-radius: 8px;
+  margin: 8px 0; font-weight: 600; }
+.conclusion { font-size: 15px; margin: 8px 0 14px; }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+  min-width: 0; }
+.stat-title { color: var(--muted); font-size: 13px; }
+.stat-row { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+.stat-num { font-size: 22px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.stat-note { color: var(--muted); font-size: 12px; }
+.filters { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  padding: 10px 0; margin: 14px 0 4px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.filters label { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); }
+.filters select { font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--line);
+  border-radius: 6px; padding: 3px 6px; }
+.chart { margin-top: 14px; }
+.read { color: var(--muted); font-size: 13px; margin: 0 0 6px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); margin: 4px 0; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 2px; }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { fill: var(--muted); font-size: 11px; }
+.grid line { stroke: var(--grid); }
+.axis { stroke: var(--line); }
+.multi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.multi .card h3 { font-size: 13.5px; }
+details { margin-top: 8px; }
+summary { cursor: pointer; color: var(--accent); font-size: 13px; }
+.tbl-wrap { overflow-x: auto; max-width: 100%; }
+table { border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; margin-top: 6px; }
+th, td { border-bottom: 1px solid var(--line); padding: 3px 8px; text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--muted); font-weight: 600; }
+.tip { position: fixed; z-index: 20; pointer-events: none; background: var(--tip-bg); color: var(--tip-fg);
+  font-size: 12px; padding: 6px 9px; border-radius: 6px; max-width: 320px; line-height: 1.45;
+  box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+.tip b { font-weight: 650; }
+.links a { color: var(--accent); margin-right: 14px; display: inline-block; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 2px 14px; font-size: 13px; }
+.kv div:nth-child(odd) { color: var(--muted); }
+.empty { color: var(--muted); padding: 24px 0; }
+@media (max-width: 760px) {
+  .cards, .multi { grid-template-columns: minmax(0, 1fr); }
+  h1 { font-size: 19px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header id="hdr"></header>
+  <div id="filters" class="filters"></div>
+  <main id="main"></main>
+  <footer id="ftr"></footer>
+</div>
+<div id="tip" class="tip" hidden></div>
+<script>
+"use strict";
+const L = /*__LABELS__*/null;
+const DATA = /*__DATA__*/null;
+const P = L.punct;
+
+const GROUP_COLOR = { nomaint: "#D55E00", maint: "#0072B2" };
+const GROUP_DASH = { nomaint: "6 4", maint: null };
+const TYPE_COLOR = {
+  calib: "#9e9e9e", impl: "#2E8B57", debug: "#C49A00", maint_security: "#7B4FA0",
+  maint_tests: "#D81B60", maint_refactor: "#00897B", maint_knowledge: "#8D6E63",
+  unused: "#cfcfcf", overspend: "#C62828",
+};
+const SPEND_ORDER = ["impl", "debug", "maint_security", "maint_tests", "maint_refactor",
+  "maint_knowledge", "unused"];
+const METRIC_ORDER = ["loc", "max_file_lines", "dup_ratio", "coverage", "vulns", "outdated_deps",
+  "avg_input_tokens", "build_tests"];
+const NS = "http://www.w3.org/2000/svg";
+let uid = 0;
+
+// ---------- small helpers ----------
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function fmtUsd(v) {
+  if (v === null || v === undefined) return "–";
+  const a = Math.abs(v);
+  return "$" + (a >= 10 ? v.toFixed(1) : a >= 1 ? v.toFixed(2) : v.toFixed(3));
+}
+function fmtNum(v, nd) {
+  if (v === null || v === undefined) return "–";
+  return nd === undefined ? (Number.isInteger(v) ? String(v) : v.toFixed(2)) : v.toFixed(nd);
+}
+function fmtTok(v) {
+  if (v === null || v === undefined) return "–";
+  if (Math.abs(v) >= 1e6) return (v / 1e6).toFixed(2) + "M";
+  if (Math.abs(v) >= 1e3) return Math.round(v / 1e3) + "k";
+  return String(Math.round(v));
+}
+function fmtUsdAxis(v) { return "$" + String(+v.toFixed(3)); }
+function fmtPct(v) { return v === null || v === undefined ? "–" : (v * 100).toFixed(1) + "%"; }
+const METRIC_FMT = {
+  loc: v => fmtNum(v, 0), max_file_lines: v => fmtNum(v, 0), dup_ratio: fmtPct, coverage: fmtPct,
+  vulns: v => fmtNum(v, v !== null && !Number.isInteger(v) ? 1 : undefined),
+  outdated_deps: v => fmtNum(v, v !== null && !Number.isInteger(v) ? 1 : undefined),
+  avg_input_tokens: fmtTok, build_tests: v => fmtNum(v, v !== null && !Number.isInteger(v) ? 2 : undefined),
+};
+function fmtLong(n) { return n === null || n === undefined ? "–" : Math.round(n).toLocaleString("en-US"); }
+
+function s(tag, attrs, kids) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs || {})) if (v !== undefined && v !== null) e.setAttribute(k, v);
+  for (const c of [].concat(kids || [])) if (c !== null && c !== undefined) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  return e;
+}
+function h(tag, attrs, kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === undefined || v === null) continue;
+    if (k === "html") e.innerHTML = v; else if (k === "text") e.textContent = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v);
+  }
+  for (const c of [].concat(kids || [])) if (c !== null && c !== undefined) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  return e;
+}
+function niceTicks(lo, hi, n) {
+  if (!(hi > lo)) hi = lo + 1;
+  const raw = (hi - lo) / (n || 5);
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const r = raw / mag;
+  const step = (r >= 7.5 ? 10 : r >= 3.5 ? 5 : r >= 1.5 ? 2 : 1) * mag;
+  const out = [];
+  for (let v = Math.floor(lo / step) * step; v <= hi + step * 0.5; v += step) out.push(+v.toPrecision(12));
+  return out;
+}
+function tipRows(rows) {
+  return rows.filter(r => r).map(([k, v]) => `<div>${esc(k)}: <b>${esc(v)}</b></div>`).join("");
+}
+function hatch(defs, color) {
+  const id = "h" + (++uid);
+  const p = s("pattern", { id, width: 6, height: 6, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
+  p.appendChild(s("rect", { width: 6, height: 6, fill: color, opacity: 0.35 }));
+  p.appendChild(s("rect", { width: 3, height: 6, fill: color }));
+  defs.appendChild(p);
+  return `url(#${id})`;
+}
+
+// ---------- tooltip ----------
+const tip = document.getElementById("tip");
+function showTip(target, x, y) {
+  tip.innerHTML = target.getAttribute("data-tip");
+  tip.hidden = false;
+  const w = tip.offsetWidth, hgt = tip.offsetHeight;
+  let left = x + 14, top = y + 14;
+  if (left + w > window.innerWidth - 8) left = Math.max(8, x - w - 14);
+  if (top + hgt > window.innerHeight - 8) top = Math.max(8, y - hgt - 14);
+  tip.style.left = left + "px"; tip.style.top = top + "px";
+}
+document.addEventListener("mousemove", e => {
+  const t = e.target.closest && e.target.closest("[data-tip]");
+  if (t) showTip(t, e.clientX, e.clientY); else tip.hidden = true;
+});
+document.addEventListener("click", e => {
+  const t = e.target.closest && e.target.closest("[data-tip]");
+  if (t) showTip(t, e.clientX, e.clientY); else tip.hidden = true;
+});
+window.addEventListener("scroll", () => { tip.hidden = true; }, { passive: true });
+
+// ---------- charts ----------
+function lineChart(o) {
+  const W = 640, H = o.height || 250, m = { l: 58, r: 14, t: 12, b: 34 };
+  const xs = o.xs;
+  let ys = [];
+  for (const se of o.series) for (const p of se.points) for (const k of ["y", "lo", "hi"]) if (p[k] !== null && p[k] !== undefined) ys.push(p[k]);
+  for (const t of o.thresholds || []) if (t.y !== null && t.y !== undefined) ys.push(t.y);
+  if (!ys.length) ys = [0, 1];
+  let lo = Math.min(...ys), hi = Math.max(...ys);
+  if (o.zero !== false) lo = Math.min(0, lo);
+  else { const pad = (hi - lo) * 0.08 || Math.abs(hi) * 0.05 || 1; lo -= pad; hi += pad; }
+  if (hi === lo) hi = lo + 1;
+  const tk = niceTicks(lo, hi, 5).filter(v => v >= lo - 1e-12 && v <= hi + (hi - lo));
+  lo = Math.min(lo, tk[0]); hi = Math.max(hi, tk[tk.length - 1]);
+  const x0 = xs[0], x1 = xs[xs.length - 1];
+  const X = v => m.l + (x1 === x0 ? 0.5 : (v - x0) / (x1 - x0)) * (W - m.l - m.r - 16) + 8;
+  const Y = v => H - m.b - (v - lo) / (hi - lo) * (H - m.t - m.b);
+  const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+  const g = s("g", { class: "grid" });
+  for (const v of tk) {
+    g.appendChild(s("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) }));
+    svg.appendChild(s("text", { x: m.l - 6, y: Y(v) + 3.5, "text-anchor": "end" }, (o.yFmt || fmtNum)(v)));
+  }
+  svg.insertBefore(g, svg.firstChild);
+  for (const xv of xs) svg.appendChild(s("text", { x: X(xv), y: H - m.b + 15, "text-anchor": "middle" }, String(xv)));
+  svg.appendChild(s("text", { x: (m.l + W - m.r) / 2, y: H - 3, "text-anchor": "middle" }, L.table.week));
+  if (o.yLabel) svg.appendChild(s("text", { x: 12, y: (m.t + H - m.b) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(m.t + H - m.b) / 2})` }, o.yLabel));
+  svg.appendChild(s("line", { class: "axis", x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }));
+  for (const t of o.thresholds || []) {
+    if (t.y === null || t.y === undefined) continue;
+    svg.appendChild(s("line", { x1: m.l, x2: W - m.r, y1: Y(t.y), y2: Y(t.y), stroke: "var(--threshold)", "stroke-dasharray": "2 3", "stroke-width": 1.2 }));
+    svg.appendChild(s("text", { x: W - m.r, y: Y(t.y) - 4, "text-anchor": "end" }, t.label));
+  }
+  for (const se of o.series) {
+    if (se.band) {
+      let seg = [];
+      const flush = () => {
+        if (seg.length > 1) {
+          const pts = seg.map(p => `${X(p.x)},${Y(p.hi)}`).concat(seg.slice().reverse().map(p => `${X(p.x)},${Y(p.lo)}`));
+          svg.appendChild(s("polygon", { points: pts.join(" "), fill: se.color, opacity: 0.13 }));
+        } else if (seg.length === 1) {
+          const p = seg[0];
+          svg.appendChild(s("line", { x1: X(p.x), x2: X(p.x), y1: Y(p.lo), y2: Y(p.hi), stroke: se.color, "stroke-width": 6, opacity: 0.18 }));
+        }
+        seg = [];
+      };
+      for (const p of se.points) { if (p.lo !== null && p.hi !== null && p.lo !== undefined) seg.push(p); else flush(); }
+      flush();
+    }
+  }
+  for (const se of o.series) {
+    let d = "", pen = false;
+    for (const p of se.points) {
+      if (p.y === null || p.y === undefined) { pen = false; continue; }
+      d += (pen ? "L" : "M") + X(p.x) + "," + Y(p.y); pen = true;
+    }
+    if (d) svg.appendChild(s("path", { d, fill: "none", stroke: se.color, "stroke-width": se.width || 2, "stroke-dasharray": se.dash, opacity: se.opacity }));
+    for (const p of se.points) {
+      if (p.y === null || p.y === undefined) continue;
+      svg.appendChild(s("circle", { cx: X(p.x), cy: Y(p.y), r: se.r || 3.4, fill: se.hollow ? "var(--card)" : se.color, stroke: se.color, "stroke-width": 1.6, opacity: se.opacity, "data-tip": p.tip }));
+    }
+  }
+  for (const mk of o.markers || []) {
+    if (mk.y === null || mk.y === undefined) continue;
+    const cx = X(mk.x), cy = Y(mk.y) - 9;
+    svg.appendChild(s("path", { d: `M${cx - 5},${cy - 4}L${cx + 5},${cy - 4}L${cx},${cy + 4}Z`, fill: mk.color, "data-tip": mk.tip }));
+    if (mk.label) svg.appendChild(s("text", { x: cx + 7, y: cy - 1, style: "font-size:10px" }, mk.label));
+  }
+  return svg;
+}
+
+function legendLines(groups) {
+  return h("div", { class: "legend" }, groups.map(g => h("span", {}, [
+    lineSwatch(GROUP_COLOR[g], GROUP_DASH[g]), `${L.group_names[g]}${P.lp}${L.group_line[g]}${P.rp}`])));
+}
+function lineSwatch(color, dash, hollow) {
+  const sv = s("svg", { viewBox: "0 0 28 10", style: "width:28px;height:10px" });
+  sv.appendChild(s("line", { x1: 0, x2: 28, y1: 5, y2: 5, stroke: color, "stroke-width": 2, "stroke-dasharray": dash }));
+  if (hollow !== undefined) sv.appendChild(s("circle", { cx: 14, cy: 5, r: 3.2, fill: hollow ? "var(--card)" : color, stroke: color, "stroke-width": 1.5 }));
+  return sv;
+}
+function legendTypes(types) {
+  return h("div", { class: "legend" }, types.map(t => h("span", {}, [
+    h("span", { class: "sw", style: `background:${TYPE_COLOR[t]}` }), L.task_type_names[t]])));
+}
+function table(headers, rows) {
+  return h("div", { class: "tbl-wrap" }, h("table", {}, [
+    h("thead", {}, h("tr", {}, headers.map(x => h("th", { text: x })))),
+    h("tbody", {}, rows.map(r => h("tr", {}, r.map(c => h("td", { text: c === null || c === undefined ? "–" : String(c) })))))]));
+}
+function dataTable(headers, rows) {
+  return h("details", {}, [h("summary", { text: L.table.show }), table(headers, rows)]);
+}
+function card(title, read, body) {
+  return h("section", { class: "card chart" }, [h("h3", { text: title }), read ? h("p", { class: "read", text: read }) : null, ...[].concat(body)]);
+}
+
+// ---------- state ----------
+const keys = Object.keys((DATA && DATA.datasets) || {});
+const state = { ds: keys[0] || null, rep: "all" };
+function readHash() {
+  const q = new URLSearchParams(location.hash.slice(1));
+  if (q.get("ds") && keys.includes(q.get("ds"))) state.ds = q.get("ds");
+  if (q.get("rep")) state.rep = q.get("rep");
+}
+function writeHash() { history.replaceState(null, "", `#ds=${state.ds}&rep=${state.rep}`); }
+
+// ---------- sections ----------
+function renderHeader(D, V) {
+  const hdr = document.getElementById("hdr");
+  hdr.innerHTML = "";
+  document.title = L.page_title;
+  hdr.appendChild(h("h1", { text: L.page_title }));
+  hdr.appendChild(h("p", { class: "sub", text: L.page_subtitle }));
+  if (!D) { hdr.appendChild(h("p", { class: "empty", text: L.sections.no_data })); return; }
+  const isSim = D.phase === "sim";
+  const badges = h("div", { class: "badges" }, [
+    h("span", { class: "badge " + (isSim ? "src-sim" : "src-real"), text: `${L.source}${P.colon}${isSim ? L.source_sim : L.source_real}` }),
+    isSim ? h("span", { class: "badge", text: `${L.hypothesis}${P.colon}${L.hypothesis_names[D.hypothesis] || D.hypothesis}` }) : null,
+    h("span", { class: "badge", text: state.rep === "all" ? L.headline.mean_of.replace("{n}", D.reps.length) : L.headline.single_rep.replace("{rep}", state.rep) }),
+  ]);
+  hdr.appendChild(badges);
+  hdr.appendChild(h("div", { class: "warn", text: isSim ? L.sim_disclaimer : L.real_disclaimer.replace("{reps}", D.reps.length) }));
+  hdr.appendChild(h("p", { class: "conclusion", text: V.conclusion }));
+  const H = V.headline, G = D.groups;
+  const multi = state.rep === "all";
+  const rangeNote = sp => multi && sp.min !== null ? `${L.headline.range} ${fmtNum(sp.min, sp.min % 1 ? 2 : 0)}–${fmtNum(sp.max, sp.max % 1 ? 2 : 0)}` : "";
+  const statCard = (title, note, rows) => h("div", { class: "card" }, [
+    h("div", { class: "stat-title", text: title + (note ? `${P.lp}${note}${P.rp}` : "") }),
+    ...rows.map(([g, num, sub]) => h("div", { class: "stat-row" }, [
+      lineSwatch(GROUP_COLOR[g], GROUP_DASH[g]),
+      h("span", { class: "stat-title", text: L.group_names[g] }),
+      h("span", { class: "stat-num", text: num }),
+      sub ? h("span", { class: "stat-note", text: sub }) : null]))]);
+  const cards = h("div", { class: "cards" }, [
+    statCard(L.headline.cum, "", G.map(g => [g, fmtNum(H[g].cum.mean, multi ? 1 : 0), rangeNote(H[g].cum)])),
+    statCard(L.headline.ratio, L.headline.ratio_note, G.map(g => {
+      const r = H[g].ratio;
+      const inf = r.inf ? L.headline.inf_note.replace("{n}", r.inf) : "";
+      return [g, r.mean === null ? (r.inf ? "∞" : "–") : fmtNum(r.mean, 2), [rangeNote(r), inf].filter(x => x).join(P.semi)];
+    })),
+    statCard(L.headline.overspend, L.headline.overspend_note, G.map(g => [g, `${H[g].item_overspends}`, `(${H[g].week_overspends})`])),
+  ]);
+  hdr.appendChild(cards);
+}
+
+function renderFilters(D) {
+  const f = document.getElementById("filters");
+  f.innerHTML = "";
+  if (!D) return;
+  const phases = [...new Set(keys.map(k => k.split("/")[0]))];
+  const hyps = keys.filter(k => k.startsWith(D.phase + "/")).map(k => k.split("/")[1]);
+  const sel = (label, options, value, onchange) => h("label", {}, [label,
+    h("select", { onchange: e => onchange(e.target.value) }, options.map(([v, t]) => {
+      const o = h("option", { value: v, text: t }); if (v === value) o.selected = true; return o; }))]);
+  f.appendChild(sel(L.filters.phase, phases.map(p => [p, L.phase_names[p] || p]), D.phase, v => {
+    state.ds = keys.find(k => k.startsWith(v + "/")); state.rep = "all"; render(); }));
+  f.appendChild(sel(L.filters.hypothesis, hyps.map(x => [x, L.hypothesis_names[x] || x]), D.hypothesis, v => {
+    state.ds = D.phase + "/" + v; state.rep = "all"; render(); }));
+  f.appendChild(sel(L.filters.rep, [["all", L.filters.rep_all], ...D.reps.map(r => [String(r), String(r)])], state.rep, v => {
+    state.rep = v; render(); }));
+}
+
+function bandSeries(D, perGroup, tipFmt) {
+  const multi = state.rep === "all" && D.reps.length > 1;
+  return D.groups.map(g => ({
+    color: GROUP_COLOR[g], dash: GROUP_DASH[g], band: multi,
+    points: perGroup[g].map(p => ({ x: p.week, y: p.mean, lo: p.min, hi: p.max,
+      tip: tipRows([[L.group_names[g], ""], [L.table.week, p.week], [L.table.mean, tipFmt(p.mean)],
+        multi ? [L.table.values, p.values.map(tipFmt).join(", ")] : null]) })),
+  }));
+}
+
+function chartCost(D, V) {
+  const xs = Array.from({ length: D.weeks }, (_, i) => i + 1);
+  const svg = lineChart({ xs, series: bandSeries(D, V.cost, fmtUsd), yLabel: L.charts.cost.y, yFmt: fmtUsdAxis });
+  const rows = [];
+  for (const g of D.groups) for (const p of V.cost[g]) rows.push([L.group_names[g], p.week, fmtUsd(p.mean), fmtUsd(p.min), fmtUsd(p.max), p.values.map(fmtUsd).join(", ")]);
+  return card(L.charts.cost.title, L.charts.cost.read, [legendLines(D.groups), svg,
+    dataTable([L.table.group, L.table.week, L.table.mean, L.table.min, L.table.max, L.table.values], rows)]);
+}
+
+function chartCum(D, V) {
+  const xs = Array.from({ length: D.weeks }, (_, i) => i + 1);
+  const f = v => fmtNum(v, Number.isInteger(v) ? 0 : 1);
+  const svg = lineChart({ xs, series: bandSeries(D, V.cum, f), yLabel: L.charts.cum.y, yFmt: v => fmtNum(v, 0) });
+  const rows = [];
+  for (const g of D.groups) for (const p of V.cum[g]) rows.push([L.group_names[g], p.week, f(p.mean), f(p.min), f(p.max), p.values.map(f).join(", ")]);
+  return card(L.charts.cum.title, L.charts.cum.read, [legendLines(D.groups), svg,
+    dataTable([L.table.group, L.table.week, L.table.mean, L.table.min, L.table.max, L.table.values], rows)]);
+}
+
+function chartSpend(D, V) {
+  const W = 640, H = 270, m = { l: 58, r: 14, t: 12, b: 34 };
+  const weeks = Array.from({ length: D.weeks }, (_, i) => i + 1);
+  let hi = 0;
+  for (const g of D.groups) for (const w of V.spend[g]) {
+    const tot = SPEND_ORDER.reduce((a, k) => a + (w[k] || 0), 0) + (w.overspend || 0);
+    hi = Math.max(hi, tot, w.budget || 0);
+  }
+  const tk = niceTicks(0, hi || 1, 5); hi = Math.max(hi, tk[tk.length - 1]);
+  const Y = v => H - m.b - v / hi * (H - m.t - m.b);
+  const slot = (W - m.l - m.r) / weeks.length, bw = Math.min(26, slot * 0.36);
+  const svg = s("svg", { viewBox: `0 0 ${W} ${H}` });
+  const defs = s("defs"); svg.appendChild(defs);
+  const overFill = hatch(defs, TYPE_COLOR.overspend);
+  const g0 = s("g", { class: "grid" });
+  for (const v of tk) { g0.appendChild(s("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) })); svg.appendChild(s("text", { x: m.l - 6, y: Y(v) + 3.5, "text-anchor": "end" }, fmtUsdAxis(v))); }
+  svg.insertBefore(g0, defs.nextSibling);
+  svg.appendChild(s("text", { x: 12, y: (m.t + H - m.b) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(m.t + H - m.b) / 2})` }, L.charts.spend.y));
+  svg.appendChild(s("text", { x: (m.l + W - m.r) / 2, y: H - 3, "text-anchor": "middle" }, L.table.week));
+  weeks.forEach((wk, i) => {
+    const cx = m.l + slot * (i + 0.5);
+    svg.appendChild(s("text", { x: cx, y: H - m.b + 15, "text-anchor": "middle" }, String(wk)));
+    D.groups.forEach((g, j) => {
+      const w = V.spend[g][i]; if (!w || w.budget === undefined) return;
+      const x = cx + (j === 0 ? -bw - 2 : 2);
+      let acc = 0;
+      const tipBase = [[L.group_names[g], ""], [L.table.week, wk]];
+      for (const k of SPEND_ORDER) {
+        const v = w[k] || 0; if (v <= 0) continue;
+        svg.appendChild(s("rect", { x, y: Y(acc + v), width: bw, height: Math.max(0.5, Y(acc) - Y(acc + v)), fill: TYPE_COLOR[k],
+          "data-tip": tipRows([...tipBase, [L.task_type_names[k], fmtUsd(v)]]) }));
+        acc += v;
+      }
+      if (w.overspend > 0) {
+        svg.appendChild(s("rect", { x, y: Y(acc + w.overspend), width: bw, height: Math.max(0.5, Y(acc) - Y(acc + w.overspend)), fill: overFill,
+          "data-tip": tipRows([...tipBase, [L.task_type_names.overspend, fmtUsd(w.overspend)]]) }));
+        acc += w.overspend;
+      }
+      svg.appendChild(s("rect", { x, y: Y(acc), width: bw, height: Math.max(0, Y(0) - Y(acc)), fill: "none", stroke: GROUP_COLOR[g], "stroke-width": 1.6, "stroke-dasharray": GROUP_DASH[g] }));
+    });
+  });
+  const budget = V.spend[D.groups[0]].find(w => w.budget !== undefined);
+  if (budget) {
+    svg.appendChild(s("line", { x1: m.l, x2: W - m.r, y1: Y(budget.budget), y2: Y(budget.budget), stroke: "var(--budget)", "stroke-width": 1.3 }));
+  }
+  svg.appendChild(s("line", { class: "axis", x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }));
+  const rows = [];
+  for (const g of D.groups) for (const w of V.spend[g]) rows.push([L.group_names[g], w.week, ...SPEND_ORDER.map(k => fmtUsd(w[k])), fmtUsd(w.overspend), fmtUsd(w.carry)]);
+  return card(L.charts.spend.title, L.charts.spend.read, [
+    legendTypes([...SPEND_ORDER, "overspend"]),
+    h("div", { class: "legend" }, [...legendLines(D.groups).children,
+      h("span", {}, [lineSwatch("var(--budget)", null), `${L.table.budget} ${budget ? fmtUsd(budget.budget) : "–"}`])]), svg,
+    dataTable([L.table.group, L.table.week, ...SPEND_ORDER.map(k => L.task_type_names[k]), L.task_type_names.overspend, L.table.carry], rows)]);
+}
+
+function chartMetrics(D, V) {
+  const xs = Array.from({ length: D.weeks + 1 }, (_, i) => i);
+  const multi = state.rep === "all" && D.reps.length > 1;
+  const cards = METRIC_ORDER.map(mk => {
+    const M = V.metrics[mk]; const f = METRIC_FMT[mk];
+    const series = D.groups.map(g => ({
+      color: GROUP_COLOR[g], dash: GROUP_DASH[g], band: multi, r: 2.6, width: 1.8,
+      points: M.groups[g].map(p => ({ x: p.week, y: p.mean, lo: p.min, hi: p.max,
+        tip: tipRows([[L.group_names[g], ""], [L.table.week, p.week], [L.metric_names[mk], f(p.mean)], multi ? [L.table.values, p.values.map(f).join(", ")] : null]) })),
+    }));
+    const thr = M.threshold !== null && M.threshold !== undefined ? [{ y: M.threshold, label: `${L.table.threshold} ${f(M.threshold)}` }] : [];
+    const maintPts = M.groups.maint || [];
+    const markers = Object.entries(M.trig || {}).map(([wk, n]) => {
+      const p = maintPts.find(q => q.week === Number(wk));
+      return { x: Number(wk), y: p ? p.mean : null, color: TYPE_COLOR["maint_" + M.agent],
+        label: multi ? String(n) : "", tip: tipRows([[L.task_type_names["maint_" + M.agent], ""], [L.table.week, wk], [L.table.trigger_count, `${n}/${state.rep === "all" ? D.reps.length : 1}`]]) };
+    });
+    const svg = lineChart({ xs, series, thresholds: thr, markers, height: 200, yFmt: f, zero: ["vulns", "outdated_deps", "build_tests"].includes(mk) });
+    const rows = [];
+    for (const g of D.groups) for (const p of M.groups[g]) rows.push([L.group_names[g], p.week, f(p.mean), f(p.min), f(p.max), M.trig[p.week] && g === "maint" ? M.trig[p.week] : ""]);
+    return h("div", { class: "card" }, [h("h3", { text: L.metric_names[mk] }), svg,
+      dataTable([L.table.group, L.table.week, L.table.mean, L.table.min, L.table.max, L.table.trigger_count], rows)]);
+  });
+  return card(L.charts.metrics.title, L.charts.metrics.read, [legendLines(D.groups), h("div", { class: "multi" }, cards)]);
+}
+
+function chartForecast(D, V) {
+  const xs = Array.from({ length: D.weeks }, (_, i) => i + 1);
+  const f = v => fmtNum(v, 1);
+  const series = [];
+  for (const g of D.groups) {
+    series.push({ color: GROUP_COLOR[g], dash: GROUP_DASH[g], hollow: true, opacity: 0.6, width: 1.4,
+      points: V.forecast[g].map(p => ({ x: p.week, y: p.predicted.mean, tip: tipRows([[L.group_names[g], ""], [L.table.week, p.week], [L.charts.forecast.predicted, f(p.predicted.mean)], [L.charts.forecast.actual, f(p.actual.mean)]]) })) });
+    series.push({ color: GROUP_COLOR[g], dash: GROUP_DASH[g],
+      points: V.forecast[g].map(p => ({ x: p.week, y: p.actual.mean, tip: tipRows([[L.group_names[g], ""], [L.table.week, p.week], [L.charts.forecast.predicted, f(p.predicted.mean)], [L.charts.forecast.actual, f(p.actual.mean)]]) })) });
+  }
+  const svg = lineChart({ xs, series, yLabel: L.charts.forecast.y, yFmt: v => fmtNum(v, 0) });
+  const legend = h("div", { class: "legend" }, D.groups.flatMap(g => [
+    h("span", {}, [lineSwatch(GROUP_COLOR[g], GROUP_DASH[g], true), `${L.group_names[g]} · ${L.charts.forecast.predicted}`]),
+    h("span", {}, [lineSwatch(GROUP_COLOR[g], GROUP_DASH[g], false), `${L.group_names[g]} · ${L.charts.forecast.actual}`])]));
+  const rows = [];
+  for (const g of D.groups) for (const p of V.forecast[g]) rows.push([L.group_names[g], p.week, f(p.predicted.mean), f(p.actual.mean), f(p.predicted.mean === null || p.actual.mean === null ? null : p.predicted.mean - p.actual.mean)]);
+  return card(L.charts.forecast.title, L.charts.forecast.read, [legend, svg,
+    dataTable([L.table.group, L.table.week, L.charts.forecast.predicted, L.charts.forecast.actual, "Δ"], rows)]);
+}
+
+function taskTip(t) {
+  const yn = v => (v ? L.tip.yes : L.tip.no);
+  const rows = [
+    [L.tip.task_type, L.task_type_names[t.task_type] || t.task_type],
+    t.item ? [L.tip.item, t.item] : null,
+    t.item ? [L.tip.debug_index, t.debug_index] : null,
+    [L.tip.input, fmtLong(t.input_tokens)], [L.tip.cache_write, fmtLong(t.cache_write_tokens)],
+    [L.tip.cache_read, fmtLong(t.cache_read_tokens)], [L.tip.output, fmtLong(t.output_tokens)],
+    [L.tip.cost, fmtUsd(t.cost_usd)], [L.tip.item_cost, fmtUsd(t.item_cost_usd)],
+    t.overspend_usd > 0 ? [L.tip.overspend, fmtUsd(t.overspend_usd)] : null,
+    [L.tip.accepted, yn(t.accepted)], [L.tip.rolled_back, yn(t.rolled_back)],
+    t.forced_stop ? [L.tip.forced_stop, L.tip.yes] : null,
+  ];
+  if (t.trigger_metric) {
+    rows.push([L.tip.trigger, t.trigger_metric.split(";").map(x => L.metric_names[x] || x).join(P.sep)]);
+    rows.push([L.tip.trigger_value, t.trigger_value]);
+    rows.push([L.tip.trigger_baseline, t.trigger_baseline]);
+    rows.push([L.tip.trigger_threshold, t.trigger_threshold]);
+  }
+  return tipRows(rows);
+}
+
+function chartTimeline(D, rep) {
+  const run = D.runs[rep] || {};
+  let xmax = 0;
+  for (const g of D.groups) {
+    const R = run[g]; if (!R) continue;
+    for (const w of R.weeks) {
+      const tot = R.tasks.filter(t => t.week === w.week).reduce((a, t) => a + t.cost_usd, 0);
+      xmax = Math.max(xmax, tot, w.budget_usd, w.available_usd);
+    }
+  }
+  xmax = xmax * 1.04 || 1;
+  const panels = D.groups.map(g => {
+    const R = run[g]; if (!R) return null;
+    const W = 640, rowH = 20, gap = 6, lw = 40, top = 6;
+    const H = top + D.weeks * (rowH + gap) + 24;
+    const X = v => lw + v / xmax * (W - lw - 10);
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}` });
+    const defs = s("defs"); svg.appendChild(defs);
+    const fills = {};
+    const failFill = t => fills[t] || (fills[t] = hatch(defs, TYPE_COLOR[t]));
+    for (const w of R.weeks) {
+      const y = top + (w.week - 1) * (rowH + gap);
+      svg.appendChild(s("text", { x: 0, y: y + rowH / 2 + 4 }, `${L.table.week}${w.week}`));
+      svg.appendChild(s("rect", { x: X(0), y, width: X(w.available_usd) - X(0), height: rowH, fill: "var(--grid)" }));
+      let acc = 0;
+      for (const t of R.tasks.filter(t => t.week === w.week)) {
+        const x = X(acc), wd = Math.max(1, X(acc + t.cost_usd) - X(acc));
+        svg.appendChild(s("rect", { x, y, width: wd, height: rowH, fill: t.accepted ? TYPE_COLOR[t.task_type] : failFill(t.task_type),
+          stroke: "var(--card)", "stroke-width": 0.8, "data-tip": taskTip(t) }));
+        if (t.rolled_back && wd > 9) svg.appendChild(s("text", { x: x + wd / 2, y: y + rowH / 2 + 4, "text-anchor": "middle", style: "fill:#fff;font-weight:700;pointer-events:none" }, "↺"));
+        else if (t.rolled_back) svg.appendChild(s("rect", { x, y: y + rowH - 3, width: wd, height: 3, fill: "#111", "pointer-events": "none" }));
+        acc += t.cost_usd;
+      }
+      svg.appendChild(s("line", { x1: X(w.available_usd), x2: X(w.available_usd), y1: y - 2, y2: y + rowH + 2, stroke: "var(--budget)", "stroke-width": 1.6 }));
+      if (w.carryover_in_usd > 0) svg.appendChild(s("line", { x1: X(w.budget_usd), x2: X(w.budget_usd), y1: y - 2, y2: y + rowH + 2, stroke: "var(--budget)", "stroke-width": 1, "stroke-dasharray": "2 2" }));
+    }
+    const tk = niceTicks(0, xmax, 6);
+    for (const v of tk) if (v <= xmax) svg.appendChild(s("text", { x: X(v), y: H - 6, "text-anchor": "middle" }, fmtUsdAxis(v)));
+    return h("div", { style: "margin-top:10px" }, [h("h3", {}, [lineSwatch(GROUP_COLOR[g], GROUP_DASH[g]), " ", L.group_names[g]]), svg]);
+  });
+  const legend = h("div", {}, [
+    legendTypes(["impl", "debug", "maint_security", "maint_tests", "maint_refactor", "maint_knowledge"]),
+    h("div", { class: "legend" }, [
+      h("span", {}, [h("span", { class: "sw", style: `background:${TYPE_COLOR.impl}` }), L.charts.timeline.passed]),
+      h("span", {}, [h("span", { class: "sw", style: `background:repeating-linear-gradient(45deg, ${TYPE_COLOR.impl} 0 3px, transparent 3px 6px)` }), L.charts.timeline.failed]),
+      h("span", { text: `↺ ${L.charts.timeline.rolled_back}` })])]);
+  const rows = [];
+  for (const g of D.groups) for (const t of ((run[g] || {}).tasks || [])) rows.push([L.group_names[g], t.week, t.seq, t.item || "", L.task_type_names[t.task_type], t.debug_index, fmtLong(t.input_tokens + t.cache_write_tokens + t.cache_read_tokens), fmtLong(t.output_tokens), fmtUsd(t.cost_usd), t.accepted ? L.tip.yes : L.tip.no, t.rolled_back ? L.tip.yes : L.tip.no, t.trigger_metric ? `${t.trigger_metric}=${t.trigger_value}` : ""]);
+  return card(L.charts.timeline.title, L.charts.timeline.read, [legend, ...panels,
+    dataTable([L.table.group, L.table.week, "#", L.tip.item, L.tip.task_type, L.tip.debug_index, "input", "output", L.tip.cost, L.tip.accepted, L.tip.rolled_back, L.tip.trigger], rows)]);
+}
+
+function weeklyTable(D, rep) {
+  const run = D.runs[rep] || {};
+  const names = s => s ? s.split(";").filter(x => x).map(a => L.task_type_names["maint_" + a] || a).join(P.sep) : "";
+  const rows = [];
+  for (const g of D.groups) for (const w of ((run[g] || {}).weeks || [])) rows.push([
+    L.group_names[g], w.week, fmtUsd(w.budget_usd), fmtUsd(w.carryover_in_usd), fmtUsd(w.available_usd), fmtUsd(w.spend_maint),
+    fmtUsd(w.spend_impl), fmtUsd(w.spend_debug), fmtUsd(w.unused_usd), fmtUsd(w.week_overspend_usd), fmtNum(w.predicted_items, 1),
+    w.completed_items, w.failed_items, w.item_overspend_count, names(w.triggered), names(w.maint_skipped)]);
+  return card(L.charts.weekly.title, null, table([L.table.group, L.table.week, L.table.budget, L.table.carry, L.table.available, L.table.maint,
+    L.table.impl, L.table.debug, L.table.unused, L.table.week_overspend, L.table.predicted, L.table.completed, L.table.failed,
+    L.table.item_overspend, L.table.triggered, L.table.skipped], rows));
+}
+
+function renderFooter(D) {
+  const f = document.getElementById("ftr");
+  f.innerHTML = "";
+  if (!D) return;
+  const S = D.settings;
+  const prices = S.prices ? Object.entries(S.prices).map(([k, v]) => `${k} ${v}`).join(" · ") : "–";
+  f.appendChild(h("h2", { text: L.sections.settings }));
+  f.appendChild(h("div", { class: "card kv" }, [
+    h("div", { text: L.settings.budget }), h("div", { text: fmtUsd(S.budget) }),
+    h("div", { text: L.settings.cap }), h("div", { text: fmtUsd(S.cap) }),
+    h("div", { text: L.settings.maint_cap }), h("div", { text: fmtUsd(S.maint_cap) }),
+    h("div", { text: L.settings.calib }), h("div", { text: `${fmtUsd(S.calib_mean)} (${S.calib_n})` }),
+    h("div", { text: L.settings.model }), h("div", { text: S.model || "–" }),
+    h("div", { text: L.settings.prices }), h("div", { text: prices }),
+    h("div", { text: L.settings.generated }), h("div", { text: S.generated_at || "–" }),
+    h("div", { text: L.settings.commit }), h("div", { text: (S.git_commit || "–").slice(0, 12) }),
+  ]));
+  f.appendChild(h("h2", { text: L.sections.raw_logs }));
+  f.appendChild(h("div", { class: "card links" }, Object.entries(D.links).map(([k, href]) => h("a", { href, text: L.links[k] || k }))));
+}
+
+function render() {
+  const D = state.ds ? DATA.datasets[state.ds] : null;
+  if (D && state.rep !== "all" && !D.reps.map(String).includes(state.rep)) state.rep = "all";
+  const V = D ? D.views[state.rep] : null;
+  renderHeader(D, V);
+  renderFilters(D);
+  const main = document.getElementById("main");
+  main.innerHTML = "";
+  if (D) {
+    main.appendChild(h("h2", { text: L.sections.overview }));
+    main.appendChild(chartCost(D, V));
+    main.appendChild(chartCum(D, V));
+    main.appendChild(chartSpend(D, V));
+    main.appendChild(chartMetrics(D, V));
+    main.appendChild(chartForecast(D, V));
+    const rep = state.rep === "all" ? String(D.reps[0]) : state.rep;
+    main.appendChild(h("h2", { text: `${L.sections.single_run} · ${L.headline.single_rep.replace("{rep}", rep)}` }));
+    if (state.rep === "all") main.appendChild(h("p", { class: "read", text: L.sections.single_run_note }));
+    main.appendChild(chartTimeline(D, rep));
+    main.appendChild(weeklyTable(D, rep));
+  }
+  renderFooter(D);
+  if (D) writeHash();
+}
+readHash();
+render();
+</script>
+</body>
+</html>

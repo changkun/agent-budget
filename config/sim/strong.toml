@@ -1,0 +1,13 @@
+# Hypothesis "strong": a worse codebase clearly raises cost and failure rate.
+# EVERY VALUE IN THIS FILE IS AN ASSUMPTION.
+name = "strong"
+
+[effects]
+loc_elasticity = 0.5           # ASSUMPTION aL: input grows as (1 + xL)^aL
+dup_input = 0.4                # ASSUMPTION sD: input multiplier (1 + sD*xD + sM*xM)
+max_file_input = 0.15          # ASSUMPTION sM
+context_step = 0.015           # ASSUMPTION dK: knowledge staleness added per accepted item
+context_after_knowledge = 0.80 # ASSUMPTION kappa: K after a successful knowledge agent
+coverage_fail = 1.5            # ASSUMPTION fC: pass rate * exp(-(fC*xC + fD*xD + fM*xM))
+dup_fail = 0.15                # ASSUMPTION fD
+max_file_fail = 0.10           # ASSUMPTION fM

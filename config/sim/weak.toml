@@ -1,0 +1,13 @@
+# Hypothesis "weak": a worse codebase barely changes cost or failure rate.
+# EVERY VALUE IN THIS FILE IS AN ASSUMPTION.
+name = "weak"
+
+[effects]
+loc_elasticity = 0.1           # ASSUMPTION aL
+dup_input = 0.02               # ASSUMPTION sD
+max_file_input = 0.01          # ASSUMPTION sM
+context_step = 0.001           # ASSUMPTION dK
+context_after_knowledge = 0.98 # ASSUMPTION kappa
+coverage_fail = 0.05           # ASSUMPTION fC
+dup_fail = 0.005               # ASSUMPTION fD
+max_file_fail = 0.005          # ASSUMPTION fM

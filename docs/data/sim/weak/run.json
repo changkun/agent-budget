@@ -1,0 +1,167 @@
+{
+  "experiment": {
+    "backlog_size": 40,
+    "budget_multiplier": 4.5,
+    "calibration_items": 6,
+    "cap_multiplier": 1.5,
+    "cap_quantile": 0.8,
+    "carry_overspend": true,
+    "early_weeks": [
+      1,
+      2,
+      3
+    ],
+    "groups": [
+      "nomaint",
+      "maint"
+    ],
+    "late_weeks": [
+      6,
+      7,
+      8
+    ],
+    "maint_cap_multiplier": 1.0,
+    "maint_order": [
+      "security",
+      "tests",
+      "refactor",
+      "knowledge"
+    ],
+    "max_debug": 2,
+    "reps": 3,
+    "runaway_guard_multiplier": 3.0,
+    "seed": "agent-budget-v1",
+    "weeks": 8
+  },
+  "generated_at": "2026-10-07T22:27:44+00:00",
+  "git_commit": "754a906e41691f73c008f972142fe3086bc55d11",
+  "hypothesis": "weak",
+  "model": "claude-sonnet-5-5",
+  "phase": "sim",
+  "plan": {
+    "baseline": {
+      "avg_input_tokens": 516644.0,
+      "build_ok": 1,
+      "coverage": 0.8,
+      "dup_ratio": 0.03,
+      "loc": 3000,
+      "max_file_lines": 300,
+      "outdated_deps": 0,
+      "tests_ok": 1,
+      "vulns": 0
+    },
+    "budget": 1.987673775,
+    "calib_costs": [
+      0.1627415,
+      0.5708337,
+      0.9849245999999999,
+      0.4337114,
+      0.3456499,
+      0.1523706
+    ],
+    "calib_mean": 0.4417052833333333,
+    "calib_quantile": 0.5708337,
+    "cap": 0.8562505499999999,
+    "maint_cap": 0.8562505499999999
+  },
+  "prices": {
+    "cache_read": 0.1,
+    "cache_write_1h": 4.0,
+    "cache_write_5m": 2.5,
+    "input": 2.0,
+    "output": 10.0
+  },
+  "prices_source": "config/prices.toml",
+  "sim_params": {
+    "acceptance": {
+      "p_debug": 0.6,
+      "p_impl": 0.85
+    },
+    "drift": {
+      "dup_ratio_step": 0.0015,
+      "hot_file_share": 0.15,
+      "loc_added_mean": 120,
+      "loc_added_min": 30,
+      "loc_added_sd": 30,
+      "new_code_coverage": 0.65
+    },
+    "effects": {
+      "context_after_knowledge": 0.98,
+      "context_step": 0.001,
+      "coverage_fail": 0.05,
+      "dup_fail": 0.005,
+      "dup_input": 0.02,
+      "loc_elasticity": 0.1,
+      "max_file_fail": 0.005,
+      "max_file_input": 0.01
+    },
+    "initial": {
+      "context_factor": 1.0,
+      "coverage": 0.8,
+      "dup_ratio": 0.03,
+      "loc": 3000,
+      "max_file_lines": 300,
+      "outdated_deps": 0,
+      "vulns": 0
+    },
+    "maint": {
+      "knowledge": {
+        "base_input": 500000,
+        "loc_exponent": 0.5,
+        "output": 6000,
+        "p_success": 0.95
+      },
+      "refactor": {
+        "base_input": 900000,
+        "dup_after_factor": 1.1,
+        "loc_exponent": 0.5,
+        "max_file_after_factor": 1.2,
+        "output": 25000,
+        "p_success": 0.8
+      },
+      "security": {
+        "base_input": 300000,
+        "loc_exponent": 0.0,
+        "output": 4000,
+        "p_success": 0.9
+      },
+      "tests": {
+        "base_input": 700000,
+        "coverage_after_gap": 0.01,
+        "loc_exponent": 0.5,
+        "output": 20000,
+        "p_success": 0.85
+      }
+    },
+    "name": "weak",
+    "tokens": {
+      "cache_read_share": 0.85,
+      "cache_write_share": 0.14,
+      "debug_input_ratio": 0.5,
+      "debug_output": 3000,
+      "explore_input": 500000,
+      "fixed_input": 100000,
+      "impl_output": 8000,
+      "noise_sigma": 0.5
+    },
+    "weekly_events": {
+      "p_new_outdated": 0.3,
+      "p_new_vuln": 0.15
+    }
+  },
+  "thresholds": {
+    "knowledge": {
+      "avg_input_tokens_rel_rise_gt": 0.2
+    },
+    "refactor": {
+      "dup_rel_rise_gt": 0.3,
+      "max_file_rel_rise_gt": 0.5
+    },
+    "security": {
+      "vulns_gt": 0
+    },
+    "tests": {
+      "coverage_rel_drop_gt": 0.05
+    }
+  }
+}

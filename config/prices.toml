@@ -1,0 +1,15 @@
+# USD per million tokens.
+# Source: https://platform.claude.com/docs/en/about-claude/pricing (retrieved 2026-10-07).
+# Note: on 2026-10-07 the Sonnet 5.5 cache-read price was cut from 0.20 to 0.10; the
+# Claude Code CLI still reported costs at 0.20 that day. Costs in the logs are computed
+# from this table, not taken from the CLI.
+
+# Model whose prices the simulation uses.
+sim_model = "claude-sonnet-5-5"
+
+[models."claude-sonnet-5-5"]
+input = 2.0
+cache_write_5m = 2.5
+cache_write_1h = 4.0
+cache_read = 0.10
+output = 10.0
