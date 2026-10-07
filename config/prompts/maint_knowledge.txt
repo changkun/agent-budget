@@ -1,0 +1,10 @@
+You are maintaining the Bookshelf web app in the current directory (a git repository).
+
+Coding agents working on this project read CLAUDE.md at the repository root at the start of every
+task. Recent implementation tasks have needed more context than before (average input tokens
+rose from {baseline} to {value}). Write or update CLAUDE.md so that a new agent can find its way
+quickly: architecture and request flow, where each kind of code lives, conventions (validation,
+errors, views, tests), how to build and test, and known pitfalls. Be concise: at most 150 lines.
+Only edit CLAUDE.md.
+
+Do not commit; the harness commits accepted work.

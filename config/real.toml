@@ -1,0 +1,7 @@
+# Real phase settings. Fixed before the formal run.
+
+model = "claude-sonnet-5-5"        # identical for both groups; full model id, no alias
+total_cap_usd = 600.0              # whole real phase: feasibility + calibration + formal runs
+start_ref = "site-v0"              # tag (commit 4a0ea0c) both groups start from
+work_root = "/home/user/agent-work" # working copies live outside the repository
+parallel = 6                       # (group, rep) series run concurrently

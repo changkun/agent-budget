@@ -22,6 +22,10 @@ carry_overspend = true
 maint_order = ["security", "tests", "refactor", "knowledge"]
 # Real phase only: hard per-session stop at cap * runaway_guard_multiplier (runaway guard).
 runaway_guard_multiplier = 3.0
+# Real phase only: per-session guard during calibration, before the cap is known.
+calibration_guard_usd = 10.0
+# Real phase only: wall-clock limit per agent session.
+session_timeout_s = 1800
 
 early_weeks = [1, 2, 3]
 late_weeks = [6, 7, 8]

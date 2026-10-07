@@ -1,0 +1,13 @@
+You are maintaining the Bookshelf web app in the current directory (a git repository).
+
+`npm audit` reports {value} known vulnerabilities in the dependencies. Fix them by updating
+dependencies (for example `npm audit fix`, or raising versions in package.json and reinstalling).
+While doing so, also update outdated dependencies (`npm outdated`) where this is safe.
+Do not change application behavior.
+
+Before you finish, make sure all of these pass:
+- npm run build
+- npm test
+- node --test "acceptance/*.test.js"   (if the acceptance/ directory has tests; do not edit them)
+
+Do not commit; the harness commits accepted work.

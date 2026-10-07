@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import fcntl
 import json
 from pathlib import Path
 
@@ -59,12 +60,32 @@ class RunLog:
         if unknown:
             raise KeyError(f"unknown {kind} columns: {sorted(unknown)}")
         with open(self.dir / f"{kind}.csv", "a", newline="", encoding="utf-8") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)  # several run processes may append concurrently
             csv.writer(f).writerow([_fmt(row.get(c)) for c in columns])
 
     def write_run_meta(self, meta: dict) -> None:
         with open(self.dir / "run.json", "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=2, ensure_ascii=False, sort_keys=True)
             f.write("\n")
+
+
+def drop_rows(directory: Path, group: str, rep: int, after_week: int) -> None:
+    """Remove rows of one (group, rep) with week > after_week (an interrupted week)."""
+    for name, columns in FILES.items():
+        path = Path(directory) / f"{name}.csv"
+        if not path.exists():
+            continue
+        with open(path, "r+", newline="", encoding="utf-8") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            rows = list(csv.DictReader(f))
+            keep = [r for r in rows if not (r["group"] == group and int(r["rep"]) == rep
+                                            and int(r["week"]) > after_week)]
+            f.seek(0)
+            f.truncate()
+            w = csv.writer(f)
+            w.writerow(columns)
+            for r in keep:
+                w.writerow([r.get(c, "") for c in columns])
 
 
 def read_csv(path: Path) -> list[dict]:

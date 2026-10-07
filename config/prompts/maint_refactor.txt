@@ -1,0 +1,14 @@
+You are maintaining the Bookshelf web app in the current directory (a git repository).
+
+Code health has degraded:
+{details}
+
+Refactor src/ to remove duplicated code and to split overly large files into cohesive modules.
+Do not change behavior, the HTTP API, or the signature of createApp in src/app.js.
+
+Before you finish, make sure all of these pass:
+- npm run build
+- npm test
+- node --test "acceptance/*.test.js"   (if the acceptance/ directory has tests; do not edit them)
+
+Do not commit; the harness commits accepted work.

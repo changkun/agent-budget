@@ -1,0 +1,12 @@
+You are maintaining the Bookshelf web app in the current directory (a git repository).
+
+Line coverage of src/ has dropped from {baseline_pct} to {value_pct} (see `npm run coverage`).
+Add or extend tests under test/ to raise coverage. Test real behavior through the existing
+interfaces (createApp and HTTP requests, or module functions). Do not change application behavior.
+
+Before you finish, make sure all of these pass:
+- npm run build
+- npm test
+- node --test "acceptance/*.test.js"   (if the acceptance/ directory has tests; do not edit them)
+
+Do not commit; the harness commits accepted work.

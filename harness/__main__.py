@@ -3,10 +3,15 @@
     python3 -m harness sim [strong|weak|all]   run the simulated phase
     python3 -m harness dashboard               regenerate docs/index.html
     python3 -m harness report                  print summary tables (markdown)
+    python3 -m harness real calibrate          real phase: run calibration items
+    python3 -m harness real run-all            real phase: run or resume all series
+    python3 -m harness real run --group G --rep N
+    python3 -m harness real status
 """
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 
 from . import config
@@ -22,6 +27,18 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("dashboard")
     p_rep = sub.add_parser("report")
     p_rep.add_argument("--phase", default="sim")
+    p_real = sub.add_parser("real")
+    real_sub = p_real.add_subparsers(dest="real_cmd", required=True)
+    p_cal = real_sub.add_parser("calibrate")
+    p_cal.add_argument("--force", action="store_true")
+    p_run = real_sub.add_parser("run")
+    p_run.add_argument("--group", required=True)
+    p_run.add_argument("--rep", type=int, required=True)
+    p_run.add_argument("--deadline-min", type=float, default=95)
+    p_all = real_sub.add_parser("run-all")
+    p_all.add_argument("--parallel", type=int, default=None)
+    p_all.add_argument("--deadline-min", type=float, default=95)
+    real_sub.add_parser("status")
     args = ap.parse_args(argv)
 
     if args.cmd == "sim":
@@ -38,6 +55,21 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "dashboard":
         from . import dashboard
         print(dashboard.build())
+    elif args.cmd == "real":
+        from . import real_run
+        if args.real_cmd == "calibrate":
+            meta = real_run.cmd_calibrate(force=args.force)
+            plan, est = meta["plan"], meta["estimate"]
+            print(json.dumps({"calib_costs": plan["calib_costs"], "calib_mean": plan["calib_mean"],
+                              "budget": plan["budget"], "cap": plan["cap"],
+                              "baseline": plan["baseline"], "estimate": est}, indent=2))
+        elif args.real_cmd == "run":
+            return real_run.cmd_run(args.group, args.rep, args.deadline_min)
+        elif args.real_cmd == "run-all":
+            parallel = args.parallel or real_run.settings()["parallel"]
+            return real_run.cmd_run_all(parallel, args.deadline_min)
+        elif args.real_cmd == "status":
+            print(real_run.cmd_status())
     elif args.cmd == "report":
         from . import stats
         print(stats.markdown_summary(args.phase))

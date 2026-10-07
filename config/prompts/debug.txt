@@ -1,0 +1,20 @@
+You are working on the Bookshelf web app in the current directory (a git repository).
+
+Task {item_id}: {title}
+{description}
+
+A previous attempt at this task did not pass evaluation. The working tree still contains that
+attempt's changes. Evaluation output (truncated):
+
+{evaluation}
+
+Fix the problem. The acceptance test is acceptance/{item_id}.test.js (helpers in
+acceptance/_helpers.js). Do not edit anything under acceptance/; it is restored from a pristine
+copy before evaluation.
+
+The task is done when all of these pass:
+- node --test "acceptance/*.test.js"   (this task and earlier accepted tasks)
+- npm run build
+- npm test
+
+Do not commit; the harness commits accepted work.

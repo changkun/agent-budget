@@ -115,7 +115,7 @@ def check_trigger(agent: str, m: dict, baseline: dict, thr: dict) -> list[tuple]
         t = thr["refactor"]["dup_rel_rise_gt"]
         d0 = max(baseline["dup_ratio"], thr["refactor"].get("dup_baseline_floor", 0.0))
         if d0 > 0 and (m["dup_ratio"] - d0) / d0 > t + EPS:
-            fired.append(("dup_ratio", m["dup_ratio"], d0, t))
+            fired.append(("dup_ratio", m["dup_ratio"], baseline["dup_ratio"], t))
         t = thr["refactor"]["max_file_rel_rise_gt"]
         m0 = baseline["max_file_lines"]
         if m0 > 0 and (m["max_file_lines"] - m0) / m0 > t + EPS:
