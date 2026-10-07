@@ -1,1 +1,10 @@
 phase,hypothesis,group,rep,week,budget_usd,carryover_in_usd,available_usd,loc,max_file_lines,dup_ratio,coverage,vulns,outdated_deps,build_ok,tests_ok,avg_input_tokens,spend_maint_security,spend_maint_tests,spend_maint_refactor,spend_maint_knowledge,spend_maint,spend_impl,spend_debug,spend_implementation,unused_usd,week_overspend_usd,predicted_items,completed_items,failed_items,item_overspend_count,item_overspend_usd,triggered,maint_skipped
+real,real,nomaint,1,1,0.31834,0,0.31834,664,73,0,0.9543,0,0,1,1,102730.833333,0,0,0,0,0,0.228697,0,0.228697,0.089643,0,4.5,5,0,0,0,,
+real,real,maint,2,1,0.31834,0,0.31834,664,73,0,0.9543,0,0,1,1,102730.833333,0,0,0,0,0,0.232433,0,0.232433,0.085907,0,4.5,5,0,0,0,,
+real,real,nomaint,2,1,0.31834,0,0.31834,664,73,0,0.9543,0,0,1,1,102730.833333,0,0,0,0,0,0.231333,0,0.231333,0.087007,0,4.5,5,0,0,0,,
+real,real,nomaint,3,1,0.31834,0,0.31834,664,73,0,0.9543,0,0,1,1,102730.833333,0,0,0,0,0,0.224269,0,0.224269,0.094071,0,4.5,5,0,0,0,,
+real,real,maint,1,1,0.31834,0,0.31834,664,73,0,0.9543,0,0,1,1,102730.833333,0,0,0,0,0,0.206814,0,0.206814,0.111526,0,4.5,4,0,0,0,,
+real,real,maint,3,1,0.31834,0,0.31834,664,73,0,0.9543,0,0,1,1,102730.833333,0,0,0,0,0,0.231095,0,0.231095,0.087245,0,4.5,5,0,0,0,,
+real,real,nomaint,1,2,0.31834,0,0.31834,727,75,0,0.8992,0,0,1,1,69420.6,0,0,0,0,0,0.246322,0,0.246322,0.072018,0,6.959854,4,0,0,0,,
+real,real,maint,2,2,0.31834,0,0.31834,719,73,0,0.9092,0,0,1,1,69713.2,0,0,0,0,0,0.257756,0,0.257756,0.060584,0,6.847983,4,0,0,0,,
+real,real,nomaint,3,2,0.31834,0,0.31834,743,89,0,0.8824,0,0,1,1,65890,0,0,0,0,0,0.204138,0,0.204138,0.114202,0,7.097283,3,0,0,0,,
