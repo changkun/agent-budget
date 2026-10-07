@@ -33,8 +33,8 @@
     "seed": "agent-budget-v1",
     "weeks": 8
   },
-  "generated_at": "2026-10-07T22:27:44+00:00",
-  "git_commit": "754a906e41691f73c008f972142fe3086bc55d11",
+  "generated_at": "2026-10-07T22:41:25+00:00",
+  "git_commit": "6e8aa2ac68b105f5b72d412e43157ae352ed4edf",
   "hypothesis": "strong",
   "model": "claude-sonnet-5-5",
   "phase": "sim",
@@ -154,6 +154,7 @@
       "avg_input_tokens_rel_rise_gt": 0.2
     },
     "refactor": {
+      "dup_baseline_floor": 0.02,
       "dup_rel_rise_gt": 0.3,
       "max_file_rel_rise_gt": 0.5
     },

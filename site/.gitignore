@@ -1,0 +1,5 @@
+node_modules/
+dist/
+coverage/
+# Acceptance tests are copied in by the experiment harness; never commit them.
+acceptance/

@@ -1,0 +1,41 @@
+{
+  "kind": "calibration",
+  "items": [
+    {
+      "id": "C1",
+      "title": "Language field",
+      "description": "Books accept an optional language: a two-letter ISO 639-1 code, stored lowercase ('FR' -> 'fr'); anything else returns 400 with fields.language. API responses include language (null when absent). GET /api/books accepts ?language=<code> to filter; an invalid code returns 400.",
+      "acceptance_test": "C1.test.js"
+    },
+    {
+      "id": "C2",
+      "title": "Word count of notes",
+      "description": "API responses include notesWordCount: the number of whitespace-separated words in notes (0 for empty notes). The book detail page shows '<n> words'.",
+      "acceptance_test": "C2.test.js"
+    },
+    {
+      "id": "C3",
+      "title": "Publisher",
+      "description": "Books accept an optional publisher (trimmed string, max 100 characters, else 400 with fields.publisher); null when absent. GET /api/publishers returns { publishers: [{ name, count }] } for books that have a publisher, sorted by count desc then name.",
+      "acceptance_test": "C3.test.js"
+    },
+    {
+      "id": "C4",
+      "title": "Book format",
+      "description": "Books have a format: 'paper', 'ebook' or 'audio' (default 'paper'); other values return 400. GET /api/books accepts ?format= to filter; an invalid value returns 400.",
+      "acceptance_test": "C4.test.js"
+    },
+    {
+      "id": "C5",
+      "title": "Oldest and newest",
+      "description": "GET /api/books/oldest and GET /api/books/newest return the book with the smallest or largest year; books without a year are ignored; ties go to the lowest id. 404 when no book has a year.",
+      "acceptance_test": "C5.test.js"
+    },
+    {
+      "id": "C6",
+      "title": "Dropped status",
+      "description": "Add the status 'dropped'. A book with status 'dropped' must have a non-empty droppedReason (else 400 with fields.droppedReason). When the status changes to anything else, droppedReason becomes null. API responses include droppedReason (null by default) and the detail page shows the reason.",
+      "acceptance_test": "C6.test.js"
+    }
+  ]
+}

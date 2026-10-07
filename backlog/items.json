@@ -1,0 +1,245 @@
+{
+  "kind": "backlog",
+  "items": [
+    {
+      "id": "B01",
+      "title": "Filter books by status",
+      "description": "GET /api/books accepts ?status=want|reading|done and returns only books with that status. `total` and `pages` reflect the filtered set; pagination still applies. Any other status value returns 400 with error.code \"bad_request\".",
+      "acceptance_test": "B01.test.js"
+    },
+    {
+      "id": "B02",
+      "title": "Filter books by tag",
+      "description": "GET /api/books accepts ?tag=<tag>. The value is normalized like stored tags (trimmed, lowercased, inner whitespace to '-'), so ?tag=Science%20Fiction matches 'science-fiction'. Unknown tags give an empty list with total 0.",
+      "acceptance_test": "B02.test.js"
+    },
+    {
+      "id": "B03",
+      "title": "Search books",
+      "description": "GET /api/books accepts ?q=<text>: a case-insensitive substring match on title or author. An empty q returns all books. total reflects the matches.",
+      "acceptance_test": "B03.test.js"
+    },
+    {
+      "id": "B04",
+      "title": "Sort books",
+      "description": "GET /api/books accepts ?sort=title|author|year|rating|createdAt and ?order=asc|desc (default asc). Text sorts are case-insensitive. Books with a null year or rating always come last, in both directions. Ties keep insertion (id) order. Unknown sort or order values return 400. Without ?sort the order is unchanged (insertion order).",
+      "acceptance_test": "B04.test.js"
+    },
+    {
+      "id": "B05",
+      "title": "Statistics endpoint",
+      "description": "GET /api/stats returns { total, byStatus: { want, reading, done }, averageRating, topTags }. averageRating is the mean of non-null ratings rounded to 2 decimals, or null when no book is rated. topTags is the first 3 entries of the /api/tags list ({ name, count }, sorted by count desc then name).",
+      "acceptance_test": "B05.test.js"
+    },
+    {
+      "id": "B06",
+      "title": "Export books as CSV",
+      "description": "GET /api/books.csv returns all books as CSV with content-type text/csv. Header: id,title,author,year,status,rating,tags. Tags are joined with ';'. Null values are empty. A field containing a comma, double quote or newline is wrapped in double quotes with inner quotes doubled. Rows are in insertion order.",
+      "acceptance_test": "B06.test.js"
+    },
+    {
+      "id": "B07",
+      "title": "Import books from CSV",
+      "description": "POST /api/books/import with a text/csv body creates books. The header row must contain at least title and author (other recognized columns: year, status, rating, tags with ';' separators); otherwise 400. Quoted fields follow the same rules as the CSV export. Invalid rows are skipped. Response 200: { created: <count>, errors: [{ line, fields }] } where line is the 1-based line number in the file (header is line 1) and fields is the validation error map.",
+      "acceptance_test": "B07.test.js"
+    },
+    {
+      "id": "B08",
+      "title": "Bulk delete",
+      "description": "POST /api/books/bulk-delete with { ids: [<integer>...] } deletes the listed books and returns 200 { deleted: [ids that existed], missing: [ids not found] }, both in request order. If ids is not an array of integers, return 400 and delete nothing.",
+      "acceptance_test": "B08.test.js"
+    },
+    {
+      "id": "B09",
+      "title": "Reject duplicate books",
+      "description": "Creating a book whose title and author both match an existing book (trimmed, case-insensitive) returns 409 with error.code \"conflict\" and error.existingId set to the existing book's id. An update that would make a book a duplicate of another book also returns 409. Updating a book without changing it into a duplicate still works.",
+      "acceptance_test": "B09.test.js"
+    },
+    {
+      "id": "B10",
+      "title": "Reading progress",
+      "description": "Books accept pageCount (integer >= 1 or null) and currentPage (integer >= 0 or null) on create and update. currentPage may not exceed pageCount (400 with fields.currentPage). API responses include pageCount, currentPage and progress = Math.round(currentPage / pageCount * 100), or null when either value is missing. Invalid pageCount returns 400 with fields.pageCount.",
+      "acceptance_test": "B10.test.js"
+    },
+    {
+      "id": "B11",
+      "title": "Started and finished dates",
+      "description": "API responses include startedAt and finishedAt (ISO strings or null), taken from the app clock. When a book's status becomes 'reading' and startedAt is null, set startedAt. When it becomes 'done', set finishedAt (and startedAt too if it is null). When it becomes 'want', clear both. This applies on create and update.",
+      "acceptance_test": "B11.test.js"
+    },
+    {
+      "id": "B12",
+      "title": "Filter by year range",
+      "description": "GET /api/books accepts ?yearFrom and ?yearTo (inclusive integers). When either bound is given, books without a year are excluded. Non-integer values return 400.",
+      "acceptance_test": "B12.test.js"
+    },
+    {
+      "id": "B13",
+      "title": "Authors endpoint",
+      "description": "GET /api/authors returns { authors: [{ name, count, books: [ids] }] } sorted by count desc, then name asc. Book ids are in insertion order.",
+      "acceptance_test": "B13.test.js"
+    },
+    {
+      "id": "B14",
+      "title": "Author page",
+      "description": "GET /authors/:name shows an HTML page listing the author's books as links <a href=\"/books/<id>\"><title></a>. Return a 404 page when the author has no books. Author names on the home page and on book detail pages link to /authors/<encodeURIComponent(name)>.",
+      "acceptance_test": "B14.test.js"
+    },
+    {
+      "id": "B15",
+      "title": "Tag page",
+      "description": "GET /tags/:tag shows an HTML page listing books with that tag as links <a href=\"/books/<id>\"><title></a>. Return a 404 page when no book has the tag. Tag chips on the home page and on book detail pages link to /tags/<tag>.",
+      "acceptance_test": "B15.test.js"
+    },
+    {
+      "id": "B16",
+      "title": "Statistics page",
+      "description": "GET /stats shows an HTML page with the total number of books and the count per status, each in an element with class stat-total, stat-want, stat-reading or stat-done whose text is the number. The site navigation (<nav>) links to /stats.",
+      "acceptance_test": "B16.test.js"
+    },
+    {
+      "id": "B17",
+      "title": "Search on the home page",
+      "description": "The home page has a search form (action=\"/\", input name=\"q\") and GET /?q=<text> lists only books whose title or author contains the text (case-insensitive). The input keeps the current value (name attribute before value). The count line shows the number of matching books, e.g. '2 books'.",
+      "acceptance_test": "B17.test.js"
+    },
+    {
+      "id": "B18",
+      "title": "Pagination on the home page",
+      "description": "The home page shows 10 books per page. ?page=N selects the page (non-integer or < 1 returns 400). Show links href=\"/?page=N\" to the previous and next pages when they exist. The count line keeps showing the total, e.g. '25 books'.",
+      "acceptance_test": "B18.test.js"
+    },
+    {
+      "id": "B19",
+      "title": "Formatting in notes",
+      "description": "On the book detail page, notes are rendered with: **bold** -> <strong>, *italic* -> <em>, `code` -> <code>, single newlines -> <br>, blank lines separate <p> paragraphs. All HTML in notes is escaped before formatting is applied.",
+      "acceptance_test": "B19.test.js"
+    },
+    {
+      "id": "B20",
+      "title": "Favorites",
+      "description": "Books have a boolean favorite (default false) in API responses. POST /api/books/:id/favorite toggles it and returns the book (404 for unknown ids). GET /api/books?favorite=true lists only favorites.",
+      "acceptance_test": "B20.test.js"
+    },
+    {
+      "id": "B21",
+      "title": "Shelves",
+      "description": "Shelves group books. POST /api/shelves { name } creates one: 201 { id, name, bookIds: [] }; name is required (400) and unique case-insensitively (409). GET /api/shelves returns { shelves: [...] }. PUT /api/shelves/:id/books/:bookId adds a book (idempotent) and DELETE removes it; both return 200 with the shelf. Unknown shelf or book returns 404. Deleting a book removes it from all shelves.",
+      "acceptance_test": "B21.test.js"
+    },
+    {
+      "id": "B22",
+      "title": "Activity log",
+      "description": "GET /api/activity returns { events: [{ type, bookId, title, at }] }, newest first, where type is 'created', 'updated' or 'deleted' and at is the app clock time. Changes through the API and through the HTML forms are recorded; books passed to createApp are not. ?limit=N (1-50, default 50) limits the result; other values return 400.",
+      "acceptance_test": "B22.test.js"
+    },
+    {
+      "id": "B23",
+      "title": "Books per publication year",
+      "description": "GET /api/stats/years returns { years: [{ year, count }] } sorted by year ascending, with books without a year counted in a final { year: null, count } entry (omitted when there are none).",
+      "acceptance_test": "B23.test.js"
+    },
+    {
+      "id": "B24",
+      "title": "Yearly reading goal",
+      "description": "PUT /api/goal { year, target } (integers, target >= 1, else 400) stores a goal and returns { year, target }. GET /api/goal?year=YYYY returns { year, target, done, remaining, percent } where done counts books with status 'done' whose updatedAt falls in that year, remaining = max(0, target - done) and percent = Math.round(done / target * 100). 404 if no goal is set for the year.",
+      "acceptance_test": "B24.test.js"
+    },
+    {
+      "id": "B25",
+      "title": "Export and import the library as JSON",
+      "description": "GET /api/export returns { version: 1, exportedAt, books: [all books as in the API] }. POST /api/import { books: [...] } replaces the whole library with the given books (ids reassigned from 1 in order, unknown fields ignored) and returns { imported: <count> }. If the body has no books array or any book is invalid, return 400 and change nothing.",
+      "acceptance_test": "B25.test.js"
+    },
+    {
+      "id": "B26",
+      "title": "ISBN",
+      "description": "Books accept an optional isbn (ISBN-10 or ISBN-13). Spaces and hyphens are removed; a trailing x becomes X. Invalid length or checksum returns 400 with fields.isbn. API responses include isbn (normalized, or null). GET /api/books/isbn/:isbn finds a book by ISBN (input normalized the same way); 404 if none.",
+      "acceptance_test": "B26.test.js"
+    },
+    {
+      "id": "B27",
+      "title": "Series",
+      "description": "Books accept optional series (string) and seriesNumber (integer >= 1). seriesNumber without series returns 400. API responses include both (null when absent). GET /api/series returns { series: [{ name, books: [{ id, title, seriesNumber }] }] } sorted by name, books sorted by seriesNumber.",
+      "acceptance_test": "B27.test.js"
+    },
+    {
+      "id": "B28",
+      "title": "Random pick",
+      "description": "GET /api/books/random returns one book, optionally restricted by ?status. With ?seed=N (integer >= 0) the pick is deterministic: the book at index N mod count among matching books in id order. A negative or non-integer seed returns 400. 404 when no book matches.",
+      "acceptance_test": "B28.test.js"
+    },
+    {
+      "id": "B29",
+      "title": "Rename a tag",
+      "description": "POST /api/tags/:tag/rename { to } renames the tag on every book. Both names are normalized like tags. A book that already has the target tag keeps a single copy, in the position of the existing tags. Returns 200 { renamed: <books changed> }; 404 if no book has the tag; 400 if 'to' is empty.",
+      "acceptance_test": "B29.test.js"
+    },
+    {
+      "id": "B30",
+      "title": "Delete a tag",
+      "description": "DELETE /api/tags/:tag removes the tag (normalized) from every book and returns 200 { removed: <books changed> }; 404 if no book has it.",
+      "acceptance_test": "B30.test.js"
+    },
+    {
+      "id": "B31",
+      "title": "Cover colour",
+      "description": "API responses include coverColor, derived from the title: h = 0; for each character of title.toLowerCase(): h = (h * 31 + codePoint) % 360. The colour is HSL(h, 45%, 55%) converted to hex '#rrggbb' (lowercase, each channel Math.round(x * 255)). The book detail page has an element with class=\"cover\" whose tag contains the colour (for example in a style attribute).",
+      "acceptance_test": "B31.test.js"
+    },
+    {
+      "id": "B32",
+      "title": "Trash",
+      "description": "Deleting a book (API or form) moves it to a trash instead of removing it. Trashed books are not listed and GET /api/books/:id returns 404. GET /api/trash returns { items: [book fields + deletedAt] }. POST /api/trash/:id/restore returns 200 with the restored book. DELETE /api/trash/:id purges it (204). Unknown ids in the trash return 404.",
+      "acceptance_test": "B32.test.js"
+    },
+    {
+      "id": "B33",
+      "title": "Lending books",
+      "description": "POST /api/books/:id/loan { to } lends a book: 200 with the book whose loan is { to, since } (since = app clock). 'to' is required (400); lending a book already on loan returns 409; unknown book 404. POST /api/books/:id/return clears the loan (200, loan null); 409 if not on loan. Books not on loan have loan: null. GET /api/loans returns { loans: [{ bookId, title, to, since }] } sorted by since ascending.",
+      "acceptance_test": "B33.test.js"
+    },
+    {
+      "id": "B34",
+      "title": "Reviews",
+      "description": "POST /api/books/:id/reviews { text, rating? } adds a review: 201 { id, bookId, text, rating, createdAt }; text is required (max 2000 chars), rating is optional 1-5 (null when absent). GET /api/books/:id/reviews returns { reviews: [...] } oldest first. DELETE /api/books/:id/reviews/:reviewId returns 204. Unknown book or review returns 404.",
+      "acceptance_test": "B34.test.js"
+    },
+    {
+      "id": "B35",
+      "title": "Similar books",
+      "description": "GET /api/books/:id/similar returns { items: [{ id, title, score }] } where score = 2 * (number of shared tags) + (3 if the author is the same). The book itself and books with score 0 are excluded. Sorted by score desc, then id asc; at most 5 items. 404 for an unknown book.",
+      "acceptance_test": "B35.test.js"
+    },
+    {
+      "id": "B36",
+      "title": "Recently updated",
+      "description": "GET /api/books/recent returns { items: [books] } sorted by updatedAt desc, ties by id desc. ?limit=N (1-20, default 5); other values return 400.",
+      "acceptance_test": "B36.test.js"
+    },
+    {
+      "id": "B37",
+      "title": "Copy a book",
+      "description": "POST /api/books/:id/copy creates a copy: 201 with a Location header, title '<title> (copy)', the same author, year, tags and notes, status 'want' and rating null. 404 for an unknown book.",
+      "acceptance_test": "B37.test.js"
+    },
+    {
+      "id": "B38",
+      "title": "Export as Markdown",
+      "description": "GET /api/books.md returns content-type text/markdown. One section per status in the order want, reading, done with headings '## Want to read', '## Reading', '## Done'; each heading is followed by a blank line and one bullet per book '- *<title>* by <author> (<year>)' (the year part is omitted when null), in insertion order. Sections are separated by a blank line; empty sections are omitted.",
+      "acceptance_test": "B38.test.js"
+    },
+    {
+      "id": "B39",
+      "title": "Request ids",
+      "description": "Every response carries an X-Request-Id header: the incoming X-Request-Id value if the request has one, otherwise a new unique id of at least 8 characters from [A-Za-z0-9-].",
+      "acceptance_test": "B39.test.js"
+    },
+    {
+      "id": "B40",
+      "title": "Rate a book from its page",
+      "description": "The book detail page has a form method=\"post\" action=\"/books/<id>/rating\" with a <select name=\"rating\"> offering 1-5. Posting sets the rating and redirects 303 to /books/<id>. An invalid rating returns 400 and leaves the book unchanged; an unknown book returns 404.",
+      "acceptance_test": "B40.test.js"
+    }
+  ]
+}

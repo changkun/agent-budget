@@ -7,7 +7,9 @@ vulns_gt = 0                          # trigger when vulnerability count > this
 coverage_rel_drop_gt = 0.05           # (C0 - C) / C0 > this
 
 [refactor]
-dup_rel_rise_gt = 0.30                # (D - D0) / D0 > this
+dup_rel_rise_gt = 0.30                # (D - D0') / D0' > this, D0' = max(D0, floor)
+dup_baseline_floor = 0.02             # the real site starts with D0 = 0; relative change
+                                      # needs a non-zero base, so D0 is raised to this floor
 max_file_rel_rise_gt = 0.50           # (M - M0) / M0 > this
 
 [knowledge]

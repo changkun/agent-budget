@@ -98,6 +98,10 @@ EPS = 1e-9
 def check_trigger(agent: str, m: dict, baseline: dict, thr: dict) -> list[tuple]:
     """Return [(metric, value, baseline, threshold)] for each condition that fires."""
     fired = []
+    keys = {"security": ("vulns",), "tests": ("coverage",),
+            "refactor": ("dup_ratio", "max_file_lines"), "knowledge": ("avg_input_tokens",)}
+    if any(m.get(k) is None for k in keys.get(agent, ())):
+        return fired  # a metric that could not be measured never triggers
     if agent == "security":
         t = thr["security"]["vulns_gt"]
         if m["vulns"] > t:
@@ -109,7 +113,7 @@ def check_trigger(agent: str, m: dict, baseline: dict, thr: dict) -> list[tuple]
             fired.append(("coverage", m["coverage"], c0, t))
     elif agent == "refactor":
         t = thr["refactor"]["dup_rel_rise_gt"]
-        d0 = baseline["dup_ratio"]
+        d0 = max(baseline["dup_ratio"], thr["refactor"].get("dup_baseline_floor", 0.0))
         if d0 > 0 and (m["dup_ratio"] - d0) / d0 > t + EPS:
             fired.append(("dup_ratio", m["dup_ratio"], d0, t))
         t = thr["refactor"]["max_file_rel_rise_gt"]

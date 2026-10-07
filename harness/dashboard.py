@@ -59,7 +59,8 @@ def _thresholds(meta: dict) -> dict:
     return {
         "vulns": thr["security"]["vulns_gt"],
         "coverage": base["coverage"] * (1 - thr["tests"]["coverage_rel_drop_gt"]),
-        "dup_ratio": base["dup_ratio"] * (1 + thr["refactor"]["dup_rel_rise_gt"]),
+        "dup_ratio": max(base["dup_ratio"], thr["refactor"].get("dup_baseline_floor", 0.0))
+        * (1 + thr["refactor"]["dup_rel_rise_gt"]),
         "max_file_lines": base["max_file_lines"] * (1 + thr["refactor"]["max_file_rel_rise_gt"]),
         "avg_input_tokens": base["avg_input_tokens"]
         * (1 + thr["knowledge"]["avg_input_tokens_rel_rise_gt"]),
