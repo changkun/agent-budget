@@ -2,13 +2,15 @@
 
 本文件是实验计划。确认前不写实现代码。标注【待定】的地方需要你决定，其余为默认值。
 
+语言约定：`PLAN.md` 和 `REPORT.md` 用中文；`README.md` 用英文；代码、注释、配置、日志列名用英文，尽量不出现中文。看板文字按规格用中文，中文文案集中放在一个文案文件里（`harness/labels_zh.json`），代码只引用键名。
+
 ## 0. 待填项与默认值
 
 | 项 | 取值 | 说明 |
 |---|---|---|
 | 实验脚本语言 | Python 3.13，只用标准库 | 环境已装，零安装。`tomllib` 读带注释的配置，`random`/`hashlib` 做可复现随机数，`csv`/`json` 写日志，`subprocess` 调 agent。看板由 Python 生成单个 HTML，内联手写 JS + SVG，不引用 CDN，下载后离线可看。 |
 | 被实验网站语言 | Node.js 22 | 自带测试运行器和覆盖率（`node --test --experimental-test-coverage`），npm 提供依赖清单、`npm audit`、`npm outdated`。 |
-| 第二阶段模型 | 【待定】 | 两组用同一个完整 model ID，不用别名。 |
+| 第二阶段模型 | `claude-sonnet-5-5`（推荐，待你确认） | 两组用同一个完整 model ID，不用别名，不设 fallback 模型。理由见 7.1。 |
 | 预算单位 | 美元，按价格表从 token 折算 | `config/prices.toml` 留空待你填。模拟阶段用占位价格（见 4.6），在看板标明“占位价格”。 |
 | 每组重复次数 | 3 | 模拟和真实相同，可配置。 |
 | 周数 / backlog | 8 周 / 40 项 | |
@@ -66,20 +68,22 @@ work/                       工作副本（.gitignore，不提交）
 for w in 1..8:
     （仅模拟）注入本周随机事件：新漏洞、新过期依赖
     m = 指标来源.measure()           # 周初指标，用于触发判断
-    R = B
+    R = B − 上周结转的超支额
     if 组别 == 维护组:
         for agent in [安全, 补测试, 整理, 知识提炼]:    # 固定顺序，每类每周最多一次
             if 触发(agent, m, 基线) and R >= cap_m:
-                r = 执行器.run(agent, cap_m);  R -= r.cost;  记录
+                r = 执行器.run(agent);  R -= r.cost;  记录      # 跑完为止，不中途打断
                 if 构建或已有测试失败: 回滚，记录
     预计完成 = R ÷ 截至上周的每项平均成本      # 第 1 周用 c̄
     while 指针 < 40 and R >= cap:
         取下一项；本项已花 s = 0
         for 尝试 in 0, 1, 2:                       # 0=实现，1、2=调试
-            r = 执行器.run(实现或调试, cap - s);  s += r.cost;  R -= r.cost;  记录
+            if s >= cap: break                     # 已超上限，不再开新的调试会话
+            r = 执行器.run(实现或调试);  s += r.cost;  R -= r.cost;  记录   # 跑完为止
             if 通过验收: 提交，break
-            if 触及上限: break                      # 不再调试
         未通过：回滚，记为失败，指针照样前进（失败项不再重试）
+        if s > cap: 记一次单项超支，超支额 = s − cap
+    if R < 0: 周超支额 = −R，从下一周预算中扣除（结转）
     未用完 = max(R, 0)，作废；写周行；测周末指标
 ```
 
@@ -88,7 +92,11 @@ for w in 1..8:
 - 截至上周的每项平均成本 = 第 1..w-1 周（实现 + 调试）花费合计 ÷ 完成项合计；完成项为 0 时用 `c̄`。
 - 后期/前期比值 = 第 6–8 周每项成本 ÷ 第 1–3 周每项成本。后期完成项为 0 时记为 ∞ 并单独注明。
 - 平均输入 token（指标）= 上一周所有实现任务第一次尝试的（未缓存输入 + 缓存写入 + 缓存命中）均值；上一周没有实现任务时沿用上一个值。
-- 超支：一项（或一个维护任务）的累计成本触及上限被截停。模拟中截停时按剩余上限计费；真实运行中把剩余上限传给 `--max-budget-usd`，实际可能略超，按实际计费。看板顶部的“超支次数”是这类事件的次数。【待定：是否同意此定义】
+- 上限只在会话之间检查，不在会话内截停。一个会话开始时本项累计成本低于上限，就让它跑完；跑完后累计成本超过上限的部分是超支，成本照计，之后不再开新的调试会话。
+- 单项超支：一项（或一个维护任务）结束时累计成本 > 上限。超支额 = 累计成本 − 上限。看板顶部的“超支次数”是单项超支的次数，旁边注明周超支次数。
+- 周超支：一周结束时剩余预算 < 0。超支额从下一周预算中扣除（结转），这样超支多的组要为超支付费，两组总预算保持可比。第 8 周的周超支无法结转，单独列出。周内用不完的预算仍然作废，不结转。
+- 预留空间：开新一项的条件是剩余 ≥ cap（约 2·c̄），而一项平均只花 c̄，所以这条规则本身就留出了容纳单项超支的余量。估算见 7.3。
+- 防失控：真实运行给每个会话设 `--max-budget-usd = 3 × cap`，只用来防止会话失控，正常情况下不应触发。触发时记 `forced_stop = 1`。
 
 ### 2.4 触发条件（`config/thresholds.toml`，初值）
 
@@ -111,7 +119,7 @@ for w in 1..8:
 ```
 phase, hypothesis, group, rep, week, seq, item, task_type, debug_index,
 input_tokens, cache_write_tokens, cache_read_tokens, output_tokens, total_input_tokens,
-cost_usd, accepted, rolled_back, over_cap,
+cost_usd, accepted, rolled_back, item_cost_usd, overspend_usd, forced_stop,
 trigger_metric, trigger_value, trigger_baseline, trigger_threshold,
 model, session_id, duration_s
 ```
@@ -120,19 +128,22 @@ model, session_id, duration_s
 - `input_tokens`：未缓存输入；`cache_read_tokens`：缓存命中；`cache_write_tokens`：缓存写入（计价不同，单独记）。
 - `accepted`：本次尝试是否通过验收（维护任务：构建和已有测试是否通过）。
 - `rolled_back`：在该项最后一次尝试的行上标 1。
+- `item_cost_usd`、`overspend_usd`：本项到这次尝试为止的累计成本、超过上限的部分（未超为 0）。
+- `forced_stop`：会话被防失控上限中止（只在真实运行中可能为 1）。
 - `trigger_*`：仅维护任务填写，记触发它的指标名、当时的值、基线、阈值。
 - `model`、`session_id`、`duration_s`：真实运行填写，模拟留空或为 `sim`。
 
 ### 3.2 weeks.csv（每组每重复每周一行）
 ```
-phase, hypothesis, group, rep, week, budget_usd,
+phase, hypothesis, group, rep, week, budget_usd, carryover_in_usd, available_usd,
 loc, max_file_lines, dup_ratio, coverage, vulns, outdated_deps, build_ok, tests_ok, avg_input_tokens,
 spend_maint_security, spend_maint_tests, spend_maint_refactor, spend_maint_knowledge, spend_maint,
-spend_impl, spend_debug, spend_implementation, unused_usd,
-predicted_items, completed_items, failed_items, over_cap_count, triggered
+spend_impl, spend_debug, spend_implementation, unused_usd, week_overspend_usd,
+predicted_items, completed_items, failed_items, item_overspend_count, item_overspend_usd, triggered
 ```
 - 指标为周初测量值（触发判断用的值）。
 - `spend_implementation` = `spend_impl + spend_debug`（规格中的“实现花费”）。
+- `carryover_in_usd`：上周结转过来的超支额；`available_usd = budget_usd − carryover_in_usd`。
 - `triggered`：本周触发的维护 agent，用分号分隔。
 
 ### 3.3 metrics.csv（指标快照）
@@ -252,20 +263,36 @@ P(实现通过) = p0 · q；P(调试通过) = p0_dbg · q
 - `site/`：Node 22 小型网站，约 20 个源文件，`npm run build / test / coverage`，`package.json` + `package-lock.json` 为依赖清单。生成后打标签 `site-v0`。
 - 指标：行数和最大文件行数（脚本统计 `site/src`）；重复比例（`harness/dupcheck.py`，按规范化后的连续 6 行窗口哈希，重复行 ÷ 总行）；覆盖率（Node 内置覆盖率，行覆盖率）；漏洞数（`npm audit --json`）；过期依赖（`npm outdated --json`）；构建/测试（退出码）；平均输入 token（来自任务日志）。
 - 工作副本：每个 组别 × 重复 一个 `git clone` 到 `work/`，互不共享。
-- 执行器：每个任务一次新的 `claude -p` 会话，`--model <固定 ID> --output-format json --max-budget-usd <剩余上限> --no-session-persistence`，并隔离用户级配置与记忆。从输出的 usage 读输入、输出、缓存命中、缓存写入 token，用价格表自算成本。
+- 执行器：每个任务一次新的 `claude -p` 会话，`--model <固定 ID> --output-format json --max-budget-usd <3 × cap，防失控> --no-session-persistence`，并隔离用户级配置与记忆。从输出的 usage 读输入、输出、缓存命中、缓存写入 token，用价格表自算成本。
 - 初步观察（未做可行性检查）：本环境装有 Claude Code CLI 2.1.293，支持上述参数；环境中没有 `ANTHROPIC_API_KEY`，嵌套会话能否认证、能否读到逐任务用量要在第 3 步实测。
 
-## 7. 不确定的地方（需要你决定或知悉）
+## 7. 决定与不确定的地方
 
-1. 【待定】第二阶段模型 ID。
-2. 【待定】价格表。模拟先用占位价格，你填后重跑，结论不变（见 4.7）。
-3. 【待定】超支的定义（见 2.3）。
-4. 【待定】调试是否开新会话。默认开新会话，提示中给出验收失败输出，工作副本保留上次改动。另一选择是续接实现会话，更便宜但违背“每个任务全新会话”。
-5. 【待定】验收测试是否对 agent 可见。默认可见：任务开始时复制进工作副本供 agent 阅读和运行，评估前从原始副本覆盖恢复。另一选择是不可见，只给接口说明，通过率会更低、更依赖说明质量。
+### 7.1 已决定
+1. 第二阶段模型：推荐 `claude-sonnet-5-5`，待你确认。理由：
+   - 成本：约 200–250 个会话，Sonnet 级单价明显低于 Opus 级。
+   - 能力：对小网站的功能任务足够，通过率不会贴近 100%，技术债的影响才看得出来；能力更强的模型通过率接近上限，可能掩盖差异；更弱的模型失败多，噪声主要来自能力不足而不是技术债。
+   - 每个会话记录实际服务的模型（CLI 输出的分模型用量）。若 Claude Code 内部调用了辅助小模型，按各自价格分别计费，两组配置相同；第 3 步核实。
+2. 超支：会话跑完为止，不中途截停；规则见 2.3。周超支结转到下一周（推荐，待你确认）。
+3. 调试：每次开新会话。提示中给出验收失败的输出，工作副本保留上次的改动。
+4. 验收测试对 agent 可见：任务开始时复制进工作副本，agent 可以阅读和运行；评估前从原始副本覆盖恢复，agent 的修改无效。验收 = 本项验收测试通过 + 构建通过 + 已有测试通过（防止新功能破坏旧功能）。第 4 步审测试时检查能否靠针对测试硬编码蒙混过关。
+5. 价格表留空待你填。模拟先用占位价格，你填后重跑，结论不变（见 4.7）。
+
+### 7.2 默认执行，需要你知悉
 6. 维护任务上限默认等于单项上限；每类维护每周最多一次；顺序固定为 安全 → 补测试 → 整理 → 知识提炼；触发判断都用周初那一次测量。
 7. 知识提炼的触发量是原始平均输入 token。代码变大本身就会抬高它，而基线固定在第 0 周，所以后期可能每周都触发、且提炼后仍高于阈值。默认按规格执行；如要改成按每千行归一化，需在运行前决定。
-8. 规则本身造成的预算作废：B = 4.5·c̄，cap = 1.5·c80，对右偏分布 cap 约为 2·c̄，所以每周剩余不足一个上限时就结束，约有 1/3 预算作废。规则不改，看板“未用完”会显示这部分。按此估计每周约完成 3 项，8 周约 20–25 项，40 项 backlog 用不完。
-9. 校准只有 3 个样本，c80 很粗。模拟也用 3 个以与真实一致（可配置）。
-10. 真实阶段漏洞：用当前最新版本依赖时，几小时内上游出现新公告的概率很低，安全维护很可能一次也不触发。默认不人为植入；可选做法是钉一个有已知公告的旧版本依赖，使第 1 周必然触发。
-11. 真实阶段规模和时长：预计 200–250 个 agent 会话。云端容器闲置会被回收，运行器做成可续跑（从日志恢复进度），每周结束提交日志；6 个运行（2 组 × 3 次）可并行，能否并行在第 3 步确认。
-12. GitHub Pages：看板在 `docs/`。Pages 需要你在仓库设置里指向包含 `docs/` 的分支；也可以直接下载 `docs/index.html` 离线查看。
+8. 真实阶段漏洞：用当前最新版本依赖时，几小时内上游出现新公告的概率很低，安全维护很可能一次也不触发。默认不人为植入；可选做法是钉一个有已知公告的旧版本依赖，使第 1 周必然触发。
+9. 真实阶段规模和时长：预计 200–250 个 agent 会话。云端容器闲置会被回收，运行器做成可续跑（从日志恢复进度），每周结束提交日志；6 个运行（2 组 × 3 次）可并行，能否并行在第 3 步确认。
+10. GitHub Pages：看板在 `docs/`。Pages 需要你在仓库设置里指向包含 `docs/` 的分支；也可以直接下载 `docs/index.html` 离线查看。
+
+### 7.3 超支与作废的粗估（按 4.5 节系数做的蒙特卡洛，只说明量级）
+
+| 状态 | 单项超支率 | 平均超支额 | 周超支率 | 未用完 | 每周完成 |
+|---|---|---|---|---|---|
+| 初始代码库 | 4.7% | 0.40·c̄ | 2.0% | 32% | 3.0 |
+| “强”假设、不维护、约完成 20 项后 | 67% | 0.99·c̄ | 26% | 19% | 1.0 |
+
+- 初始状态下，“剩余 ≥ cap 才开新项”留出的余量足以吸收大部分单项超支，周超支很少。代价是约 1/3 预算作废，这是规格规则的直接结果，不改。
+- 上限在第 0 周校准后固定。代码变差后单次成本上升，超支会变得常见；这正是要观察的现象之一。
+- 结转与否对上面的数字影响很小（差异在 0.1 项/周以内），因为作废的余量通常够抵扣。结转主要是为了公平：真实运行中如果出现一次很大的超支，由超支的那一组承担。
+- 校准只有 3 个样本：按同一模型抽样，校准得到的周预算落在真值的 0.63–1.42 倍之间（10–90 分位），上限落在 0.55–1.33 倍之间。这是预算设定的最大不确定来源。模拟也用 3 个以与真实一致（可配置）；第 5 步若预算允许，可以考虑多跑几个校准任务，由你决定。
