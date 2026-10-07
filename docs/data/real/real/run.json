@@ -1,0 +1,118 @@
+{
+  "calibration_items": [
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "C6"
+  ],
+  "cli_version": "2.1.293 (Claude Code)",
+  "estimate": {
+    "formal_upper_usd": 17.561114099999998,
+    "note": "upper bound: every week spends its whole budget, plus one runaway-guard overspend per series in week 8; unused budget makes the real figure lower",
+    "series": 6,
+    "spent_before_formal_usd": 0.502111,
+    "total_upper_usd": 18.063225099999997
+  },
+  "experiment": {
+    "backlog_size": 40,
+    "budget_multiplier": 4.5,
+    "calibration_guard_usd": 10.0,
+    "calibration_items": 6,
+    "cap_multiplier": 1.5,
+    "cap_quantile": 0.8,
+    "carry_overspend": true,
+    "early_weeks": [
+      1,
+      2,
+      3
+    ],
+    "groups": [
+      "nomaint",
+      "maint"
+    ],
+    "late_weeks": [
+      6,
+      7,
+      8
+    ],
+    "maint_cap_multiplier": 1.0,
+    "maint_order": [
+      "security",
+      "tests",
+      "refactor",
+      "knowledge"
+    ],
+    "max_debug": 2,
+    "reps": 3,
+    "runaway_guard_multiplier": 3.0,
+    "seed": "agent-budget-v1",
+    "session_timeout_s": 1800,
+    "weeks": 8
+  },
+  "generated_at": "2026-10-07T22:49:47+00:00",
+  "git_commit": "24ddef050555159a6b182d4f99b6a542ed378f4c",
+  "hypothesis": "real",
+  "model": "claude-sonnet-5-5",
+  "phase": "real",
+  "plan": {
+    "baseline": {
+      "avg_input_tokens": 102730.83333333333,
+      "build_ok": 1,
+      "coverage": 0.9543,
+      "dup_ratio": 0.0,
+      "loc": 664,
+      "max_file_lines": 73,
+      "outdated_deps": 0,
+      "tests_ok": 1,
+      "vulns": 0
+    },
+    "budget": 0.318339975,
+    "calib_costs": [
+      0.0697762,
+      0.0486599,
+      0.08447389999999999,
+      0.0706087,
+      0.0491335,
+      0.1018011
+    ],
+    "calib_mean": 0.07074221666666666,
+    "calib_quantile": 0.08447389999999999,
+    "cap": 0.12671084999999999,
+    "maint_cap": 0.12671084999999999
+  },
+  "prices": {
+    "cache_read": 0.1,
+    "cache_write_1h": 4.0,
+    "cache_write_5m": 2.5,
+    "input": 2.0,
+    "output": 10.0
+  },
+  "prices_source": "config/prices.toml",
+  "real": {
+    "model": "claude-sonnet-5-5",
+    "parallel": 6,
+    "start_ref": "site-v0",
+    "total_cap_usd": 600.0,
+    "work_root": "/home/user/agent-work"
+  },
+  "start_commit": "4a0ea0c359192db5813027f84145f5310057d34c",
+  "start_ref": "site-v0",
+  "thresholds": {
+    "knowledge": {
+      "avg_input_tokens_rel_rise_gt": 0.2
+    },
+    "refactor": {
+      "dup_baseline_floor": 0.02,
+      "dup_rel_rise_gt": 0.3,
+      "max_file_rel_rise_gt": 0.5
+    },
+    "security": {
+      "vulns_gt": 0
+    },
+    "tests": {
+      "coverage_rel_drop_gt": 0.05
+    }
+  }
+}

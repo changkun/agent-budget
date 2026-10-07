@@ -1,0 +1,7 @@
+phase,hypothesis,group,rep,week,seq,item,task_type,debug_index,input_tokens,cache_write_tokens,cache_read_tokens,output_tokens,total_input_tokens,cost_usd,accepted,rolled_back,item_cost_usd,overspend_usd,forced_stop,trigger_metric,trigger_value,trigger_baseline,trigger_threshold,model,session_id,duration_s,cli_cost_usd
+real,real,calib,0,0,1,C1,calib,0,12,11697,94142,1355,105851,0.069776,1,0,0.069776,0,0,,,,,claude-sonnet-5-5,da9d3e5a-3c37-4c00-93cd-fcdab7b50cdb,26.6,0.07919
+real,real,calib,0,0,2,C2,calib,0,10,7877,71319,1000,79206,0.04866,1,0,0.04866,0,0,,,,,claude-sonnet-5-5,a1ec50e4-ae50-47cc-bb43-95819438013d,24.1,0.055792
+real,real,calib,0,0,3,C3,calib,0,14,12401,115419,2330,127834,0.084474,1,0,0.084474,0,0,,,,,claude-sonnet-5-5,6d7fbc40-7787-49cd-b23c-fffc01cb11f1,32.3,0.096016
+real,real,calib,0,0,4,C4,calib,0,12,11533,95227,1493,106772,0.070609,1,0,0.070609,0,0,,,,,claude-sonnet-5-5,a5b06990-d862-4287-9c74-9965001926a5,15.9,0.080131
+real,real,calib,0,0,5,C5,calib,0,10,7991,71395,1001,79396,0.049133,1,0,0.049133,0,0,,,,,claude-sonnet-5-5,1073d772-3e01-4430-9c46-6c752d9416da,13.6,0.056273
+real,real,calib,0,0,6,C6,calib,0,12,15263,102051,3052,117326,0.101801,1,0,0.101801,0,0,,,,,claude-sonnet-5-5,f52e5a4f-df00-4a5e-bab9-8f1f626417f5,23.2,0.112006
