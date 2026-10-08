@@ -15,6 +15,41 @@ Questions: does the per-item implementation cost of `nomaint` rise week over wee
 
 The plan (in Chinese) is in [PLAN.md](PLAN.md); the final report (in Chinese) is in [REPORT.md](REPORT.md).
 
+## Results
+
+Full report (in Chinese): [REPORT.md](REPORT.md). Dashboard: [docs/index.html](docs/index.html).
+Screenshots below are taken from the dashboard (labels are in Chinese) with
+`node harness/screenshots.mjs`.
+
+**Real run** (claude-sonnet-5-5, 3 reps per group, 8 weeks; 13.07 USD in total). The `maint`
+group delivered 23-24 items against 29-31 for `nomaint`. Per-item cost rose only slightly in
+both groups (late/early ratio 1.12-1.21 vs 1.08-1.11). The same backlog item cost about the
+same in both groups, so the rise reflects larger items later in the backlog, not a degrading
+codebase. No acceptance check failed in 173 sessions. Within this scale the premise is not
+supported.
+
+![Real run: headline numbers](docs/img/real-header.png)
+
+| Cumulative items completed | Implementation cost per item |
+|---|---|
+| ![Real run: cumulative items](docs/img/real-cumulative.png) | ![Real run: cost per item](docs/img/real-cost.png) |
+
+Where each week's budget went (implementation, debugging, each maintenance agent, unused),
+and the metrics with their trigger thresholds:
+
+![Real run: weekly budget split](docs/img/real-budget.png)
+
+![Real run: metrics by week](docs/img/real-metrics.png)
+
+**Simulation** (assumed coefficients; it shows how the conclusion depends on the assumptions
+and cannot test the premise). Under `strong`, the per-item cost of `nomaint` rises 1.4-2.6x
+while `maint` stays flat, yet `maint` still delivers about 2 fewer items in 8 weeks; under
+`weak` it delivers about 7 fewer.
+
+| strong: cumulative items | weak: cumulative items |
+|---|---|
+| ![Simulation strong: cumulative items](docs/img/sim-strong-cumulative.png) | ![Simulation weak: cumulative items](docs/img/sim-weak-cumulative.png) |
+
 ## Phases
 
 1. **Simulation** (no model calls). A seeded model of codebase state and task cost, run under
@@ -33,6 +68,7 @@ harness/           scheduling loop, executors, metrics sources, stats, dashboard
 tests/             unit tests for the loop rules
 docs/index.html    dashboard (single self-contained file, regenerated after every run)
 docs/data/         raw logs: <phase>/<hypothesis>/{tasks,weeks,metrics}.csv and run.json
+docs/img/          dashboard screenshots used by README.md and REPORT.md
 site/              website used in the real run
 backlog/           backlog items and calibration items for the real run
 acceptance/        acceptance tests, kept outside the working copies
@@ -55,6 +91,7 @@ python3 -m harness real calibrate # real phase: 6 calibration tasks, budget and 
 python3 -m harness real run-all   # real phase: all series (resumable at week boundaries)
 python3 -m harness real status
 python3 -m harness build-report   # regenerate REPORT.md tables from docs/report_template.md
+node harness/screenshots.mjs      # refresh docs/img/ (needs Playwright with Chromium)
 ```
 
 Open `docs/index.html` directly in a browser, or serve `docs/` with GitHub Pages.
