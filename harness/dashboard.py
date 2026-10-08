@@ -1,7 +1,7 @@
 """Build docs/index.html: one self-contained page, data embedded, no external resources.
 
 All numbers are computed here; the page only filters and draws. User-facing text comes
-from labels_zh.json.
+from labels_<lang>.json: docs/index.html is Chinese, docs/index.en.html is English.
 """
 from __future__ import annotations
 
@@ -16,8 +16,11 @@ from . import config, stats
 
 HERE = Path(__file__).resolve().parent
 TEMPLATE = HERE / "dashboard_template.html"
-LABELS = HERE / "labels_zh.json"
-OUTPUT = config.ROOT / "docs" / "index.html"
+# language -> (labels file, output page)
+PAGES = {
+    "zh": (HERE / "labels_zh.json", config.ROOT / "docs" / "index.html"),
+    "en": (HERE / "labels_en.json", config.ROOT / "docs" / "index.en.html"),
+}
 
 SPEND_SEGMENTS = ("impl", "debug", "maint_security", "maint_tests", "maint_refactor",
                   "maint_knowledge", "unused")
@@ -29,8 +32,8 @@ METRIC_AGENT = {"vulns": "security", "coverage": "tests", "dup_ratio": "refactor
 TREND_BAND = (0.9, 1.1)
 
 
-def _labels() -> dict:
-    with open(LABELS, encoding="utf-8") as f:
+def _labels(lang: str = "zh") -> dict:
+    with open(PAGES[lang][0], encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -241,19 +244,21 @@ def _dataset(phase: str, hyp: str, L: dict) -> dict:
 
 
 def build() -> str:
-    L = _labels()
-    datasets = {}
-    for phase, hyp in stats.available_datasets():
-        datasets[f"{phase}/{hyp}"] = _dataset(phase, hyp, L)
-    payload = {
-        "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
-        "datasets": _clean(datasets),
-    }
-    html = TEMPLATE.read_text(encoding="utf-8")
-    html = html.replace("/*__LABELS__*/null", json.dumps(L, ensure_ascii=False))
-    html = html.replace("/*__DATA__*/null",
-                        json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(html, encoding="utf-8")
-    return f"wrote {OUTPUT.relative_to(config.ROOT)} ({len(html) // 1024} KiB, " \
-           f"{len(datasets)} datasets)"
+    """Write the dashboard once per language."""
+    datasets_found = stats.available_datasets()
+    template = TEMPLATE.read_text(encoding="utf-8")
+    written = []
+    for lang, (_labels_file, output) in PAGES.items():
+        L = _labels(lang)
+        datasets = {f"{phase}/{hyp}": _dataset(phase, hyp, L) for phase, hyp in datasets_found}
+        payload = {
+            "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+            "datasets": _clean(datasets),
+        }
+        html = template.replace("/*__LABELS__*/null", json.dumps(L, ensure_ascii=False))
+        html = html.replace("/*__DATA__*/null",
+                            json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(html, encoding="utf-8")
+        written.append(f"{output.relative_to(config.ROOT)} ({len(html) // 1024} KiB)")
+    return f"wrote {', '.join(written)}; {len(datasets_found)} datasets"

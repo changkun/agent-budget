@@ -74,6 +74,7 @@ th { color: var(--muted); font-weight: 600; }
   box-shadow: 0 4px 14px rgba(0,0,0,.18); }
 .tip b { font-weight: 650; }
 .links a { color: var(--accent); margin-right: 14px; display: inline-block; }
+.lang { float: right; color: var(--accent); font-size: 13px; margin-top: 4px; }
 .kv { display: grid; grid-template-columns: max-content 1fr; gap: 2px 14px; font-size: 13px; }
 .kv div:nth-child(odd) { color: var(--muted); }
 .empty { color: var(--muted); padding: 24px 0; }
@@ -309,6 +310,9 @@ function renderHeader(D, V) {
   const hdr = document.getElementById("hdr");
   hdr.innerHTML = "";
   document.title = L.page_title;
+  document.documentElement.lang = L.lang;
+  const keep = state.ds ? `#ds=${state.ds}&rep=${state.rep}` : "";
+  hdr.appendChild(h("a", { class: "lang", href: L.other_lang.href + keep, text: L.other_lang.label }));
   hdr.appendChild(h("h1", { text: L.page_title }));
   hdr.appendChild(h("p", { class: "sub", text: L.page_subtitle }));
   if (!D) { hdr.appendChild(h("p", { class: "empty", text: L.sections.no_data })); return; }
@@ -534,7 +538,7 @@ function chartTimeline(D, rep) {
     const failFill = t => fills[t] || (fills[t] = hatch(defs, TYPE_COLOR[t]));
     for (const w of R.weeks) {
       const y = top + (w.week - 1) * (rowH + gap);
-      svg.appendChild(s("text", { x: 0, y: y + rowH / 2 + 4 }, `${L.table.week}${w.week}`));
+      svg.appendChild(s("text", { x: 0, y: y + rowH / 2 + 4 }, `${L.table.week_short}${w.week}`));
       svg.appendChild(s("rect", { x: X(0), y, width: X(w.available_usd) - X(0), height: rowH, fill: "var(--grid)" }));
       let acc = 0;
       for (const t of R.tasks.filter(t => t.week === w.week)) {

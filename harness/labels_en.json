@@ -1,0 +1,200 @@
+{
+  "lang": "en",
+  "other_lang": {
+    "label": "中文",
+    "href": "index.html"
+  },
+  "punct": {
+    "lp": " (",
+    "rp": ")",
+    "sep": ", ",
+    "semi": "; ",
+    "colon": ": "
+  },
+  "page_title": "Maintenance vs. implementation under a fixed weekly budget",
+  "page_subtitle": "Same codebase, same backlog, same weekly budget: a group that never maintains vs. a group that maintains when metrics cross thresholds",
+  "source": "Data source",
+  "source_sim": "Simulation",
+  "source_real": "Real run",
+  "hypothesis": "Hypothesis",
+  "sim_disclaimer": "Simulated results reflect only the assumed coefficients; they cannot show whether the premise holds.",
+  "real_disclaimer": "Small sample ({reps} reps per group): results are descriptive, with no claim of statistical significance.",
+  "placeholder_prices": "placeholder prices",
+  "filters": {
+    "phase": "Phase",
+    "hypothesis": "Hypothesis",
+    "rep": "Rep",
+    "rep_all": "All"
+  },
+  "phase_names": {
+    "sim": "Simulation",
+    "real": "Real run"
+  },
+  "hypothesis_names": {
+    "strong": "Strong tech-debt effect",
+    "weak": "Weak tech-debt effect",
+    "real": "Real run"
+  },
+  "group_names": {
+    "nomaint": "No-maintenance group",
+    "maint": "Maintenance group"
+  },
+  "group_line": {
+    "nomaint": "dashed",
+    "maint": "solid"
+  },
+  "task_type_names": {
+    "calib": "Calibration",
+    "impl": "Implementation",
+    "debug": "Debugging",
+    "maint_security": "Security scan & dependency update",
+    "maint_tests": "Add tests",
+    "maint_refactor": "Refactor",
+    "maint_knowledge": "Knowledge distillation",
+    "unused": "Unused",
+    "overspend": "Week overspend"
+  },
+  "metric_names": {
+    "loc": "Lines of code",
+    "max_file_lines": "Largest file (lines)",
+    "dup_ratio": "Duplicated code",
+    "coverage": "Test coverage",
+    "vulns": "Dependency vulnerabilities",
+    "outdated_deps": "Outdated dependencies",
+    "build_tests": "Build and tests pass",
+    "avg_input_tokens": "Avg input tokens per implementation task"
+  },
+  "headline": {
+    "cum": "Items completed in 8 weeks",
+    "ratio": "Per-item cost, late ÷ early",
+    "ratio_note": "weeks 6–8 ÷ weeks 1–3",
+    "overspend": "Overspends",
+    "overspend_note": "item overspends; week overspends in parentheses",
+    "range": "range",
+    "mean_of": "mean of {n} reps",
+    "single_rep": "rep {rep}",
+    "inf_note": "{n} reps completed nothing late (ratio ∞)"
+  },
+  "conclusion": {
+    "template": "{hyp}: in 8 weeks the no-maintenance group completed {a} items and the maintenance group {b} ({scope}). Per-item cost, late vs. early: {r1} for the no-maintenance group ({trend}), {r2} for the maintenance group. {verdict}",
+    "scope_all": "mean of {n} reps",
+    "scope_one": "rep {rep}",
+    "trend_up": "rising",
+    "trend_down": "falling",
+    "trend_flat": "about flat",
+    "trend_none": "not computable",
+    "verdict_more": "In these data the maintenance group delivered more.",
+    "verdict_less": "In these data the maintenance group delivered less.",
+    "verdict_equal": "In these data both groups delivered the same."
+  },
+  "sections": {
+    "overview": "Overview",
+    "single_run": "Single run",
+    "single_run_note": "With Rep set to All, this view shows rep 1.",
+    "raw_logs": "Raw logs",
+    "settings": "Run settings",
+    "no_data": "No data yet."
+  },
+  "charts": {
+    "cost": {
+      "title": "1. Implementation cost per item, by week",
+      "read": "Each week's (implementation + debugging) spend ÷ items completed that week. The line is the mean over reps; the band spans min to max. Reps that completed nothing that week are left out.",
+      "y": "USD / item"
+    },
+    "cum": {
+      "title": "2. Cumulative items completed",
+      "read": "Backlog items that passed acceptance, cumulative to the end of each week. Higher and steeper means more delivered.",
+      "y": "items"
+    },
+    "spend": {
+      "title": "3. Where each week's budget went",
+      "read": "Two bars per week: left the no-maintenance group, right the maintenance group (mean over reps). The black line is the weekly budget. The red hatched part above it is a week overspend; it is deducted from the next week's budget, so that bar ends below the line.",
+      "y": "USD"
+    },
+    "metrics": {
+      "title": "4. Metrics by week",
+      "read": "One chart per metric, measured at the start of each week (week 0 is the baseline). The grey dotted line is the trigger threshold. A triangle marks a week in which the maintenance group ran a maintenance agent because of this metric; the number is how many reps triggered."
+    },
+    "forecast": {
+      "title": "5. Forecast at week start vs. items completed",
+      "read": "Hollow points: the forecast at the start of the week (this week's implementation budget ÷ average cost per item so far). Solid points: items actually completed. The gap is the forecast error.",
+      "y": "items",
+      "predicted": "forecast",
+      "actual": "actual"
+    },
+    "timeline": {
+      "title": "6. Task timeline",
+      "read": "One row per week, one block per task. Width is cost, colour is task type. The vertical line is the week's budget; anything past it is a week overspend. Solid blocks passed, hatched blocks failed, ↺ marks an item that was rolled back. Hover for details.",
+      "passed": "passed",
+      "failed": "failed",
+      "rolled_back": "rolled back"
+    },
+    "weekly": {
+      "title": "7. Weekly details"
+    }
+  },
+  "table": {
+    "show": "Data table",
+    "week": "Week",
+    "week_short": "W",
+    "group": "Group",
+    "mean": "Mean",
+    "min": "Min",
+    "max": "Max",
+    "values": "Per rep",
+    "budget": "Weekly budget",
+    "carry": "Overspend carried in",
+    "available": "Available",
+    "maint": "Maintenance",
+    "impl": "Implementation",
+    "debug": "Debugging",
+    "unused": "Unused",
+    "week_overspend": "Week overspend",
+    "predicted": "Forecast",
+    "completed": "Completed",
+    "failed": "Failed",
+    "item_overspend": "Item overspends",
+    "triggered": "Maintenance run",
+    "skipped": "Triggered, no budget",
+    "threshold": "threshold",
+    "trigger_count": "Triggers"
+  },
+  "tip": {
+    "item": "Backlog item",
+    "task_type": "Task type",
+    "debug_index": "Debug attempt",
+    "input": "Input tokens (uncached)",
+    "cache_write": "Cache write tokens",
+    "cache_read": "Cache read tokens",
+    "output": "Output tokens",
+    "cost": "Cost",
+    "item_cost": "Item cost so far",
+    "overspend": "Over cap",
+    "accepted": "Accepted",
+    "rolled_back": "Rolled back",
+    "trigger": "Trigger metric",
+    "trigger_value": "Value",
+    "trigger_baseline": "Baseline",
+    "trigger_threshold": "Threshold (relative change)",
+    "yes": "yes",
+    "no": "no",
+    "forced_stop": "Stopped by runaway guard"
+  },
+  "settings": {
+    "budget": "Weekly budget",
+    "cap": "Item cap",
+    "maint_cap": "Maintenance task cap",
+    "calib": "Calibration mean (n)",
+    "model": "Model priced",
+    "prices": "Prices (USD per million tokens)",
+    "generated": "Generated",
+    "commit": "Commit"
+  },
+  "links": {
+    "tasks": "Task log tasks.csv",
+    "weeks": "Week log weeks.csv",
+    "metrics": "Metric snapshots metrics.csv",
+    "run": "Run settings run.json",
+    "report": "Final report"
+  }
+}

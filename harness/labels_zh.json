@@ -1,4 +1,9 @@
 {
+  "lang": "zh-CN",
+  "other_lang": {
+    "label": "English",
+    "href": "index.en.html"
+  },
   "punct": {
     "lp": "（",
     "rp": "）",
@@ -151,7 +156,8 @@
     "triggered": "触发的维护",
     "skipped": "触发但预算不足",
     "threshold": "阈值",
-    "trigger_count": "触发次数"
+    "trigger_count": "触发次数",
+    "week_short": "周"
   },
   "tip": {
     "item": "backlog 项",

@@ -17,9 +17,10 @@ The plan (in Chinese) is in [PLAN.md](PLAN.md); the final report (in Chinese) is
 
 ## Results
 
-Full report (in Chinese): [REPORT.md](REPORT.md). Dashboard: [docs/index.html](docs/index.html).
-Screenshots below are taken from the dashboard (labels are in Chinese) with
-`node harness/screenshots.mjs`.
+Full report (in Chinese): [REPORT.md](REPORT.md). Dashboard:
+[docs/index.en.html](docs/index.en.html) (English) and [docs/index.html](docs/index.html)
+(Chinese), both built from the same data. Screenshots below are taken from the English
+dashboard with `node harness/screenshots.mjs`.
 
 **Real run** (claude-sonnet-5-5, 3 reps per group, 8 weeks; 13.07 USD in total). The `maint`
 group delivered 23-24 items against 29-31 for `nomaint`. Per-item cost rose only slightly in
@@ -28,18 +29,18 @@ same in both groups, so the rise reflects larger items later in the backlog, not
 codebase. No acceptance check failed in 173 sessions. Within this scale the premise is not
 supported.
 
-![Real run: headline numbers](docs/img/real-header.png)
+![Real run: headline numbers](docs/img/en/real-header.png)
 
 | Cumulative items completed | Implementation cost per item |
 |---|---|
-| ![Real run: cumulative items](docs/img/real-cumulative.png) | ![Real run: cost per item](docs/img/real-cost.png) |
+| ![Real run: cumulative items](docs/img/en/real-cumulative.png) | ![Real run: cost per item](docs/img/en/real-cost.png) |
 
 Where each week's budget went (implementation, debugging, each maintenance agent, unused),
 and the metrics with their trigger thresholds:
 
-![Real run: weekly budget split](docs/img/real-budget.png)
+![Real run: weekly budget split](docs/img/en/real-budget.png)
 
-![Real run: metrics by week](docs/img/real-metrics.png)
+![Real run: metrics by week](docs/img/en/real-metrics.png)
 
 **Simulation** (assumed coefficients; it shows how the conclusion depends on the assumptions
 and cannot test the premise). Under `strong`, the per-item cost of `nomaint` rises 1.4-2.6x
@@ -48,7 +49,7 @@ while `maint` stays flat, yet `maint` still delivers about 2 fewer items in 8 we
 
 | strong: cumulative items | weak: cumulative items |
 |---|---|
-| ![Simulation strong: cumulative items](docs/img/sim-strong-cumulative.png) | ![Simulation weak: cumulative items](docs/img/sim-weak-cumulative.png) |
+| ![Simulation strong: cumulative items](docs/img/en/sim-strong-cumulative.png) | ![Simulation weak: cumulative items](docs/img/en/sim-weak-cumulative.png) |
 
 ## Phases
 
@@ -66,9 +67,10 @@ while `maint` stays flat, yet `maint` still delivers about 2 fewer items in 8 we
 config/            experiment rules, thresholds, prices, simulation coefficients
 harness/           scheduling loop, executors, metrics sources, stats, dashboard builder
 tests/             unit tests for the loop rules
-docs/index.html    dashboard (single self-contained file, regenerated after every run)
+docs/index.html    dashboard in Chinese (single self-contained file, regenerated after every run)
+docs/index.en.html the same dashboard in English
 docs/data/         raw logs: <phase>/<hypothesis>/{tasks,weeks,metrics}.csv and run.json
-docs/img/          dashboard screenshots used by README.md and REPORT.md
+docs/img/          dashboard screenshots: Chinese for REPORT.md, docs/img/en/ English for README.md
 site/              website used in the real run
 backlog/           backlog items and calibration items for the real run
 acceptance/        acceptance tests, kept outside the working copies
@@ -83,7 +85,7 @@ Python 3.11+ standard library only.
 
 ```sh
 python3 -m harness sim all        # run both simulated hypotheses and rebuild the dashboard
-python3 -m harness dashboard      # rebuild docs/index.html from docs/data/
+python3 -m harness dashboard      # rebuild docs/index.html and docs/index.en.html from docs/data/
 python3 -m harness report         # print summary tables
 python3 -m unittest discover -s tests
 
@@ -94,7 +96,8 @@ python3 -m harness build-report   # regenerate REPORT.md tables from docs/report
 node harness/screenshots.mjs      # refresh docs/img/ (needs Playwright with Chromium)
 ```
 
-Open `docs/index.html` directly in a browser, or serve `docs/` with GitHub Pages.
+Open `docs/index.en.html` (English) or `docs/index.html` (Chinese) directly in a browser, or
+serve `docs/` with GitHub Pages.
 
 ## Rules in short
 
