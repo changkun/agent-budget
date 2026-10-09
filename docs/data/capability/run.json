@@ -3,7 +3,7 @@
   "experiment_rules": {
     "max_debug": 2
   },
-  "git_commit": "0d4859c8e655c8120b96dee6040bbdcde2825afb",
+  "git_commit": "1a8ed2db5330a8b5a659eda0d1e67bd991f5548a",
   "prices": {
     "claude-fable-5-1": {
       "cache_read": 0.25,
@@ -53,6 +53,17 @@
         "claude-fable-5-1"
       ],
       "t": "2026-10-09T16:49:39+00:00"
+    },
+    {
+      "blocks": [
+        "core2",
+        "core3",
+        "A2s",
+        "D"
+      ],
+      "command": "run",
+      "jobs": 636,
+      "t": "2026-10-09T17:03:47+00:00"
     }
   ],
   "settings": {
@@ -72,15 +83,16 @@
         "core3",
         "A2",
         "A3",
+        "A2s",
         "D"
       ]
     },
     "effort": "high",
     "guard_usd": {
-      "claude-fable-5-1": 1.9,
-      "claude-haiku-5-5": 0.1,
-      "claude-opus-5-5": 0.8,
-      "claude-sonnet-5-5": 0.4
+      "claude-fable-5-1": 4.0,
+      "claude-haiku-5-5": 0.15,
+      "claude-opus-5-5": 1.5,
+      "claude-sonnet-5-5": 0.6
     },
     "maint_agents": [
       "tests",

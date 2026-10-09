@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-10-09T17:03:37+00:00",
+  "spent_before_usd": 6.455644294356436,
+  "cap_usd": 200.0,
+  "plan_margin": 1.2,
+  "debug_margin": 1.15,
+  "units": {
+    "claude-haiku-5-5": {
+      "c1": 0.0123585,
+      "probe": 0.013279190544412605,
+      "item": 0.010623352435530085,
+      "maint": 0.1023,
+      "maint_source": "max of 0.1023 (stopped at old guard 0.10) and 0.0844"
+    },
+    "claude-sonnet-5-5": {
+      "c1": 0.0955775,
+      "probe": 0.10269788681948423,
+      "item": 0.08215830945558737,
+      "maint": 0.6,
+      "maint_source": "stopped at old guard 0.40 (0.36 at list price): new guard 0.60"
+    },
+    "claude-opus-5-5": {
+      "c1": 0.20664,
+      "probe": 0.2220343839541547,
+      "item": 0.17762750716332376,
+      "maint": 0.4709,
+      "maint_source": "one complete session"
+    },
+    "claude-fable-5-1": {
+      "c1": 0.8530745,
+      "probe": 0.9166273280802291,
+      "item": 0.7333018624641833,
+      "maint": 4.0,
+      "maint_source": "stopped at old guard 1.90 (2.15): new guard 4.00"
+    }
+  },
+  "blocks": [
+    {
+      "block": "core2",
+      "jobs": 324,
+      "projected_usd": 54.14001006447003,
+      "included": true
+    },
+    {
+      "block": "core3",
+      "jobs": 162,
+      "projected_usd": 47.71906551575934,
+      "included": true
+    },
+    {
+      "block": "A2",
+      "jobs": 120,
+      "projected_usd": 168.16984271131815,
+      "included": false
+    },
+    {
+      "block": "A3",
+      "jobs": 81,
+      "projected_usd": 143.1669152363899,
+      "included": false
+    },
+    {
+      "block": "A2s",
+      "jobs": 42,
+      "projected_usd": 44.27309994627508,
+      "included": true
+    },
+    {
+      "block": "D",
+      "jobs": 108,
+      "projected_usd": 14.612972976360995,
+      "included": true
+    }
+  ],
+  "included": [
+    "core2",
+    "core3",
+    "A2s",
+    "D"
+  ],
+  "block_limits": {
+    "core2": 81.21001509670505,
+    "core3": 71.57859827363902,
+    "A2s": 66.40964991941263,
+    "D": 21.919459464541493
+  }
+}

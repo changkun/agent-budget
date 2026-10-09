@@ -717,7 +717,10 @@ def projected(jobs: list[Job], units: dict) -> float:
 
 def make_plan() -> dict:
     s = settings()
-    units = unit_costs()
+    # units.json, when present, holds the feasibility unit costs after reconciliation
+    # (maintenance sessions stopped by the old guard are counted at the new guard)
+    path = DATA / "units.json"
+    units = json.loads(path.read_text()) if path.exists() else unit_costs()
     spent = ledger().total()
     budget = s["total_cap_usd"] - spent
     included, rows, seen = [], [], set()
