@@ -77,6 +77,7 @@ site/              website used in the real run
 backlog/           backlog items and calibration items for the real run
 acceptance/        acceptance tests, kept outside the working copies
 snapshots/         archived real-run working copies (git bundles), session transcripts, spend ledger
+PLAN-capability.md follow-up plan (Chinese, not run): does the need for maintenance depend on model capability?
 ```
 
 Working copies for the real run live outside the repository (`/home/user/agent-work`, see
