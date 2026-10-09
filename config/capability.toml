@@ -1,0 +1,37 @@
+# Capability experiment settings (PLAN-capability.md). Fixed before the paid runs.
+
+total_cap_usd = 200.0                 # API-equivalent USD for this experiment, own ledger
+work_root = "/home/user/agent-work/capability"
+parallel = 6
+seed = 20261009
+effort = "high"                       # passed as --effort to every session
+session_timeout_s = 1800
+probes = ["C1", "C2", "C3", "C4", "C5", "C6"]
+reps = [1, 2, 3]
+sonnet_k = [15, 29]                   # Sonnet-produced states: after 15 and 29 items
+producer_k = 29                       # other producers implement B01..B29
+maint_agents = ["tests", "refactor"]  # run in this order when their original trigger fires
+reference = "claude-sonnet-5-5"       # fixed maintainer and fixed consumer
+
+# Short names used in state ids and job ids.
+[models]
+"claude-haiku-5-5" = "haiku55"
+"claude-sonnet-5-5" = "sonnet55"
+"claude-opus-5-5" = "opus55"
+"claude-fable-5-1" = "fable51"
+
+# Runaway guard per session (USD, passed to --max-budget-usd): about 5x a typical
+# session at the model's price, as in the original experiment (0.38 USD for Sonnet).
+[guard_usd]
+"claude-haiku-5-5" = 0.10
+"claude-sonnet-5-5" = 0.40
+"claude-opus-5-5" = 0.80
+"claude-fable-5-1" = 1.90
+
+# Blocks in priority order. A block runs only if the re-estimate after the feasibility
+# phase keeps the projected total within total_cap_usd (PLAN-capability.md section 8).
+[blocks]
+order = ["core2", "core3", "A2", "A3", "D"]
+core_consumers = ["claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5"]
+core_producers = ["claude-haiku-5-5", "claude-opus-5-5"]
+option_a = "claude-fable-5-1"

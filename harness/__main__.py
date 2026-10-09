@@ -10,6 +10,7 @@
     python3 -m harness real run-all            real phase: run or resume all series
     python3 -m harness real run --group G --rep N
     python3 -m harness real status
+    python3 -m harness capability prepare|feasibility|plan|run|status   (PLAN-capability.md)
 """
 from __future__ import annotations
 
@@ -21,6 +22,10 @@ from . import config
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    if argv[:1] == ["capability"]:
+        from . import capability
+        return capability.main(argv[1:])
     ap = argparse.ArgumentParser(prog="harness")
     sub = ap.add_subparsers(dest="cmd", required=True)
     p_sim = sub.add_parser("sim")

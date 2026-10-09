@@ -13,3 +13,36 @@ cache_write_5m = 2.5
 cache_write_1h = 4.0
 cache_read = 0.10
 output = 10.0
+
+# Added 2026-10-09 for the capability experiment (PLAN-capability.md), same source.
+# Cache hits on Opus 5.5 are 0.05x the base input price, on Fable 5.1 0.025x.
+[models."claude-opus-5-5"]
+input = 4.0
+cache_write_5m = 5.0
+cache_write_1h = 8.0
+cache_read = 0.20
+output = 20.0
+
+[models."claude-fable-5-1"]
+input = 10.0
+cache_write_5m = 12.5
+cache_write_1h = 20.0
+cache_read = 0.25
+output = 50.0
+
+# Haiku 5.5 is priced by prompt length per request: up to 100,000 tokens at the base rate,
+# longer prompts at the `above_tier` rate.
+[models."claude-haiku-5-5"]
+input = 0.10
+cache_write_5m = 0.125
+cache_write_1h = 0.20
+cache_read = 0.01
+output = 0.50
+tier_prompt_tokens = 100000
+
+[models."claude-haiku-5-5".above_tier]
+input = 0.50
+cache_write_5m = 0.625
+cache_write_1h = 1.0
+cache_read = 0.05
+output = 2.50

@@ -10,6 +10,7 @@ from __future__ import annotations
 import fcntl
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -32,6 +33,27 @@ class BudgetExhausted(RuntimeError):
 
 class UsageUnavailable(RuntimeError):
     pass
+
+
+class InfraError(RuntimeError):
+    """The session hit a usage or rate limit or an API error; its result is not usable."""
+
+
+INFRA_PATTERN = re.compile(r"usage limit|rate.?limit|hit your limit|limit reached|quota|"
+                           r"api error|overloaded|\b(429|500|502|503|529)\b", re.IGNORECASE)
+
+
+def infra_error(session: dict) -> str | None:
+    """Return a reason if the session ended on a limit or an API error, else None."""
+    res = session.get("result") or {}
+    if res.get("subtype") == "error_max_budget_usd":
+        return None  # runaway guard: a normal forced stop
+    text = str(res.get("result") or "")
+    if res.get("is_error") and INFRA_PATTERN.search(text):
+        return text[:300]
+    if not res and INFRA_PATTERN.search(session.get("stderr") or ""):
+        return (session.get("stderr") or "")[-300:]
+    return None
 
 
 class Ledger:
@@ -143,13 +165,15 @@ def _session_env(home: str) -> dict:
 
 
 def run_session(prompt: str, cwd: Path, model: str, guard_usd: float, timeout_s: int,
-                transcript: Path | None = None) -> dict:
+                transcript: Path | None = None, effort: str | None = None) -> dict:
     """Run one fresh `claude -p` session and return its usage, read from stream-json."""
     home = tempfile.mkdtemp(prefix="agent-home-")
     cmd = ["claude", "-p", prompt, "--model", model, "--output-format", "stream-json",
            "--verbose", "--no-session-persistence", "--max-budget-usd", f"{guard_usd:.2f}",
            "--permission-mode", "bypassPermissions", "--strict-mcp-config",
            "--disallowedTools", DISALLOWED_TOOLS]
+    if effort:
+        cmd += ["--effort", effort]
     started = time.time()
     proc = subprocess.Popen(cmd, cwd=cwd, env=_session_env(home), stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, text=True, start_new_session=True)
@@ -250,22 +274,58 @@ def usage_by_model(session: dict, default_model: str) -> dict[str, dict]:
     return out
 
 
-def price(tokens_by_model: dict[str, dict], price_table: dict) -> float:
+def _cost(t: dict, p: dict) -> float:
+    return (t["input"] * p["input"] + t["cw5"] * p["cache_write_5m"]
+            + t["cw1"] * p["cache_write_1h"] + t["read"] * p["cache_read"]
+            + t["output"] * p["output"]) / 1_000_000
+
+
+def _tiered_cost(name: str, t: dict, p: dict, per_message: dict | None) -> float:
+    """Price a model whose rate depends on the prompt length of each request.
+
+    Requests are read from the per-message usage of the stream (input-side counts match the
+    result totals exactly; output counts in the stream can be lower). Input-side tokens are
+    priced per request. Output tokens are taken from the totals and split between the tiers
+    in proportion to the per-message output counts.
+    """
+    limit = p["tier_prompt_tokens"]
+    zero = {"input": 0, "cw5": 0, "cw1": 0, "read": 0, "output": 0}
+    tiers = {"base": dict(zero), "above": dict(zero)}
+    last = "base"
+    for mname, usage in (per_message or {}).values():
+        if mname != name:
+            continue
+        u = _split(usage)
+        tier = "above" if u["input"] + u["cw5"] + u["cw1"] + u["read"] > limit else "base"
+        for k, v in u.items():
+            tiers[tier][k] += v
+        last = tier
+    if per_message is None or all(tiers[x][k] == 0 for x in tiers for k in zero):
+        tiers = {"base": dict(t), "above": dict(zero)}  # no request-level data: base tier
+    else:
+        out_seen = tiers["base"]["output"] + tiers["above"]["output"]
+        for x in tiers:
+            share = tiers[x]["output"] / out_seen if out_seen else float(x == last)
+            tiers[x]["output"] = t["output"] * share
+    return _cost(tiers["base"], p) + _cost(tiers["above"], p["above_tier"])
+
+
+def price(tokens_by_model: dict[str, dict], price_table: dict,
+          per_message: dict | None = None) -> float:
     cost = 0.0
     for name, t in tokens_by_model.items():
         if name not in price_table:
             raise UsageUnavailable(f"no price for model {name!r}; add it to config/prices.toml")
         p = price_table[name]
-        cost += (t["input"] * p["input"] + t["cw5"] * p["cache_write_5m"]
-                 + t["cw1"] * p["cache_write_1h"] + t["read"] * p["cache_read"]
-                 + t["output"] * p["output"]) / 1_000_000
+        cost += _tiered_cost(name, t, p, per_message) if "tier_prompt_tokens" in p else _cost(t, p)
     return cost
 
 
 class RealExecutor:
     def __init__(self, ws: Workspace, *, model: str, price_table: dict, prompts: dict,
                  specs: dict, ledger: Ledger, session_timeout_s: int, transcript_dir: Path,
-                 accepted: list[str] | None = None, label: str = ""):
+                 accepted: list[str] | None = None, label: str = "", effort: str | None = None,
+                 ledger_meta: dict | None = None):
         self.ws = ws
         self.model = model
         self.price_table = price_table
@@ -276,6 +336,8 @@ class RealExecutor:
         self.transcript_dir = Path(transcript_dir)
         self.accepted = list(accepted or [])
         self.label = label
+        self.effort = effort
+        self.ledger_meta = dict(ledger_meta or {})
         self._pending = None
         self._last_eval = ""
         self._counter = 0
@@ -349,17 +411,29 @@ class RealExecutor:
         session = None
         for attempt in range(3):
             session = run_session(prompt, self.ws.path, self.model, guard_usd, self.timeout,
-                                  transcript)
+                                  transcript, self.effort)
             if session["result"] or session["per_message"]:
                 break
+            if infra_error(session):
+                break
             time.sleep(30 * (attempt + 1))  # infrastructure failure before any model call
+        res = session["result"] or {}
+        reason = infra_error(session)
+        if reason:
+            try:
+                tokens = usage_by_model(session, self.model)
+                cost = price(tokens, self.price_table, session["per_message"]) if tokens else 0.0
+            except UsageUnavailable:
+                cost = 0.0
+            self.ledger.add(cost, label=self.label, week=week, task_type=task_type, item=item,
+                            session_id=res.get("session_id"), infra=reason, **self.ledger_meta)
+            raise InfraError(reason)
         tokens = usage_by_model(session, self.model)
         if not tokens:
             raise UsageUnavailable(f"session produced no usage data: {session['stderr']}")
-        cost = price(tokens, self.price_table)
-        res = session["result"] or {}
+        cost = price(tokens, self.price_table, session["per_message"])
         self.ledger.add(cost, label=self.label, week=week, task_type=task_type, item=item,
-                        session_id=res.get("session_id"))
+                        session_id=res.get("session_id"), **self.ledger_meta)
         accepted, output = self._evaluate(check_items)
         self._last_eval = output
         totals = {k: sum(t[k] for t in tokens.values()) for k in ("input", "cw5", "cw1", "read", "output")}
@@ -370,7 +444,9 @@ class RealExecutor:
             accepted=accepted, forced_stop=forced, model=";".join(sorted(tokens)),
             session_id=res.get("session_id", ""), duration_s=session["duration_s"],
             extra={"cli_cost_usd": res.get("total_cost_usd"), "num_turns": res.get("num_turns"),
-                   "subtype": res.get("subtype"), "timed_out": session["timed_out"]})
+                   "subtype": res.get("subtype"), "timed_out": session["timed_out"],
+                   "is_error": bool(res.get("is_error")), "result_text": str(res.get("result") or "")[:300],
+                   "tokens_by_model": tokens})
 
     def finish(self, keep: bool) -> None:
         task_type, item, head = self._pending
