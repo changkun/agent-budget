@@ -134,6 +134,35 @@ def estimate(key: str) -> dict:
     return out
 
 
+def online_rule(beta: float, c0: float, per_type: bool) -> list[dict]:
+    """Corollary 6 applied to every maintenance task of the real maint group.
+
+    k = accepted items since the previous accepted maintenance (of the same type when
+    per_type is True); n_rem = items the series actually completed after the task.
+    """
+    data = stats.load(*DATASETS["real"])
+    events = []
+    for (g, rep), run in sorted(stats.runs_of(data).items()):
+        if g != "maint":
+            continue
+        tasks = sorted(run["tasks"], key=lambda t: (t["week"], t["seq"]))
+        done, last = 0, {}
+        for i, t in enumerate(tasks):
+            if t["task_type"] == "impl" and t["accepted"]:
+                done += 1
+            elif t["task_type"].startswith("maint_"):
+                key = t["task_type"] if per_type else "any"
+                k = done - last.get(key, 0)
+                n_rem = sum(1 for u in tasks[i + 1:] if u["task_type"] == "impl" and u["accepted"])
+                mc = t["cost_usd"] / c0
+                events.append({"rep": rep, "week": t["week"], "type": t["task_type"], "k": k,
+                               "n_rem": n_rem, "score": beta * k * n_rem, "mc": mc,
+                               "worth": beta * k * n_rem > mc})
+                if t["accepted"]:
+                    last[key] = done
+    return events
+
+
 def payback_chart(est: dict, labels: dict) -> str:
     """Inline SVG: Q(T) per dataset for the observed policy, log scale, Q = 1 is break-even."""
     W, H = 720, 320
@@ -196,6 +225,8 @@ def values() -> dict[str, str]:
             f"{k}.Q_one": _fmt(e["Q_one"], 2), f"{k}.T_obs": _fmt(e["T_obs"], 1),
             f"{k}.T_one": _fmt(e["T_one"], 1), f"{k}.T_obs_hi": _fmt(e["T_obs_hi"], 1),
             f"{k}.n_points": str(e["n_points"]),
+            f"{k}.beta_star_one": _fmt(100 * 4 * e["mc"] / e["N0"] ** 2, 2),
+            f"{k}.beta_star_obs": _fmt(100 * 2 * (e["R"] + 1) * e["mc"] / e["N0"] ** 2, 2),
             f"{k}.cum0": ", ".join(str(x) for x in e["cum0"]),
             f"{k}.cumM": ", ".join(str(x) for x in e["cumM"]),
         })
@@ -217,6 +248,17 @@ def values() -> dict[str, str]:
         lo, hi = r[f"{g}_unused"]
         out[f"real.{g}_unused"] = f"{100 * lo:.0f}–{100 * hi:.0f}%"
     out["real.baseline_loc"] = str(stats.load("real", "real")["meta"]["plan"]["baseline"]["loc"])
+    out["real.L_star"] = _fmt(math.sqrt(2 * r["mc"] / r["beta"]), 1)
+    out["real.single_premium"] = _fmt(100 * (r["beta"] * r["N0"] / 4 + r["mc"] / r["N0"]), 1)
+    out["real.quad_share"] = _fmt(100 * (r["beta"] * r["N0"] / 2), 1)
+    for name, beta, per_type in (("single", r["beta"], False), ("type", r["beta"], True),
+                                 ("type_hi", r["beta_hi"], True)):
+        ev = online_rule(beta, r["c0"], per_type)
+        out[f"real.online_{name}_n"] = str(len(ev))
+        out[f"real.online_{name}_worth"] = str(sum(e_["worth"] for e_ in ev))
+        out[f"real.online_{name}_max"] = _fmt(max(e_["score"] / e_["mc"] for e_ in ev), 2)
+        if name == "type":
+            out["_online_rows"] = ev  # type: ignore[assignment]
     out["_est"] = est  # type: ignore[assignment]
     return out
 
@@ -228,6 +270,13 @@ def build() -> str:
     chart_labels = dict(re.findall(r'data-label-(\w+)="([^"]*)"',
                                    re.search(r'<div id="chart-labels"[^>]*>', text).group(0)))
     vals["chart.payback"] = payback_chart(est, chart_labels)
+    rows = []
+    for e_ in vals.pop("_online_rows"):  # type: ignore[union-attr]
+        verdict = chart_labels["yes"] if e_["worth"] else chart_labels["no"]
+        rows.append(f"<tr><td>{e_['rep']}</td><td>{e_['week']}</td>"
+                    f"<td>{chart_labels[e_['type']]}</td><td>{e_['k']}</td><td>{e_['n_rem']}</td>"
+                    f"<td>{e_['score']:.2f}</td><td>{e_['mc']:.2f}</td><td>{verdict}</td></tr>")
+    vals["real.online_rows"] = "\n".join(rows)
 
     def repl(m):
         key = m.group(1)

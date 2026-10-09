@@ -90,6 +90,7 @@ li { margin: 3px 0; }
 其中 <span class="v">β</span> 是每多交付一项、单项成本的相对增幅，<span class="v">m</span>/<span class="v">c</span>₀ 是一次维护折合多少项实现，<span class="v">R</span> 是维护次数，<span class="v">N</span> 是期限内交付的项数。只要 <span class="v">β</span> &gt; 0，期限足够长时维护一定回本；<span class="v">β</span> = 0 时永远不回本。</li>
 <li><b>机制检验。</b>真实运行中，维护确实把指标拉回了基线（M1、M3 成立）。但同一个 backlog 项在维护组并不更便宜：维护组 ÷ 不维护组 = 1.034，自助法 90% 区间 [1.013, 1.058]。也就是说，能被维护消除的那部分 <span class="v">β</span> 不大于 0（M2 不成立）。</li>
 <li><b>结论。</b>按定理，此时维护在任何期限内都无法回本。实测维护组 8 周累计交付比不维护组少 7.0 项（3 次重复均值），每次重复都更少。前提不成立，限于本实验条件。</li>
+<li><b>什么时候可以不维护。</b>由定理可得跳过维护的阈值 <span class="v">β</span> &lt; <span class="v">β</span>* = 4(<span class="v">m</span>/<span class="v">c</span>₀)/<span class="v">N</span>²（只维护一次、时机最好时）。阈值管的是 <span class="v">β</span> = <span class="v">αδ</span>，即技术债让成本涨了多少，而不是引入了多少技术债；它随剩余工作量的平方下降。由同一模型还可以推出一条现场决策规则：<b>现在维护，当且仅当（当前每项多花的比例）×（剩余项数）&gt; <span class="v">m</span>/<span class="v">c</span>₀</b>。用这条规则回看真实运行中阈值策略触发的 12 次维护，即使把全部成本上涨都算作可修复的技术债，值得做的也只有 0 次（§6.5）。</li>
 <li><b>理论自身的检验。</b>把三组数据（模拟“强”、模拟“弱”、真实运行）代入 <span class="v">Q</span>，预测的输赢方向与实测一致，相对大小的排序也一致（§6.4）。</li>
 </ul>
 </div>
@@ -193,6 +194,33 @@ li { margin: 3px 0; }
 只要 <span class="v">β</span> &gt; 0，<span class="v">Q</span>(<span class="v">T</span>) 随期限下降并终将小于 1，回本期限 <span class="v">T</span>* 存在；<span class="v">β</span> = 0 时 <span class="v">Q</span> = ∞，不存在回本期限。所以前提 P 的真正问题不是“维护值不值”，而是“<span class="v">β</span> 是否大于 0，以及期限是否超过 <span class="v">T</span>*”。</div>
 <div class="box"><span class="label">推论 4（稳健方向）</span>以下偏离都只会减少维护的收益：维护间隔不均匀（固定 <span class="v">R</span> 时，各段长度平方和在均匀时最小）、维护只部分修复债务、部分成本增长与债务无关而无法被维护消除。因此用“均匀间隔、完全修复、把全部成本增长都算作可修复债务”算出的 <span class="v">Q</span> 是偏向维护的乐观值：据此得到 <span class="v">Q</span> &gt; 1 时，“维护不回本”的结论在这些偏离下依然成立；反过来 <span class="v">Q</span> &lt; 1 时还需要额外证据。</div>
 
+<div class="box"><span class="label">推论 5（跳过维护的阈值）</span>维护 <span class="v">R</span> 次不划算，当且仅当
+<div class="math"><span class="v">β</span> &lt; <span class="v">β</span>*<sub>R</sub> = 2(<span class="v">R</span>+1)(<span class="v">m</span>/<span class="v">c</span>₀) / <span class="v">N</span>²；对所有 <span class="v">R</span> 都不划算，当且仅当 <span class="v">β</span> &lt; <span class="v">β</span>* = 4(<span class="v">m</span>/<span class="v">c</span>₀) / <span class="v">N</span>²</div>
+这是定理的移项，后半句由推论 1 得出。三点读法：
+<ul>
+<li>阈值管的是 <span class="v">β</span> = <span class="v">αδ</span>。<span class="v">δ</span> 是每项引入的技术债，<span class="v">α</span> 是技术债让成本上涨的敏感度。指标变差（<span class="v">δ</span> &gt; 0）而成本不涨（<span class="v">α</span> = 0）时，<span class="v">β</span> = 0，不需要维护。</li>
+<li>阈值随 <span class="v">N</span>² 下降：剩余工作越多，越小的 <span class="v">β</span> 也值得维护。所以“低于阈值就不维护”只对给定的期限成立。</li>
+<li>本实验：<span class="v">β</span>* = 0.87%/项（单次最佳时机），按实测维护频率为 2.17%/项；<span class="v">β</span> 的上界 0.95%/项，可修复部分约为 0。</li>
+</ul></div>
+
+<div class="box"><span class="label">推论 6（现场维护规则）</span>设上次维护以来已交付 <span class="v">k</span> 项，当前单项成本比干净状态贵 <span class="v">βk</span>，此后还要交付 <span class="v">N</span><sub>rem</sub> 项。现在维护一次划算，当且仅当
+<div class="math"><span class="v">βk</span> · <span class="v">N</span><sub>rem</sub> &gt; <span class="v">m</span> / <span class="v">c</span>₀</div>
+即“每项多付的利息 × 剩余项数 &gt; 本金”。</div>
+<div class="proof">不维护时，剩余各项成本为 <span class="v">c</span>₀(1 + <span class="v">β</span>(<span class="v">k</span>+<span class="v">j</span>))，<span class="v">j</span> = 1..<span class="v">N</span><sub>rem</sub>；现在维护后为 <span class="v">c</span>₀(1 + <span class="v">βj</span>)，外加 <span class="v">m</span>。两者之差为 <span class="v">c</span>₀<span class="v">βk</span><span class="v">N</span><sub>rem</sub> − <span class="v">m</span>，大于 0 即得。<span class="qed">∎</span></div>
+<p>这条规则只需要两个可观测量：当前单项成本相对干净状态的溢价 <span class="v">βk</span>（可以在同类任务上直接测），以及剩余工作量。它说明：临近结束时（<span class="v">N</span><sub>rem</sub> 小）不该维护；同样的溢价，在长项目早期就值得维护。按指标阈值触发的策略不看剩余工作量，也不看成本是否真的上涨，所以会在不划算的时候触发。</p>
+
+<div class="box"><span class="label">推论 7（成本增长的形态）</span>
+<div class="tbl"><table>
+<tr><th>情形</th><th>单项成本</th><th>累计实现成本</th><th>每周交付</th></tr>
+<tr><td><span class="v">β</span> = 0</td><td>恒定 <span class="v">c</span>₀</td><td>线性：<span class="v">c</span>₀<span class="v">N</span></td><td>恒定</td></tr>
+<tr><td><span class="v">β</span> &gt; 0，不维护</td><td>线性上涨 <span class="v">c</span>₀(1+<span class="v">βk</span>)</td><td>二次：<span class="v">c</span>₀(<span class="v">N</span> + <span class="v">β</span><span class="v">N</span>²/2)</td><td>逐周下降</td></tr>
+<tr><td><span class="v">β</span> &gt; 0，每 <span class="v">L</span> 项维护一次</td><td>锯齿形，有上界</td><td>线性，斜率 <span class="v">c</span>₀(1 + <span class="v">βL</span>/2) + <span class="v">m</span>/<span class="v">L</span></td><td>恒定，但低于 <span class="v">β</span> = 0 时</td></tr>
+</table></div>
+维护的作用是把二次增长拉回线性增长，代价是一个常数。最优间隔与对应的最低平均单项成本为
+<div class="math"><span class="v">L</span>* = √(2(<span class="v">m</span>/<span class="v">c</span>₀)/<span class="v">β</span>)，　平均单项成本 = <span class="v">c</span>₀(1 + √(2<span class="v">β</span>·<span class="v">m</span>/<span class="v">c</span>₀))</div></div>
+<div class="proof">每段 <span class="v">L</span> 项的成本为 <span class="v">c</span>₀(<span class="v">L</span> + <span class="v">βL</span>²/2) + <span class="v">m</span>，除以 <span class="v">L</span> 得平均单项成本 <span class="v">c</span>₀(1 + <span class="v">βL</span>/2) + <span class="v">m</span>/<span class="v">L</span>。对 <span class="v">L</span> 求导令其为 0 得 <span class="v">L</span>*，代回得最小值。<span class="qed">∎</span></div>
+<p>代入真实运行（取 <span class="v">β</span> 的上界）：不维护时，二次项让约 30 项的累计成本比线性多出约 14.4%；在中点维护一次后，加上维护费用，溢价约为 13.8%，几乎没有差别。最优间隔约 20.5 项，8 周约 30 项里至多容纳一次。实测单项成本在 0.05–0.065 美元之间，累计成本基本是线性的。</p>
+
 <h3>3.5 失败通道</h3>
 <p>若第 <span class="v">k</span> 项首次通过率为 <span class="v">p</span>(<span class="v">D</span><sub>k</sub>)，每次调试成本约为实现的 <span class="v">λ</span> 倍，则期望成本约为 <span class="v">c</span>₀[1 + <span class="v">λ</span>(1 − <span class="v">p</span>(<span class="v">D</span><sub>k</sub>)) + …]。把 <span class="v">p</span> 在 <span class="v">D</span> = 0 处线性化，失败率随债务上升的部分就成为 <span class="v">β</span> 的一个组成部分，定理形式不变。</p>
 
@@ -201,6 +229,9 @@ li { margin: 3px 0; }
 <li><b>周颗粒度与作废。</b>每周剩余不足一个上限即结束，约 30% 预算作废。两组的作废比例接近（真实运行：不维护组 28–32%，维护组 28–31%），对比较的影响是二阶的。</li>
 <li><b>维护占用整周预算的离散效应。</b>一次维护可能让当周少开一项。这使维护在实际调度中比模型中更吃亏，方向同推论 4。</li>
 </ul>
+
+<h3>3.7 线性假设的边界</h3>
+<p>A2、A3 假设技术债线性累积、成本线性响应。现实中可能存在临界点：文件或上下文大到超出 agent 能有效处理的范围；模块纠缠到改一处坏多处，失败率突然上升。越过临界点时 <span class="v">β</span> 会跳变，按线性模型算出的阈值和回本期限都会低估风险。本实验离这种区域很远：单次实现会话只用 7–10 万 token，173 个会话验收失败 0 次，所以无法回答临界点在哪里。</p>
 
 <h2 id="p">4. 从理论到可检验预测</h2>
 <div class="tbl"><table>
@@ -253,8 +284,27 @@ li { margin: 3px 0; }
 </ul>
 <p>三组的预测方向都和实测一致，<span class="v">Q</span> 越大输得越多，排序也一致。这支持把定理当作理解这类实验的框架。</p>
 
-<h3>6.5 回本期限</h3>
-<div id="chart-labels" data-label-aria="回本系数 Q 随期限的变化" data-label-horizon="本实验 8 周" data-label-x="期限（周）" data-label-breakeven="Q = 1 回本线" data-label-strong="模拟·强" data-label-weak="模拟·弱" data-label-real="真实（β 上界）"></div>
+<h3>6.5 用现场规则回看每一次维护</h3>
+<p>按推论 6，对真实运行维护组的每一次维护计算 <span class="v">βk</span>·<span class="v">N</span><sub>rem</sub>，与该次维护的实际 <span class="v">m</span>/<span class="v">c</span>₀ 比较。<span class="v">k</span> 按维护类型分别计（同类维护之间交付的项数），这比把各类维护都当作同一笔技术债的清零更偏向维护；<span class="v">N</span><sub>rem</sub> 取该系列在这次维护之后实际交付的项数；<span class="v">β</span> 取上界 0.95%/项。</p>
+<div class="tbl"><table>
+<tr><th>重复</th><th>周</th><th>维护类型</th><th>k</th><th>N<sub>rem</sub></th><th>βk·N<sub>rem</sub></th><th>m/c₀</th><th>值得做</th></tr>
+<tr><td>1</td><td>3</td><td>补测试</td><td>8</td><td>15</td><td>1.14</td><td>2.44</td><td>否</td></tr>
+<tr><td>1</td><td>3</td><td>代码整理</td><td>8</td><td>15</td><td>1.14</td><td>1.58</td><td>否</td></tr>
+<tr><td>1</td><td>7</td><td>补测试</td><td>11</td><td>4</td><td>0.42</td><td>1.45</td><td>否</td></tr>
+<tr><td>1</td><td>8</td><td>代码整理</td><td>13</td><td>2</td><td>0.25</td><td>1.64</td><td>否</td></tr>
+<tr><td>2</td><td>3</td><td>补测试</td><td>8</td><td>16</td><td>1.21</td><td>2.58</td><td>否</td></tr>
+<tr><td>2</td><td>7</td><td>代码整理</td><td>20</td><td>4</td><td>0.76</td><td>3.65</td><td>否</td></tr>
+<tr><td>2</td><td>8</td><td>补测试</td><td>13</td><td>3</td><td>0.37</td><td>1.36</td><td>否</td></tr>
+<tr><td>3</td><td>2</td><td>补测试</td><td>5</td><td>18</td><td>0.85</td><td>1.95</td><td>否</td></tr>
+<tr><td>3</td><td>3</td><td>补测试</td><td>2</td><td>16</td><td>0.30</td><td>1.30</td><td>否</td></tr>
+<tr><td>3</td><td>4</td><td>代码整理</td><td>10</td><td>13</td><td>1.23</td><td>1.57</td><td>否</td></tr>
+<tr><td>3</td><td>7</td><td>代码整理</td><td>10</td><td>3</td><td>0.28</td><td>2.62</td><td>否</td></tr>
+<tr><td>3</td><td>8</td><td>补测试</td><td>14</td><td>2</td><td>0.27</td><td>1.81</td><td>否</td></tr>
+</table></div>
+<p>结果：12 次维护中值得做的有 <b>0</b> 次，最大的“收益/成本”比为 0.78。把各类维护视为同一笔技术债的清零时也是 0 次（最大比 0.47）。即使取 <span class="v">β</span> 区间上端 1.61%/项，也只有 2 次勉强值得（最大比 1.33）。而按 6.2 的证据，可修复的 <span class="v">β</span> 约为 0，那么一次都不值得。阈值策略触发维护时，要么积累的溢价还小，要么剩下的工作已经不多。</p>
+
+<h3>6.6 回本期限</h3>
+<div id="chart-labels" data-label-aria="回本系数 Q 随期限的变化" data-label-horizon="本实验 8 周" data-label-x="期限（周）" data-label-breakeven="Q = 1 回本线" data-label-strong="模拟·强" data-label-weak="模拟·弱" data-label-real="真实（β 上界）" data-label-yes="是" data-label-no="否" data-label-maint_tests="补测试" data-label-maint_refactor="代码整理" data-label-maint_security="安全扫描与依赖更新" data-label-maint_knowledge="知识提炼"></div>
 <figure>
 <svg viewBox="0 0 720 320" role="img" aria-label="回本系数 Q 随期限的变化">
 <line class="grid" x1="56" x2="570" y1="280.0" y2="280.0"/>
@@ -306,7 +356,7 @@ li { margin: 3px 0; }
 </figure>
 <p>回本期限（按实测维护频率）：模拟“强”约 8.3 周，模拟“弱”约 37.6 周；真实运行若把全部成本上升都算作债务约 16.4 周（取 <span class="v">β</span> 区间上端约 10.3 周），若只在中点维护一次约 7.6 周。按 6.2 的实测证据，真实运行不存在回本期限。</p>
 
-<h3>6.6 H2 与判定（T4）</h3>
+<h3>6.7 H2 与判定（T4）</h3>
 <p>8 周累计交付，不维护组每次重复为 31, 31, 29，维护组为 23, 24, 23。维护组在每次重复中都更少，按 §4 的规则判定为 <span class="bad">前提不成立（限于本实验条件）</span>。</p>
 <figure><img src="img/real-cumulative.png" alt="真实运行：累计完成项数"><figcaption>真实运行，累计完成项数。</figcaption></figure>
 
@@ -325,11 +375,14 @@ li { margin: 3px 0; }
 <li><b>数学上证明了</b>：在 A1–A5 下，维护提高累计交付的充要条件是 <span class="v">Q</span> &lt; 1；最短回本规模和期限分别由推论 2、3 给出；多种现实偏离只会让维护更不划算（推论 4）。</li>
 <li><b>实证上表明了（本实验条件下）</b>：M1、M3 成立，M2 不成立，所以 P 不成立；实测结果与定理的预测一致。</li>
 <li><b>没有证明</b>：在更大、更耦合的代码库，或更弱的模型下 <span class="v">β</span> 是否大于 0；阈值触发是否是好的维护策略。推论 1 指出维护应少而定时，而阈值策略每系列触发约 4.0 次，过于频繁。</li>
+<li><b>可直接使用的决策规则</b>：不按指标阈值触发维护，而是在同类任务上测当前单项成本相对干净状态的溢价 <span class="v">βk</span>，当 <span class="v">βk</span> × 剩余项数 &gt; 一次维护折合的项数时才维护（推论 6）；若 <span class="v">β</span> 稳定，维护间隔取 <span class="v">L</span>* = √(2(<span class="v">m</span>/<span class="v">c</span>₀)/<span class="v">β</span>)（推论 7）。</li>
 <li><b>理论给出的下一步实验</b>：
 <ol>
 <li>直接测 <span class="v">β</span>：固定同一批项，在不同债务状态的代码库副本上实现，比较成本。</li>
 <li>延长期限，使 <span class="v">N</span> 超过推论 2 的 <span class="v">N</span>*。</li>
 <li>增加“单次定时维护”对照组，检验推论 1。</li>
+<li>增加“按推论 6 现场决策”的维护组，与阈值策略对比。</li>
+<li>在更大、耦合更强的代码库上寻找线性假设失效的临界点（§3.7）。</li>
 </ol></li>
 </ul>
 
