@@ -309,3 +309,7 @@ P(实现通过) = p0 · q；P(调试通过) = p0_dbg · q
 5. agent 理论上可以读到工作副本之外的文件（bypassPermissions 下没有文件系统沙箱），提示中要求只在当前目录工作。
 6. 指标测量失败（如 `npm audit` 连不上）时该指标记为空，不触发维护。
 7. 总花费由一个加锁的账本累计（`/home/user/agent-work/ledger.jsonl`），包括可行性探测；达到 600 美元前停止开新会话。
+
+## 9. 运行后的补充（不影响已有结果）
+
+1. 按你的要求，运行结束后把六个工作副本存档到 `snapshots/`（git bundle，每个通过验收的条目或维护任务一个提交），连同全部会话记录和花费账本（`logs.tar.xz`）。这偏离了原规则“工作副本不提交”，但只发生在运行之后，分析不读这些文件。恢复方法见 `snapshots/README.md`，例如 `python3 -m harness snapshot restore nomaint-r1 --items 20 --dest /tmp/n1-k20`。

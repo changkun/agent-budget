@@ -4,6 +4,8 @@
     python3 -m harness dashboard               regenerate docs/index.html
     python3 -m harness report                  print summary tables (markdown)
     python3 -m harness methodology             regenerate docs/methodology.html
+    python3 -m harness snapshot archive        bundle the real-run working copies
+    python3 -m harness snapshot restore SERIES --dest DIR [--items K | --week W]
     python3 -m harness real calibrate          real phase: run calibration items
     python3 -m harness real run-all            real phase: run or resume all series
     python3 -m harness real run --group G --rep N
@@ -28,6 +30,14 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("dashboard")
     sub.add_parser("build-report")
     sub.add_parser("methodology")
+    p_snap = sub.add_parser("snapshot")
+    snap_sub = p_snap.add_subparsers(dest="snap_cmd", required=True)
+    snap_sub.add_parser("archive")
+    p_res = snap_sub.add_parser("restore")
+    p_res.add_argument("series")
+    p_res.add_argument("--dest", required=True)
+    p_res.add_argument("--items", type=int, default=None)
+    p_res.add_argument("--week", type=int, default=None)
     p_rep = sub.add_parser("report")
     p_rep.add_argument("--phase", default="sim")
     p_real = sub.add_parser("real")
@@ -55,6 +65,13 @@ def main(argv: list[str] | None = None) -> int:
         if not args.no_dashboard:
             from . import dashboard
             print(dashboard.build())
+    elif args.cmd == "snapshot":
+        from pathlib import Path
+        from . import real_run, snapshots
+        if args.snap_cmd == "archive":
+            print(snapshots.archive(real_run.work_root()))
+        else:
+            print(snapshots.restore(args.series, Path(args.dest), args.items, args.week))
     elif args.cmd == "methodology":
         from . import methodology
         print(methodology.build())

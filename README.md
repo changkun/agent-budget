@@ -76,10 +76,13 @@ docs/img/          dashboard screenshots: Chinese for REPORT.md, docs/img/en/ En
 site/              website used in the real run
 backlog/           backlog items and calibration items for the real run
 acceptance/        acceptance tests, kept outside the working copies
+snapshots/         archived real-run working copies (git bundles), session transcripts, spend ledger
 ```
 
 Working copies for the real run live outside the repository (`/home/user/agent-work`, see
-`config/real.toml`) and are never committed; only logs and end-of-week metrics are.
+`config/real.toml`). During the run only logs and end-of-week metrics were committed. After the
+run the working copies were archived in `snapshots/` as git bundles, one commit per accepted
+item or maintenance run, so any intermediate state can be restored (see `snapshots/README.md`).
 
 ## Usage
 
@@ -94,6 +97,8 @@ python3 -m unittest discover -s tests
 python3 -m harness real calibrate # real phase: 6 calibration tasks, budget and cap
 python3 -m harness real run-all   # real phase: all series (resumable at week boundaries)
 python3 -m harness real status
+python3 -m harness snapshot archive                       # bundle working copies and logs into snapshots/
+python3 -m harness snapshot restore nomaint-r1 --items 20 --dest /tmp/n1-k20
 python3 -m harness build-report   # regenerate REPORT.md tables from docs/report_template.md
 python3 -m harness methodology    # regenerate docs/methodology.html from docs/methodology_template.html
 node harness/screenshots.mjs      # refresh docs/img/ (needs Playwright with Chromium)

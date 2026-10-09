@@ -1,0 +1,1360 @@
+{
+  "start_ref": "site-v0",
+  "series": [
+    {
+      "series": "nomaint-r1",
+      "bundle": "nomaint-r1.bundle",
+      "commits": [
+        {
+          "sha": "8740d8fb198b63e4bc4e9bda10c5cca986a0d9c9",
+          "message": "start from site-v0",
+          "items": 0,
+          "week": 0,
+          "after": "start"
+        },
+        {
+          "sha": "4717573066f71d7fc62ecf216fc5f5d2dfb4593c",
+          "message": "impl B01",
+          "items": 1,
+          "week": 1,
+          "after": "B01"
+        },
+        {
+          "sha": "233a341da101833255aca1798af203ce195a7ffd",
+          "message": "impl B02",
+          "items": 2,
+          "week": 1,
+          "after": "B02"
+        },
+        {
+          "sha": "df6f754735ecc2d3abe98da802e6167602741715",
+          "message": "impl B03",
+          "items": 3,
+          "week": 1,
+          "after": "B03"
+        },
+        {
+          "sha": "e19dc98669a17755442b39e7e26882e105e073b8",
+          "message": "impl B04",
+          "items": 4,
+          "week": 1,
+          "after": "B04"
+        },
+        {
+          "sha": "c77a9a2b8ad666ace8f70023658a045a38781004",
+          "message": "impl B05",
+          "items": 5,
+          "week": 1,
+          "after": "B05"
+        },
+        {
+          "sha": "d00d5541f6ca6d17f3a047903b97b0e685de56cc",
+          "message": "impl B06",
+          "items": 6,
+          "week": 2,
+          "after": "B06"
+        },
+        {
+          "sha": "8a9c9ef1a164c519f24bce7acf55ba4a6bb21699",
+          "message": "impl B07",
+          "items": 7,
+          "week": 2,
+          "after": "B07"
+        },
+        {
+          "sha": "6edccbea41122b34785a3d49e2ccdb9548732c62",
+          "message": "impl B08",
+          "items": 8,
+          "week": 2,
+          "after": "B08"
+        },
+        {
+          "sha": "2374211d03bc4fa534432d1efc96ffe21258a79a",
+          "message": "impl B09",
+          "items": 9,
+          "week": 2,
+          "after": "B09"
+        },
+        {
+          "sha": "d7c77cf430e2bb9acf60cba507b38e60f6d14782",
+          "message": "impl B10",
+          "items": 10,
+          "week": 3,
+          "after": "B10"
+        },
+        {
+          "sha": "ecd6bb694af0abe6410dc1b8d80e278dabe48104",
+          "message": "impl B11",
+          "items": 11,
+          "week": 3,
+          "after": "B11"
+        },
+        {
+          "sha": "d9ac42e70f34d3e89df38497e8f85b349f199abb",
+          "message": "impl B12",
+          "items": 12,
+          "week": 3,
+          "after": "B12"
+        },
+        {
+          "sha": "dfc6634445ce9df74bb8432932a88d36d223b442",
+          "message": "impl B13",
+          "items": 13,
+          "week": 3,
+          "after": "B13"
+        },
+        {
+          "sha": "58bdbff6efdd0408769899a42341118d6cd82a6a",
+          "message": "impl B14",
+          "items": 14,
+          "week": 4,
+          "after": "B14"
+        },
+        {
+          "sha": "a48d79e037ca79a9d86078829b2f6fb619d07eff",
+          "message": "impl B15",
+          "items": 15,
+          "week": 4,
+          "after": "B15"
+        },
+        {
+          "sha": "fbd682e6619d463c0c905286e818dff18260fd56",
+          "message": "impl B16",
+          "items": 16,
+          "week": 4,
+          "after": "B16"
+        },
+        {
+          "sha": "1406bb10bf0f6b015aa336db2c0297715b5e9b6c",
+          "message": "impl B17",
+          "items": 17,
+          "week": 5,
+          "after": "B17"
+        },
+        {
+          "sha": "5ba1f041bcb559b4a6108cbb46abdef92aa97696",
+          "message": "impl B18",
+          "items": 18,
+          "week": 5,
+          "after": "B18"
+        },
+        {
+          "sha": "bb6377dac8830ce182b1376c49a0d8e7f8af304a",
+          "message": "impl B19",
+          "items": 19,
+          "week": 5,
+          "after": "B19"
+        },
+        {
+          "sha": "d754f8c20d3f6c6c4989c3aae61cd758dfa7d0c3",
+          "message": "impl B20",
+          "items": 20,
+          "week": 5,
+          "after": "B20"
+        },
+        {
+          "sha": "3df6f0fba2de2786682cb5bba3fdcc184270626f",
+          "message": "impl B21",
+          "items": 21,
+          "week": 6,
+          "after": "B21"
+        },
+        {
+          "sha": "e65ef01dcad4ef3303c6a2cffb1c4511b9a61247",
+          "message": "impl B22",
+          "items": 22,
+          "week": 6,
+          "after": "B22"
+        },
+        {
+          "sha": "e605fc987356cf9402e1f41dca68df7c557616fa",
+          "message": "impl B23",
+          "items": 23,
+          "week": 6,
+          "after": "B23"
+        },
+        {
+          "sha": "a2c422df808466ba38ae378f30acb33354d06cfd",
+          "message": "impl B24",
+          "items": 24,
+          "week": 6,
+          "after": "B24"
+        },
+        {
+          "sha": "fe0528a1834fc1c290f2a26f7865f05b120e37c6",
+          "message": "impl B25",
+          "items": 25,
+          "week": 7,
+          "after": "B25"
+        },
+        {
+          "sha": "5c034f8a6cd9d9fafaa5cf1d77faf1b272ed8ca1",
+          "message": "impl B26",
+          "items": 26,
+          "week": 7,
+          "after": "B26"
+        },
+        {
+          "sha": "0497f611b7a79ec7a88a316ac94e6fd32a46950f",
+          "message": "impl B27",
+          "items": 27,
+          "week": 7,
+          "after": "B27"
+        },
+        {
+          "sha": "d72b63a0207adfa0c4ea4130c004dfa341881f0d",
+          "message": "impl B28",
+          "items": 28,
+          "week": 8,
+          "after": "B28"
+        },
+        {
+          "sha": "6904cd29527477890e1485e86fbe0b9fcb2a913f",
+          "message": "impl B29",
+          "items": 29,
+          "week": 8,
+          "after": "B29"
+        },
+        {
+          "sha": "98dfb3d707aead2dbedbc9a52af3554c71cf708a",
+          "message": "impl B30",
+          "items": 30,
+          "week": 8,
+          "after": "B30"
+        },
+        {
+          "sha": "c9c47ed5031721f8f8d80769eacb2cf1b6f9da35",
+          "message": "impl B31",
+          "items": 31,
+          "week": 8,
+          "after": "B31"
+        }
+      ],
+      "week_end_commit": {
+        "0": "8740d8fb198b63e4bc4e9bda10c5cca986a0d9c9",
+        "1": "c77a9a2b8ad666ace8f70023658a045a38781004",
+        "2": "2374211d03bc4fa534432d1efc96ffe21258a79a",
+        "3": "dfc6634445ce9df74bb8432932a88d36d223b442",
+        "4": "fbd682e6619d463c0c905286e818dff18260fd56",
+        "5": "d754f8c20d3f6c6c4989c3aae61cd758dfa7d0c3",
+        "6": "a2c422df808466ba38ae378f30acb33354d06cfd",
+        "7": "0497f611b7a79ec7a88a316ac94e6fd32a46950f",
+        "8": "c9c47ed5031721f8f8d80769eacb2cf1b6f9da35"
+      }
+    },
+    {
+      "series": "nomaint-r2",
+      "bundle": "nomaint-r2.bundle",
+      "commits": [
+        {
+          "sha": "8740d8fb198b63e4bc4e9bda10c5cca986a0d9c9",
+          "message": "start from site-v0",
+          "items": 0,
+          "week": 0,
+          "after": "start"
+        },
+        {
+          "sha": "5a08dcf98d1acfe8f7fc97a466417d5805caefb9",
+          "message": "impl B01",
+          "items": 1,
+          "week": 1,
+          "after": "B01"
+        },
+        {
+          "sha": "95b39f33cc49053fb161707ec9d7bbf100acec4d",
+          "message": "impl B02",
+          "items": 2,
+          "week": 1,
+          "after": "B02"
+        },
+        {
+          "sha": "dad2b2e24df28cac439b0ff79b0c00c6077585b3",
+          "message": "impl B03",
+          "items": 3,
+          "week": 1,
+          "after": "B03"
+        },
+        {
+          "sha": "464a9a7965f0aa165a6c8bab699eb264b79bc76e",
+          "message": "impl B04",
+          "items": 4,
+          "week": 1,
+          "after": "B04"
+        },
+        {
+          "sha": "07cf42e99b26c3a6192eaf2277f91ce24e48b0ad",
+          "message": "impl B05",
+          "items": 5,
+          "week": 1,
+          "after": "B05"
+        },
+        {
+          "sha": "13ab0275a8060ed662d72bd37c3ab0307198dc40",
+          "message": "impl B06",
+          "items": 6,
+          "week": 2,
+          "after": "B06"
+        },
+        {
+          "sha": "953ed20691a21fd006c1a0005470cba0ae5978ae",
+          "message": "impl B07",
+          "items": 7,
+          "week": 2,
+          "after": "B07"
+        },
+        {
+          "sha": "e3ff783c2fff6eb02379d7b7d74a64b9551a1475",
+          "message": "impl B08",
+          "items": 8,
+          "week": 2,
+          "after": "B08"
+        },
+        {
+          "sha": "d9382cf2cfbfda2811c645fb34181ed2bd9cccd3",
+          "message": "impl B09",
+          "items": 9,
+          "week": 2,
+          "after": "B09"
+        },
+        {
+          "sha": "ce9d17169ef096ae694b66ac7a6175e496b3cb66",
+          "message": "impl B10",
+          "items": 10,
+          "week": 3,
+          "after": "B10"
+        },
+        {
+          "sha": "e1777dff2f85e041aedfec014ca486ee0e0c1133",
+          "message": "impl B11",
+          "items": 11,
+          "week": 3,
+          "after": "B11"
+        },
+        {
+          "sha": "fdb171836c823205aa135212129d197ee7f84b13",
+          "message": "impl B12",
+          "items": 12,
+          "week": 3,
+          "after": "B12"
+        },
+        {
+          "sha": "b43ab0072b59caa4f85aa739463b1e2e106ad17d",
+          "message": "impl B13",
+          "items": 13,
+          "week": 4,
+          "after": "B13"
+        },
+        {
+          "sha": "87af39100ae1f68c55a817a10bcf5c54515ede3d",
+          "message": "impl B14",
+          "items": 14,
+          "week": 4,
+          "after": "B14"
+        },
+        {
+          "sha": "dc4b7827ea99498f54e54831e14510680934d9be",
+          "message": "impl B15",
+          "items": 15,
+          "week": 4,
+          "after": "B15"
+        },
+        {
+          "sha": "4cc79de5804b744e53ac4727eba799ac9f0067ef",
+          "message": "impl B16",
+          "items": 16,
+          "week": 4,
+          "after": "B16"
+        },
+        {
+          "sha": "4094e212d9ab14165014684c685218f0d9d3083c",
+          "message": "impl B17",
+          "items": 17,
+          "week": 5,
+          "after": "B17"
+        },
+        {
+          "sha": "22d4dd76358cb78d084a2d157543241ae971c314",
+          "message": "impl B18",
+          "items": 18,
+          "week": 5,
+          "after": "B18"
+        },
+        {
+          "sha": "1133a5735cdb2a55a6ebf5eb4512e7684da81c56",
+          "message": "impl B19",
+          "items": 19,
+          "week": 5,
+          "after": "B19"
+        },
+        {
+          "sha": "e5c65f340b02c0c15a0fc1993792eadefb19ea1f",
+          "message": "impl B20",
+          "items": 20,
+          "week": 5,
+          "after": "B20"
+        },
+        {
+          "sha": "c53eb4d192a6636ea7c9a14a29991d66daff8977",
+          "message": "impl B21",
+          "items": 21,
+          "week": 6,
+          "after": "B21"
+        },
+        {
+          "sha": "c097fe238642dd329776ccebf9a53146f7c7260f",
+          "message": "impl B22",
+          "items": 22,
+          "week": 6,
+          "after": "B22"
+        },
+        {
+          "sha": "97703cbef756de63bac53e9d04ef8d0add0378d9",
+          "message": "impl B23",
+          "items": 23,
+          "week": 6,
+          "after": "B23"
+        },
+        {
+          "sha": "30ad0e44c880281025a0f273b75cf88c98e090de",
+          "message": "impl B24",
+          "items": 24,
+          "week": 6,
+          "after": "B24"
+        },
+        {
+          "sha": "d891e229288cec409d6f563f6f045d21d8ff2c50",
+          "message": "impl B25",
+          "items": 25,
+          "week": 7,
+          "after": "B25"
+        },
+        {
+          "sha": "547b2c3abf368311aa80c8f3e5a4c67488b4cecf",
+          "message": "impl B26",
+          "items": 26,
+          "week": 7,
+          "after": "B26"
+        },
+        {
+          "sha": "b4b420238ccbd1cdc6f17093729ba4a26877e777",
+          "message": "impl B27",
+          "items": 27,
+          "week": 7,
+          "after": "B27"
+        },
+        {
+          "sha": "762f05fe415f5524209aad6bba61c85b4bd885fc",
+          "message": "impl B28",
+          "items": 28,
+          "week": 8,
+          "after": "B28"
+        },
+        {
+          "sha": "ffc8a14ebaf8adfd6333c3b470834ddfadaedc83",
+          "message": "impl B29",
+          "items": 29,
+          "week": 8,
+          "after": "B29"
+        },
+        {
+          "sha": "ad69e1d67253920ef1dbbff4c7d3408df2db0404",
+          "message": "impl B30",
+          "items": 30,
+          "week": 8,
+          "after": "B30"
+        },
+        {
+          "sha": "444c68fa1c4b62bf692745594c76468559f47fdc",
+          "message": "impl B31",
+          "items": 31,
+          "week": 8,
+          "after": "B31"
+        }
+      ],
+      "week_end_commit": {
+        "0": "8740d8fb198b63e4bc4e9bda10c5cca986a0d9c9",
+        "1": "07cf42e99b26c3a6192eaf2277f91ce24e48b0ad",
+        "2": "d9382cf2cfbfda2811c645fb34181ed2bd9cccd3",
+        "3": "fdb171836c823205aa135212129d197ee7f84b13",
+        "4": "4cc79de5804b744e53ac4727eba799ac9f0067ef",
+        "5": "e5c65f340b02c0c15a0fc1993792eadefb19ea1f",
+        "6": "30ad0e44c880281025a0f273b75cf88c98e090de",
+        "7": "b4b420238ccbd1cdc6f17093729ba4a26877e777",
+        "8": "444c68fa1c4b62bf692745594c76468559f47fdc"
+      }
+    },
+    {
+      "series": "nomaint-r3",
+      "bundle": "nomaint-r3.bundle",
+      "commits": [
+        {
+          "sha": "8740d8fb198b63e4bc4e9bda10c5cca986a0d9c9",
+          "message": "start from site-v0",
+          "items": 0,
+          "week": 0,
+          "after": "start"
+        },
+        {
+          "sha": "baa9a04e29539555469a36fe07a7d46d258e5e29",
+          "message": "impl B01",
+          "items": 1,
+          "week": 1,
+          "after": "B01"
+        },
+        {
+          "sha": "3d0b21411803d6422631bc1e46229c3df17c354c",
+          "message": "impl B02",
+          "items": 2,
+          "week": 1,
+          "after": "B02"
+        },
+        {
+          "sha": "6c6800ae0b605ff255141b242237f62732f5f42b",
+          "message": "impl B03",
+          "items": 3,
+          "week": 1,
+          "after": "B03"
+        },
+        {
+          "sha": "63147001a878999caa85716f8b5bfd112aefe356",
+          "message": "impl B04",
+          "items": 4,
+          "week": 1,
+          "after": "B04"
+        },
+        {
+          "sha": "caa4c81012442fb3bc959144922f3390e3cc6ff9",
+          "message": "impl B05",
+          "items": 5,
+          "week": 1,
+          "after": "B05"
+        },
+        {
+          "sha": "d7d57666c4c8a166882e785b2b89651f3b726bc5",
+          "message": "impl B06",
+          "items": 6,
+          "week": 2,
+          "after": "B06"
+        },
+        {
+          "sha": "b3cadc902ab3af66062cfb29de99d34a26bbc48b",
+          "message": "impl B07",
+          "items": 7,
+          "week": 2,
+          "after": "B07"
+        },
+        {
+          "sha": "b7eba8c20ef217d42ea4ce3f3a70821ee14a70bb",
+          "message": "impl B08",
+          "items": 8,
+          "week": 2,
+          "after": "B08"
+        },
+        {
+          "sha": "09141b76f5cd5df1881e7a45297042fff17877c1",
+          "message": "impl B09",
+          "items": 9,
+          "week": 3,
+          "after": "B09"
+        },
+        {
+          "sha": "d0e21fe75d4b8a56399e5290cf3215bfe9e73607",
+          "message": "impl B10",
+          "items": 10,
+          "week": 3,
+          "after": "B10"
+        },
+        {
+          "sha": "0581ec4a9c70f9caee0fe62b983aecd3b0b078e9",
+          "message": "impl B11",
+          "items": 11,
+          "week": 3,
+          "after": "B11"
+        },
+        {
+          "sha": "4c744b887d6732f2a76adfc93f750b4ff75a7a21",
+          "message": "impl B12",
+          "items": 12,
+          "week": 4,
+          "after": "B12"
+        },
+        {
+          "sha": "9556ecbb7aafff703a69562a0f491d372591d531",
+          "message": "impl B13",
+          "items": 13,
+          "week": 4,
+          "after": "B13"
+        },
+        {
+          "sha": "a88486362227592fba9528f6789afc3600b94076",
+          "message": "impl B14",
+          "items": 14,
+          "week": 4,
+          "after": "B14"
+        },
+        {
+          "sha": "c22e43ab2d40e83df2d0205306715215a5ad6898",
+          "message": "impl B15",
+          "items": 15,
+          "week": 4,
+          "after": "B15"
+        },
+        {
+          "sha": "9ed453dc66fb760fceb6974778072fd11fda86d1",
+          "message": "impl B16",
+          "items": 16,
+          "week": 5,
+          "after": "B16"
+        },
+        {
+          "sha": "d996fb894d879c95b469f54ee1690f0beb6a7a8b",
+          "message": "impl B17",
+          "items": 17,
+          "week": 5,
+          "after": "B17"
+        },
+        {
+          "sha": "5aad90586fd4c7670e82dd3e723d08166b41a6d8",
+          "message": "impl B18",
+          "items": 18,
+          "week": 5,
+          "after": "B18"
+        },
+        {
+          "sha": "ccae1dbc8e6677cae8963dccd30ddf286a25e03f",
+          "message": "impl B19",
+          "items": 19,
+          "week": 5,
+          "after": "B19"
+        },
+        {
+          "sha": "a596b6da501dc5225ee816b0bb743f3bc6be5139",
+          "message": "impl B20",
+          "items": 20,
+          "week": 6,
+          "after": "B20"
+        },
+        {
+          "sha": "e9048170296d99d26811d98819bbfb121d6489d7",
+          "message": "impl B21",
+          "items": 21,
+          "week": 6,
+          "after": "B21"
+        },
+        {
+          "sha": "ce44aa2a1d8eea53992742922620b0eeec02a841",
+          "message": "impl B22",
+          "items": 22,
+          "week": 6,
+          "after": "B22"
+        },
+        {
+          "sha": "019078cc1cf2077835ff6c4746280a843a25fec8",
+          "message": "impl B23",
+          "items": 23,
+          "week": 7,
+          "after": "B23"
+        },
+        {
+          "sha": "b8d03c55236b4d0a2581da14e3b39af8a6b59351",
+          "message": "impl B24",
+          "items": 24,
+          "week": 7,
+          "after": "B24"
+        },
+        {
+          "sha": "b09b3c826b6f7a9785e33fb52cabf279c58f9c25",
+          "message": "impl B25",
+          "items": 25,
+          "week": 7,
+          "after": "B25"
+        },
+        {
+          "sha": "47dfe0754398e5aa139ebeba829d3d9d57c4aa47",
+          "message": "impl B26",
+          "items": 26,
+          "week": 7,
+          "after": "B26"
+        },
+        {
+          "sha": "7828c2941675a77d9ea293a11db536e825e21e18",
+          "message": "impl B27",
+          "items": 27,
+          "week": 8,
+          "after": "B27"
+        },
+        {
+          "sha": "a61e0b7986c567a91e2d27576a6f9ce717c2f19c",
+          "message": "impl B28",
+          "items": 28,
+          "week": 8,
+          "after": "B28"
+        },
+        {
+          "sha": "41eca9147c2d14522a47cb7f14a2ec1e9f049757",
+          "message": "impl B29",
+          "items": 29,
+          "week": 8,
+          "after": "B29"
+        }
+      ],
+      "week_end_commit": {
+        "0": "8740d8fb198b63e4bc4e9bda10c5cca986a0d9c9",
+        "1": "caa4c81012442fb3bc959144922f3390e3cc6ff9",
+        "2": "b7eba8c20ef217d42ea4ce3f3a70821ee14a70bb",
+        "3": "0581ec4a9c70f9caee0fe62b983aecd3b0b078e9",
+        "4": "c22e43ab2d40e83df2d0205306715215a5ad6898",
+        "5": "ccae1dbc8e6677cae8963dccd30ddf286a25e03f",
+        "6": "ce44aa2a1d8eea53992742922620b0eeec02a841",
+        "7": "47dfe0754398e5aa139ebeba829d3d9d57c4aa47",
+        "8": "41eca9147c2d14522a47cb7f14a2ec1e9f049757"
+      }
+    },
+    {
+      "series": "maint-r1",
+      "bundle": "maint-r1.bundle",
+      "commits": [
+        {
+          "sha": "8740d8fb198b63e4bc4e9bda10c5cca986a0d9c9",
+          "message": "start from site-v0",
+          "items": 0,
+          "week": 0,
+          "after": "start"
+        },
+        {
+          "sha": "7d533824d395cbc6bddf4ea445371bd60f985de5",
+          "message": "impl B01",
+          "items": 1,
+          "week": 1,
+          "after": "B01"
+        },
+        {
+          "sha": "f34fbc8f65219096467f9d699b17f06aa3d96e64",
+          "message": "impl B02",
+          "items": 2,
+          "week": 1,
+          "after": "B02"
+        },
+        {
+          "sha": "158d9aefa7231a4832c7f800d4fe73f48168253b",
+          "message": "impl B03",
+          "items": 3,
+          "week": 1,
+          "after": "B03"
+        },
+        {
+          "sha": "7057d08034cbe1fec8023291ee491464cb921dea",
+          "message": "impl B04",
+          "items": 4,
+          "week": 1,
+          "after": "B04"
+        },
+        {
+          "sha": "b3cb929a087804170c3bc9a4e306f6a6f2a36fa1",
+          "message": "impl B05",
+          "items": 5,
+          "week": 2,
+          "after": "B05"
+        },
+        {
+          "sha": "db56dd93105f67fc0a91031329a2012b64fb715a",
+          "message": "impl B06",
+          "items": 6,
+          "week": 2,
+          "after": "B06"
+        },
+        {
+          "sha": "32d5c74113947c0cdbc302f8fff7c86f3a7f8a35",
+          "message": "impl B07",
+          "items": 7,
+          "week": 2,
+          "after": "B07"
+        },
+        {
+          "sha": "ef14249a8600d17c5591accdac5040a0e367a00c",
+          "message": "impl B08",
+          "items": 8,
+          "week": 2,
+          "after": "B08"
+        },
+        {
+          "sha": "46bb9f36c324cb4fc2403d8b436b2b9a748f8753",
+          "message": "maint_tests",
+          "items": 8,
+          "week": 3,
+          "after": "maint_tests"
+        },
+        {
+          "sha": "85662408045af0d4780609b8bb8c885aecb5ace9",
+          "message": "maint_refactor",
+          "items": 8,
+          "week": 3,
+          "after": "maint_refactor"
+        },
+        {
+          "sha": "c9dc9b692a8b3092b56dfb96b920285a402547d2",
+          "message": "impl B09",
+          "items": 9,
+          "week": 4,
+          "after": "B09"
+        },
+        {
+          "sha": "5dc491c443e9bc5472092b03744d3e1b11c36eca",
+          "message": "impl B10",
+          "items": 10,
+          "week": 4,
+          "after": "B10"
+        },
+        {
+          "sha": "1d3df57ffe2037351da15556a2888096dc7cd9cf",
+          "message": "impl B11",
+          "items": 11,
+          "week": 4,
+          "after": "B11"
+        },
+        {
+          "sha": "7dce4042691aa35c4be64f1934eeca8020cfea70",
+          "message": "impl B12",
+          "items": 12,
+          "week": 5,
+          "after": "B12"
+        },
+        {
+          "sha": "73a9ae57bb45286959cd262bb7c58b33ddcaee10",
+          "message": "impl B13",
+          "items": 13,
+          "week": 5,
+          "after": "B13"
+        },
+        {
+          "sha": "c4bfeed9744d1cb0922588fe46cb24310f394d0a",
+          "message": "impl B14",
+          "items": 14,
+          "week": 5,
+          "after": "B14"
+        },
+        {
+          "sha": "0570d06032f2986f85b74b3dbf8040ef2a5e24c8",
+          "message": "impl B15",
+          "items": 15,
+          "week": 5,
+          "after": "B15"
+        },
+        {
+          "sha": "1a2cfef66fe13326483dfdd97fe5c2223ad8ce5e",
+          "message": "impl B16",
+          "items": 16,
+          "week": 6,
+          "after": "B16"
+        },
+        {
+          "sha": "0b2249e91651aa6bef449e3d30614541d6ad336c",
+          "message": "impl B17",
+          "items": 17,
+          "week": 6,
+          "after": "B17"
+        },
+        {
+          "sha": "b3b8d7c57d8e0fac553743b0d9ce6e1864302cd4",
+          "message": "impl B18",
+          "items": 18,
+          "week": 6,
+          "after": "B18"
+        },
+        {
+          "sha": "b7fa43ac92f67d357c67d630489a18769f3ff03a",
+          "message": "impl B19",
+          "items": 19,
+          "week": 6,
+          "after": "B19"
+        },
+        {
+          "sha": "f19855cb8ad40beffae51b9066f4725fbb89b973",
+          "message": "maint_tests",
+          "items": 19,
+          "week": 7,
+          "after": "maint_tests"
+        },
+        {
+          "sha": "4352fa6a6ad5650b34ca0197a5180ddb4c7292d3",
+          "message": "impl B20",
+          "items": 20,
+          "week": 7,
+          "after": "B20"
+        },
+        {
+          "sha": "cbd3c47d0bd597bcca8f6607ff745e02f7b17fc2",
+          "message": "impl B21",
+          "items": 21,
+          "week": 7,
+          "after": "B21"
+        },
+        {
+          "sha": "50e70364f416977778ae26b289f123ee37d5dce9",
+          "message": "maint_refactor",
+          "items": 21,
+          "week": 8,
+          "after": "maint_refactor"
+        },
+        {
+          "sha": "7c53d08908b5f0dd09b40ecce260988af63d58ee",
+          "message": "impl B22",
+          "items": 22,
+          "week": 8,
+          "after": "B22"
+        },
+        {
+          "sha": "d7b7cf1272cc3caab18edbf78889764c3dc7e749",
+          "message": "impl B23",
+          "items": 23,
+          "week": 8,
+          "after": "B23"
+        }
+      ],
+      "week_end_commit": {
+        "0": "8740d8fb198b63e4bc4e9bda10c5cca986a0d9c9",
+        "1": "7057d08034cbe1fec8023291ee491464cb921dea",
+        "2": "ef14249a8600d17c5591accdac5040a0e367a00c",
+        "3": "85662408045af0d4780609b8bb8c885aecb5ace9",
+        "4": "1d3df57ffe2037351da15556a2888096dc7cd9cf",
+        "5": "0570d06032f2986f85b74b3dbf8040ef2a5e24c8",
+        "6": "b7fa43ac92f67d357c67d630489a18769f3ff03a",
+        "7": "cbd3c47d0bd597bcca8f6607ff745e02f7b17fc2",
+        "8": "d7b7cf1272cc3caab18edbf78889764c3dc7e749"
+      }
+    },
+    {
+      "series": "maint-r2",
+      "bundle": "maint-r2.bundle",
+      "commits": [
+        {
+          "sha": "0e9dcdc137d0b7fafcdae009f6b6878545c79563",
+          "message": "start from site-v0",
+          "items": 0,
+          "week": 0,
+          "after": "start"
+        },
+        {
+          "sha": "035a9e0f4b79f9af7262db9681acbbc8179c37a9",
+          "message": "impl B01",
+          "items": 1,
+          "week": 1,
+          "after": "B01"
+        },
+        {
+          "sha": "ead92f3479fb10eefc28fefc489e18e05f92f242",
+          "message": "impl B02",
+          "items": 2,
+          "week": 1,
+          "after": "B02"
+        },
+        {
+          "sha": "37f94246e30691adc4ec31899f59149f02dda923",
+          "message": "impl B03",
+          "items": 3,
+          "week": 1,
+          "after": "B03"
+        },
+        {
+          "sha": "db7d0e051ffbd81c7754589b8468277647bff757",
+          "message": "impl B04",
+          "items": 4,
+          "week": 1,
+          "after": "B04"
+        },
+        {
+          "sha": "93d433a82211047da7cdc9821500eb06c6a95c44",
+          "message": "impl B05",
+          "items": 5,
+          "week": 2,
+          "after": "B05"
+        },
+        {
+          "sha": "fd649a6d05a3bbfd9d7c90472f594adef3bdf26a",
+          "message": "impl B06",
+          "items": 6,
+          "week": 2,
+          "after": "B06"
+        },
+        {
+          "sha": "f7990e8d5707b0a90fb40dae40012b53412a77db",
+          "message": "impl B07",
+          "items": 7,
+          "week": 2,
+          "after": "B07"
+        },
+        {
+          "sha": "8db1d9ebc9dfb85577dc1a079614a6a7d80dcacd",
+          "message": "impl B08",
+          "items": 8,
+          "week": 2,
+          "after": "B08"
+        },
+        {
+          "sha": "7d4fe067c96c7638455dbb809eb3058170268cca",
+          "message": "maint_tests",
+          "items": 8,
+          "week": 3,
+          "after": "maint_tests"
+        },
+        {
+          "sha": "61da556807b62ee0fccf62698b6a232a187853b9",
+          "message": "impl B09",
+          "items": 9,
+          "week": 3,
+          "after": "B09"
+        },
+        {
+          "sha": "0c1259675ce14622906029e8a6969c7f4c9eb379",
+          "message": "impl B10",
+          "items": 10,
+          "week": 4,
+          "after": "B10"
+        },
+        {
+          "sha": "b617641d7ed48502478b22e682fbd7bc6af96509",
+          "message": "impl B11",
+          "items": 11,
+          "week": 4,
+          "after": "B11"
+        },
+        {
+          "sha": "8ec6f5671775f2afc758df5e717b441496716729",
+          "message": "impl B12",
+          "items": 12,
+          "week": 4,
+          "after": "B12"
+        },
+        {
+          "sha": "a56b8fbc28f89417f88b7fb182de619151d2f54c",
+          "message": "impl B13",
+          "items": 13,
+          "week": 5,
+          "after": "B13"
+        },
+        {
+          "sha": "074e9b90e8d417b616a8db193432126017063e3a",
+          "message": "impl B14",
+          "items": 14,
+          "week": 5,
+          "after": "B14"
+        },
+        {
+          "sha": "ddc9484f2b7dff3f04b9db1b49e2ca83e35a1676",
+          "message": "impl B15",
+          "items": 15,
+          "week": 5,
+          "after": "B15"
+        },
+        {
+          "sha": "578b621eb0875a21100a011b69fd3f5e36010ffd",
+          "message": "impl B16",
+          "items": 16,
+          "week": 5,
+          "after": "B16"
+        },
+        {
+          "sha": "69cffe562ecb5bdd11353e06ce89c3483fb491c0",
+          "message": "impl B17",
+          "items": 17,
+          "week": 6,
+          "after": "B17"
+        },
+        {
+          "sha": "2ca92c1201d0db6fa1862d1450245635f1d3f579",
+          "message": "impl B18",
+          "items": 18,
+          "week": 6,
+          "after": "B18"
+        },
+        {
+          "sha": "713cea215803481bf3f416beab0ca379dcc9ad57",
+          "message": "impl B19",
+          "items": 19,
+          "week": 6,
+          "after": "B19"
+        },
+        {
+          "sha": "a6a7b8bed275f85eadd39088a8e95958ca4deade",
+          "message": "impl B20",
+          "items": 20,
+          "week": 6,
+          "after": "B20"
+        },
+        {
+          "sha": "7cbcc3c8371c839d7bab1548e50dbc4be149e220",
+          "message": "maint_refactor",
+          "items": 20,
+          "week": 7,
+          "after": "maint_refactor"
+        },
+        {
+          "sha": "a0676b165c6a3c49111a368f5803987fd61048fa",
+          "message": "impl B21",
+          "items": 21,
+          "week": 7,
+          "after": "B21"
+        },
+        {
+          "sha": "0c43fa2ec9bd6949cfda22bfc7eac68c02429a3c",
+          "message": "maint_tests",
+          "items": 21,
+          "week": 8,
+          "after": "maint_tests"
+        },
+        {
+          "sha": "6238bbb2f666acdadfe52189279ebb47e9538331",
+          "message": "impl B22",
+          "items": 22,
+          "week": 8,
+          "after": "B22"
+        },
+        {
+          "sha": "6a1cedccf6b23b58675bf263b0035066d62dc2e2",
+          "message": "impl B23",
+          "items": 23,
+          "week": 8,
+          "after": "B23"
+        },
+        {
+          "sha": "9d5b9641f8fd9b80fd65ff9d25bf7360f6b184d7",
+          "message": "impl B24",
+          "items": 24,
+          "week": 8,
+          "after": "B24"
+        }
+      ],
+      "week_end_commit": {
+        "0": "0e9dcdc137d0b7fafcdae009f6b6878545c79563",
+        "1": "db7d0e051ffbd81c7754589b8468277647bff757",
+        "2": "8db1d9ebc9dfb85577dc1a079614a6a7d80dcacd",
+        "3": "61da556807b62ee0fccf62698b6a232a187853b9",
+        "4": "8ec6f5671775f2afc758df5e717b441496716729",
+        "5": "578b621eb0875a21100a011b69fd3f5e36010ffd",
+        "6": "a6a7b8bed275f85eadd39088a8e95958ca4deade",
+        "7": "a0676b165c6a3c49111a368f5803987fd61048fa",
+        "8": "9d5b9641f8fd9b80fd65ff9d25bf7360f6b184d7"
+      }
+    },
+    {
+      "series": "maint-r3",
+      "bundle": "maint-r3.bundle",
+      "commits": [
+        {
+          "sha": "8740d8fb198b63e4bc4e9bda10c5cca986a0d9c9",
+          "message": "start from site-v0",
+          "items": 0,
+          "week": 0,
+          "after": "start"
+        },
+        {
+          "sha": "dd5a13be0eee2300419ca19d90324c6b7e6394e5",
+          "message": "impl B01",
+          "items": 1,
+          "week": 1,
+          "after": "B01"
+        },
+        {
+          "sha": "70217618feeac760436e1f7f9ab1f030e923cc84",
+          "message": "impl B02",
+          "items": 2,
+          "week": 1,
+          "after": "B02"
+        },
+        {
+          "sha": "96dc63ffbabaaaa332f060109dbeffe3e851f4ff",
+          "message": "impl B03",
+          "items": 3,
+          "week": 1,
+          "after": "B03"
+        },
+        {
+          "sha": "de8c6d34b21d445a199a251cb4a51d2422df54b4",
+          "message": "impl B04",
+          "items": 4,
+          "week": 1,
+          "after": "B04"
+        },
+        {
+          "sha": "adcd03a5cb656e95f134d64c81f63b4f9d13ca7b",
+          "message": "impl B05",
+          "items": 5,
+          "week": 1,
+          "after": "B05"
+        },
+        {
+          "sha": "f69f8c23cedc2fc1407f8b2011b85c54d61f13a1",
+          "message": "maint_tests",
+          "items": 5,
+          "week": 2,
+          "after": "maint_tests"
+        },
+        {
+          "sha": "b43247f6a4130abb0127713affdf3c979e3a7b6a",
+          "message": "impl B06",
+          "items": 6,
+          "week": 2,
+          "after": "B06"
+        },
+        {
+          "sha": "a7b88ba24f071e764cfc4220b2b96efc1afbc146",
+          "message": "impl B07",
+          "items": 7,
+          "week": 2,
+          "after": "B07"
+        },
+        {
+          "sha": "15b4786bbed34742dbb3d80319d4683109e868d7",
+          "message": "maint_tests",
+          "items": 7,
+          "week": 3,
+          "after": "maint_tests"
+        },
+        {
+          "sha": "280e2fd2d5652997ae46f60b97e02f7fccd4c42f",
+          "message": "impl B08",
+          "items": 8,
+          "week": 3,
+          "after": "B08"
+        },
+        {
+          "sha": "8efabc2981e047cebd8a6ab0c638df5b2a90300f",
+          "message": "impl B09",
+          "items": 9,
+          "week": 3,
+          "after": "B09"
+        },
+        {
+          "sha": "c0f364605976c9f5a274f70a544d78c5d5ab9bcc",
+          "message": "impl B10",
+          "items": 10,
+          "week": 3,
+          "after": "B10"
+        },
+        {
+          "sha": "b139acb287a1f6cdabb3d69d18dab712cccd4331",
+          "message": "maint_refactor",
+          "items": 10,
+          "week": 4,
+          "after": "maint_refactor"
+        },
+        {
+          "sha": "78a81efb825829ca1af0d2b5878c98acd39feb95",
+          "message": "impl B11",
+          "items": 11,
+          "week": 4,
+          "after": "B11"
+        },
+        {
+          "sha": "3c83d6411f23b4753d8b24e3f2d8e7dee5b602fe",
+          "message": "impl B12",
+          "items": 12,
+          "week": 4,
+          "after": "B12"
+        },
+        {
+          "sha": "586d31434411e226b389948fd981f34da90edd76",
+          "message": "impl B13",
+          "items": 13,
+          "week": 5,
+          "after": "B13"
+        },
+        {
+          "sha": "c8c53b082bfd36325f8d46cff4353f19f491f290",
+          "message": "impl B14",
+          "items": 14,
+          "week": 5,
+          "after": "B14"
+        },
+        {
+          "sha": "945c9aa94408ad49d1de86d9156fc0ee497eb339",
+          "message": "impl B15",
+          "items": 15,
+          "week": 5,
+          "after": "B15"
+        },
+        {
+          "sha": "2442bb88d5daf2c54df7bbdc9691bdab30c640c2",
+          "message": "impl B16",
+          "items": 16,
+          "week": 5,
+          "after": "B16"
+        },
+        {
+          "sha": "0277f8572e08ec467914caaf32be823719e6b041",
+          "message": "impl B17",
+          "items": 17,
+          "week": 6,
+          "after": "B17"
+        },
+        {
+          "sha": "027a08c891120692615d800c569615920bb9feb9",
+          "message": "impl B18",
+          "items": 18,
+          "week": 6,
+          "after": "B18"
+        },
+        {
+          "sha": "786b4989310e3d8cbd5f0e672e480b19a1a4701c",
+          "message": "impl B19",
+          "items": 19,
+          "week": 6,
+          "after": "B19"
+        },
+        {
+          "sha": "3baa363c9467798cc9e1026c53b40c8be48cc325",
+          "message": "impl B20",
+          "items": 20,
+          "week": 6,
+          "after": "B20"
+        },
+        {
+          "sha": "4e0ed8c9b5d4a0657d9709610cfdf9a105b9598e",
+          "message": "maint_refactor",
+          "items": 20,
+          "week": 7,
+          "after": "maint_refactor"
+        },
+        {
+          "sha": "3cfa1ca32f77b7decf725e210a6e8dac5e3e03f7",
+          "message": "impl B21",
+          "items": 21,
+          "week": 7,
+          "after": "B21"
+        },
+        {
+          "sha": "9519b91855524e3697ead53d3c7376d3fee371f0",
+          "message": "maint_tests",
+          "items": 21,
+          "week": 8,
+          "after": "maint_tests"
+        },
+        {
+          "sha": "74b49e5a2b0da70ee1c42aa6be58986fd3071b79",
+          "message": "impl B22",
+          "items": 22,
+          "week": 8,
+          "after": "B22"
+        },
+        {
+          "sha": "5564defe9a60736f7bd6174c0ad596eb39de5559",
+          "message": "impl B23",
+          "items": 23,
+          "week": 8,
+          "after": "B23"
+        }
+      ],
+      "week_end_commit": {
+        "0": "8740d8fb198b63e4bc4e9bda10c5cca986a0d9c9",
+        "1": "adcd03a5cb656e95f134d64c81f63b4f9d13ca7b",
+        "2": "a7b88ba24f071e764cfc4220b2b96efc1afbc146",
+        "3": "c0f364605976c9f5a274f70a544d78c5d5ab9bcc",
+        "4": "3c83d6411f23b4753d8b24e3f2d8e7dee5b602fe",
+        "5": "2442bb88d5daf2c54df7bbdc9691bdab30c640c2",
+        "6": "3baa363c9467798cc9e1026c53b40c8be48cc325",
+        "7": "3cfa1ca32f77b7decf725e210a6e8dac5e3e03f7",
+        "8": "5564defe9a60736f7bd6174c0ad596eb39de5559"
+      }
+    }
+  ]
+}
