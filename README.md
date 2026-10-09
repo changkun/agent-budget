@@ -17,7 +17,8 @@ The plan (in Chinese) is in [PLAN.md](PLAN.md); the final report (in Chinese) is
 
 ## Results
 
-Full report (in Chinese): [REPORT.md](REPORT.md). Dashboard:
+Full report (in Chinese): [REPORT.md](REPORT.md). Methodology from premise to theory to
+evidence, including the payback theorem (in Chinese): [docs/methodology.html](docs/methodology.html). Dashboard:
 [docs/index.en.html](docs/index.en.html) (English) and [docs/index.html](docs/index.html)
 (Chinese), both built from the same data. Screenshots below are taken from the English
 dashboard with `node harness/screenshots.mjs`.
@@ -69,6 +70,7 @@ harness/           scheduling loop, executors, metrics sources, stats, dashboard
 tests/             unit tests for the loop rules
 docs/index.html    dashboard in Chinese (single self-contained file, regenerated after every run)
 docs/index.en.html the same dashboard in English
+docs/methodology.html  methodology page (premise, theory, predictions, evidence), built from the logs
 docs/data/         raw logs: <phase>/<hypothesis>/{tasks,weeks,metrics}.csv and run.json
 docs/img/          dashboard screenshots: Chinese for REPORT.md, docs/img/en/ English for README.md
 site/              website used in the real run
@@ -93,6 +95,7 @@ python3 -m harness real calibrate # real phase: 6 calibration tasks, budget and 
 python3 -m harness real run-all   # real phase: all series (resumable at week boundaries)
 python3 -m harness real status
 python3 -m harness build-report   # regenerate REPORT.md tables from docs/report_template.md
+python3 -m harness methodology    # regenerate docs/methodology.html from docs/methodology_template.html
 node harness/screenshots.mjs      # refresh docs/img/ (needs Playwright with Chromium)
 ```
 

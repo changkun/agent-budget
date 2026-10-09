@@ -313,6 +313,7 @@ function renderHeader(D, V) {
   document.documentElement.lang = L.lang;
   const keep = state.ds ? `#ds=${state.ds}&rep=${state.rep}` : "";
   hdr.appendChild(h("a", { class: "lang", href: L.other_lang.href + keep, text: L.other_lang.label }));
+  hdr.appendChild(h("a", { class: "lang", href: L.methodology.href, text: L.methodology.label, style: "margin-right:14px" }));
   hdr.appendChild(h("h1", { text: L.page_title }));
   hdr.appendChild(h("p", { class: "sub", text: L.page_subtitle }));
   if (!D) { hdr.appendChild(h("p", { class: "empty", text: L.sections.no_data })); return; }

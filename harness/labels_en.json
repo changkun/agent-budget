@@ -196,5 +196,9 @@
     "metrics": "Metric snapshots metrics.csv",
     "run": "Run settings run.json",
     "report": "Final report"
+  },
+  "methodology": {
+    "label": "Methodology (in Chinese)",
+    "href": "methodology.html"
   }
 }

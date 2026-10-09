@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方法论：维护与实现的预算分配</title>
+<style>
+:root {
+  --bg: #fafaf8; --card: #ffffff; --fg: #1d1d1f; --muted: #6b6b70; --line: #e3e3e0;
+  --grid: #ececea; --accent: #0072B2; --box: #f3f6fa; --box-line: #0072B2;
+  --ok: #2E8B57; --bad: #C62828; --warn-bg: #fff6e0; --warn-fg: #7a5200;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141416; --card: #1c1c1f; --fg: #ececee; --muted: #a0a0a8; --line: #2e2e33;
+    --grid: #26262b; --accent: #5fb3ec; --box: #1a2430; --box-line: #5fb3ec;
+    --ok: #5cc28a; --bad: #ef6b6b; --warn-bg: #3a2e12; --warn-fg: #ffd98a;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141416; --card: #1c1c1f; --fg: #ececee; --muted: #a0a0a8; --line: #2e2e33;
+  --grid: #26262b; --accent: #5fb3ec; --box: #1a2430; --box-line: #5fb3ec;
+  --ok: #5cc28a; --bad: #ef6b6b; --warn-bg: #3a2e12; --warn-fg: #ffd98a;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.75 -apple-system, BlinkMacSystemFont,
+  "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+.wrap { max-width: 880px; margin: 0 auto; padding: 28px 16px 64px; }
+h1 { font-size: 26px; line-height: 1.35; margin: 0 0 6px; }
+h2 { font-size: 21px; margin: 44px 0 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+h3 { font-size: 17px; margin: 26px 0 6px; }
+p { margin: 8px 0; }
+a { color: var(--accent); }
+.sub { color: var(--muted); margin: 0 0 14px; }
+.nav { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; margin: 8px 0 18px; }
+.toc { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 18px; font-size: 15px; }
+.toc ol { margin: 6px 0; padding-left: 20px; }
+.key { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin: 16px 0; }
+.key h3 { margin-top: 0; }
+.box { background: var(--box); border-left: 4px solid var(--box-line); border-radius: 6px; padding: 10px 16px; margin: 14px 0; }
+.box .label { font-weight: 700; margin-right: 6px; }
+.proof { border-left: 3px solid var(--line); padding: 2px 0 2px 14px; margin: 8px 0 14px; color: var(--fg); }
+.proof::before { content: "证明　"; font-weight: 700; color: var(--muted); }
+.qed { float: right; color: var(--muted); }
+.math { font-family: "Cambria Math", "STIX Two Math", "Times New Roman", serif; font-size: 18px;
+  text-align: center; margin: 10px 0; overflow-x: auto; white-space: nowrap; }
+var, .v { font-family: "Cambria Math", "STIX Two Math", "Times New Roman", serif; font-style: italic; }
+.warn { background: var(--warn-bg); color: var(--warn-fg); border-radius: 8px; padding: 8px 12px; margin: 12px 0; }
+.ok { color: var(--ok); font-weight: 700; }
+.bad { color: var(--bad); font-weight: 700; }
+.tbl { overflow-x: auto; max-width: 100%; margin: 10px 0; }
+table { border-collapse: collapse; font-size: 14.5px; font-variant-numeric: tabular-nums; min-width: 100%; }
+th, td { border-bottom: 1px solid var(--line); padding: 5px 9px; text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--muted); font-weight: 600; }
+figure { margin: 16px 0; }
+figure img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+figcaption { color: var(--muted); font-size: 14px; margin-top: 4px; }
+svg { display: block; width: 100%; height: auto; }
+svg text { fill: var(--muted); font-size: 12px; }
+svg .grid { stroke: var(--grid); }
+svg .axis-strong { stroke: var(--fg); stroke-width: 1.2; stroke-dasharray: 4 3; }
+svg .mark { stroke: var(--muted); stroke-dasharray: 2 3; }
+svg .node rect { fill: var(--card); stroke: var(--line); stroke-width: 1.5; }
+svg .node text { fill: var(--fg); font-size: 14px; }
+svg .edge { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+svg .edge.dash { stroke-dasharray: 5 4; }
+svg .elabel { fill: var(--fg); font-size: 12.5px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9em;
+  background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+pre { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; overflow-x: auto; font-size: 14px; line-height: 1.55; }
+ul, ol { padding-left: 22px; }
+li { margin: 3px 0; }
+@media (max-width: 640px) { body { font-size: 15px; } h1 { font-size: 22px; } .math { font-size: 16px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>方法论：固定周预算下 coding agent 的维护与实现分配</h1>
+<p class="sub">从前提、理论模型、可检验预测，到实验设计和证据。页面中的数字由 <code>python3 -m harness methodology</code> 从 <code>docs/data/</code> 的日志计算生成。</p>
+<div class="nav"><a href="index.html">看板（中文）</a><a href="index.en.html">Dashboard (English)</a><a href="https://github.com/changkun/agent-budget/blob/claude/bold-planck-xa6jxt/REPORT.md">最终报告</a><a href="https://github.com/changkun/agent-budget/blob/claude/bold-planck-xa6jxt/PLAN.md">实验计划</a></div>
+
+<div class="key">
+<h3>结论先行</h3>
+<ul>
+<li><b>理论。</b>在“技术债随交付线性累积、一次维护把它清零”的模型下，维护能提高固定预算下的累计交付，当且仅当
+<span class="v">Q</span> = 2(<span class="v">R</span>+1)·(<span class="v">m</span>/<span class="v">c</span>₀) ÷ (<span class="v">β</span>·<span class="v">N</span>²) &lt; 1。
+其中 <span class="v">β</span> 是每多交付一项、单项成本的相对增幅，<span class="v">m</span>/<span class="v">c</span>₀ 是一次维护折合多少项实现，<span class="v">R</span> 是维护次数，<span class="v">N</span> 是期限内交付的项数。只要 <span class="v">β</span> &gt; 0，期限足够长时维护一定回本；<span class="v">β</span> = 0 时永远不回本。</li>
+<li><b>机制检验。</b>真实运行中，维护确实把指标拉回了基线（M1、M3 成立）。但同一个 backlog 项在维护组并不更便宜：维护组 ÷ 不维护组 = {{real.paired}}，自助法 90% 区间 [{{real.paired_lo}}, {{real.paired_hi}}]。也就是说，能被维护消除的那部分 <span class="v">β</span> 不大于 0（M2 不成立）。</li>
+<li><b>结论。</b>按定理，此时维护在任何期限内都无法回本。实测维护组 8 周累计交付比不维护组少 {{real.delta_abs}} 项（3 次重复均值），每次重复都更少。前提不成立，限于本实验条件。</li>
+<li><b>理论自身的检验。</b>把三组数据（模拟“强”、模拟“弱”、真实运行）代入 <span class="v">Q</span>，预测的输赢方向与实测一致，相对大小的排序也一致（§6.4）。</li>
+</ul>
+</div>
+
+<div class="toc"><b>目录</b>
+<ol>
+<li><a href="#q">研究问题</a></li>
+<li><a href="#h">前提与假设</a></li>
+<li><a href="#t">理论模型：定理与证明</a></li>
+<li><a href="#p">从理论到可检验预测</a></li>
+<li><a href="#d">实验设计</a></li>
+<li><a href="#e">证据</a></li>
+<li><a href="#v">有效性威胁</a></li>
+<li><a href="#c">结论：证明了什么，没有证明什么</a></li>
+<li><a href="#r">复现</a></li>
+</ol></div>
+
+<h2 id="q">1. 研究问题</h2>
+<p>同一个代码库、同一份 40 项 backlog、同样的每周预算 <span class="v">B</span>，共 8 周。比较两种分配策略：</p>
+<ul>
+<li><b>π₀（不维护）</b>：全部预算用于实现，以及让当前这一项通过验收所需的调试。</li>
+<li><b>π<sub>M</sub>（阈值维护）</b>：每周开始测量指标，越过阈值的指标触发对应的维护 agent，剩余预算用于实现。</li>
+</ul>
+<p>要回答：π₀ 的每项实现成本是否逐周上升；π<sub>M</sub> 的 8 周累计交付是否多于 π₀。</p>
+
+<h2 id="h">2. 前提与假设</h2>
+<div class="box"><span class="label">前提 P</span>不维护会让技术债累积，技术债让后续实现更贵或更容易失败；因此把一部分固定预算用于维护，能在期限内换回更多交付。</div>
+<p>P 是一个复合主张。把它拆成三个机制假设和两个结果假设，分别可以检验：</p>
+<div class="tbl"><table>
+<tr><th>编号</th><th style="text-align:left">内容</th><th style="text-align:left">类型</th></tr>
+<tr><td>M1 累积</td><td style="text-align:left;white-space:normal">不维护时，债务指标（覆盖率、最大文件、重复代码、上下文开销）随交付变差</td><td style="text-align:left">机制</td></tr>
+<tr><td>M2 代价</td><td style="text-align:left;white-space:normal">债务越高，同一项实现的期望成本越高（更多输入 token，更多失败与调试）</td><td style="text-align:left">机制</td></tr>
+<tr><td>M3 修复</td><td style="text-align:left;white-space:normal">维护 agent 能把对应指标拉回基线附近</td><td style="text-align:left">机制</td></tr>
+<tr><td>H1</td><td style="text-align:left;white-space:normal">π₀ 的每项成本逐周上升</td><td style="text-align:left">结果</td></tr>
+<tr><td>H2</td><td style="text-align:left;white-space:normal">π<sub>M</sub> 的 8 周累计交付多于 π₀</td><td style="text-align:left">结果</td></tr>
+</table></div>
+<p>逻辑关系：P 成立需要 M1、M2、M3 同时成立；H1 是 M1 与 M2 的可观测后果；H2 还取决于维护本身的成本和期限长短（§3）。所以 <b>H1 成立推不出 H2</b>，而 <b>M2 不成立足以推翻 P</b>。</p>
+
+<figure>
+<svg viewBox="0 0 720 286" role="img" aria-label="因果图">
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a8a90"/></marker></defs>
+<g class="node"><rect x="12" y="112" width="112" height="44" rx="10"/><text x="68" y="139" text-anchor="middle">周预算 B</text></g>
+<g class="node"><rect x="196" y="22" width="120" height="44" rx="10"/><text x="256" y="49" text-anchor="middle">维护 M</text></g>
+<g class="node"><rect x="196" y="202" width="120" height="44" rx="10"/><text x="256" y="229" text-anchor="middle">实现交付 n</text></g>
+<g class="node"><rect x="392" y="112" width="120" height="44" rx="10"/><text x="452" y="139" text-anchor="middle">技术债 D</text></g>
+<g class="node"><rect x="584" y="202" width="124" height="44" rx="10"/><text x="646" y="229" text-anchor="middle">单项成本 c</text></g>
+<g class="node"><rect x="584" y="22" width="124" height="44" rx="10"/><text x="646" y="49" text-anchor="middle">项目本身大小</text></g>
+<path class="edge" d="M124,124 C160,100 170,70 196,52" marker-end="url(#arr)"/>
+<text class="elabel" x="132" y="86">花费 m</text>
+<path class="edge" d="M124,146 C160,170 170,200 196,218" marker-end="url(#arr)"/>
+<text class="elabel" x="120" y="196">剩余预算</text>
+<path class="edge" d="M316,52 C360,70 380,100 400,114" marker-end="url(#arr)"/>
+<text class="elabel" x="356" y="70">M3 修复（−）</text>
+<path class="edge" d="M316,218 C360,200 380,168 400,154" marker-end="url(#arr)"/>
+<text class="elabel" x="340" y="206">M1 累积（+）</text>
+<path class="edge" d="M512,148 C545,170 565,190 584,210" marker-end="url(#arr)"/>
+<text class="elabel" x="534" y="170">M2 代价（+）</text>
+<path class="edge" d="M584,236 C460,262 380,262 318,238" marker-end="url(#arr)"/>
+<text class="elabel" x="420" y="266">成本越高，同样预算交付越少</text>
+<path class="edge dash" d="M646,66 L646,200" marker-end="url(#arr)"/>
+<text class="elabel" x="654" y="138">混杂</text>
+</svg>
+<figcaption>因果图。实线是前提 P 主张的路径；虚线是混杂：backlog 按固定顺序排列，后面的项本身可能更大，它和“越往后债务越多”同时发生，单看成本随周数上升无法区分两者。§4 用同一项在两组之间的配对比较来切断这条混杂。</figcaption>
+</figure>
+
+<h2 id="t">3. 理论模型：定理与证明</h2>
+<h3>3.1 设定</h3>
+<p>把 8 周看成一个总预算 <span class="v">S</span> = <span class="v">T</span>·<span class="v">B</span>，比较两种策略交付 <span class="v">N</span> 项各需要多少钱。模型假设：</p>
+<ul>
+<li><b>A1 固定预算。</b>期限内总预算 <span class="v">S</span> 固定。周颗粒度和“剩余不足一个上限即结束本周”造成的作废先忽略（§3.6 讨论）。</li>
+<li><b>A2 债务累积。</b>不维护时，交付第 <span class="v">k</span> 项时的债务 <span class="v">D</span><sub>k</sub> = <span class="v">δ</span>·<span class="v">k</span>。</li>
+<li><b>A3 成本随债务线性上升。</b>第 <span class="v">k</span> 项的期望成本 <span class="v">c</span><sub>k</sub> = <span class="v">c</span>₀(1 + <span class="v">α</span><span class="v">D</span><sub>k</sub>) = <span class="v">c</span>₀(1 + <span class="v">β</span><span class="v">k</span>)，<span class="v">β</span> = <span class="v">αδ</span>。期望成本包含失败后的调试：失败率随债务上升的部分并入 <span class="v">α</span>。</li>
+<li><b>A4 维护清零。</b>一次维护花费 <span class="v">m</span>，把债务降到 0。</li>
+<li><b>A5 项目同质。</b>各项的基础成本都是 <span class="v">c</span>₀，成本变化只来自债务。</li>
+</ul>
+
+<h3>3.2 三个引理</h3>
+<div class="box"><span class="label">引理 1（交付与成本等价）</span>设策略 <span class="v">x</span> 交付 <span class="v">N</span> 项的总成本为 <span class="v">C</span><sub>x</sub>(<span class="v">N</span>)，对 <span class="v">N</span> 严格递增；预算 <span class="v">S</span> 下交付 <span class="v">N</span><sub>x</sub> = max{<span class="v">N</span> : <span class="v">C</span><sub>x</sub>(<span class="v">N</span>) ≤ <span class="v">S</span>}。若在相关范围内 <span class="v">C</span><sub>M</sub>(<span class="v">N</span>) &lt; <span class="v">C</span>₀(<span class="v">N</span>)，则 <span class="v">N</span><sub>M</sub> ≥ <span class="v">N</span>₀；若 <span class="v">C</span><sub>M</sub>(<span class="v">N</span>) &gt; <span class="v">C</span>₀(<span class="v">N</span>)，则 <span class="v">N</span><sub>M</sub> ≤ <span class="v">N</span>₀。</div>
+<div class="proof">由定义 <span class="v">C</span>₀(<span class="v">N</span>₀) ≤ <span class="v">S</span>。若 <span class="v">C</span><sub>M</sub>(<span class="v">N</span>₀) &lt; <span class="v">C</span>₀(<span class="v">N</span>₀) ≤ <span class="v">S</span>，则 <span class="v">N</span>₀ 在 π<sub>M</sub> 下可行，故 <span class="v">N</span><sub>M</sub> ≥ <span class="v">N</span>₀。另一方向对称。所以“维护能否多交付”等价于“维护能否降低交付同样项数的总成本”。<span class="qed">∎</span></div>
+
+<div class="box"><span class="label">引理 2（不维护的总成本）</span>
+<div class="math"><span class="v">C</span>₀(<span class="v">N</span>) = Σ<sub>k=1..N</sub> <span class="v">c</span>₀(1 + <span class="v">βk</span>) ≈ <span class="v">c</span>₀(<span class="v">N</span> + <span class="v">β</span><span class="v">N</span>²/2)</div></div>
+<div class="proof">等差数列求和，Σ<span class="v">k</span> = <span class="v">N</span>(<span class="v">N</span>+1)/2 ≈ <span class="v">N</span>²/2。<span class="qed">∎</span></div>
+
+<div class="box"><span class="label">引理 3（维护 R 次、间隔均匀的总成本）</span>
+<div class="math"><span class="v">C</span><sub>R</sub>(<span class="v">N</span>) ≈ <span class="v">c</span>₀(<span class="v">N</span> + <span class="v">β</span><span class="v">N</span>²/(2(<span class="v">R</span>+1))) + <span class="v">R</span><span class="v">m</span></div></div>
+<div class="proof"><span class="v">R</span> 次维护把 <span class="v">N</span> 项分成 <span class="v">R</span>+1 段，每段 <span class="v">L</span> = <span class="v">N</span>/(<span class="v">R</span>+1) 项。每段从零债务开始，由引理 2 成本为 <span class="v">c</span>₀(<span class="v">L</span> + <span class="v">β</span><span class="v">L</span>²/2)。乘以 <span class="v">R</span>+1 段，利用 (<span class="v">R</span>+1)<span class="v">L</span> = <span class="v">N</span>、(<span class="v">R</span>+1)<span class="v">L</span>² = <span class="v">NL</span>，再加上 <span class="v">R</span> 次维护费用即得。<span class="qed">∎</span></div>
+
+<h3>3.3 定理：回本条件</h3>
+<div class="box"><span class="label">定理</span>在 A1–A5 下，均匀维护 <span class="v">R</span> ≥ 1 次能提高累计交付，当且仅当
+<div class="math"><span class="v">m</span>/<span class="v">c</span>₀ &lt; <span class="v">β</span><span class="v">N</span>² / (2(<span class="v">R</span>+1))，即 <span class="v">Q</span> ≡ 2(<span class="v">R</span>+1)(<span class="v">m</span>/<span class="v">c</span>₀) / (<span class="v">β</span><span class="v">N</span>²) &lt; 1</div></div>
+<div class="proof">由引理 2、3，<span class="v">C</span>₀(<span class="v">N</span>) − <span class="v">C</span><sub>R</sub>(<span class="v">N</span>) = <span class="v">c</span>₀<span class="v">β</span><span class="v">N</span>²/2 · (1 − 1/(<span class="v">R</span>+1)) − <span class="v">Rm</span> = <span class="v">c</span>₀<span class="v">β</span><span class="v">N</span>²<span class="v">R</span>/(2(<span class="v">R</span>+1)) − <span class="v">Rm</span>。它大于 0 当且仅当上式成立。再由引理 1 得交付结论。<span class="qed">∎</span></div>
+<p>读法：<span class="v">m</span>/<span class="v">c</span>₀ 是一次维护“折合多少项实现”；右边是每次维护平均能省下的实现成本（同样以项计）。省下的量随 <span class="v">N</span>² 增长，因为债务对后面每一项都起作用。</p>
+
+<h3>3.4 推论</h3>
+<div class="box"><span class="label">推论 1（维护次数）</span>若 <span class="v">R</span> = 1 时 <span class="v">Q</span> ≥ 1，则任何 <span class="v">R</span> ≥ 1 都不回本。最优次数 <span class="v">R</span>* ≈ <span class="v">N</span>·√(<span class="v">β</span> / (2<span class="v">m</span>/<span class="v">c</span>₀)) − 1。</div>
+<div class="proof">净收益除以 <span class="v">R</span> 等于 <span class="v">c</span>₀<span class="v">β</span><span class="v">N</span>²/(2(<span class="v">R</span>+1)) − <span class="v">m</span>，随 <span class="v">R</span> 递减；在 <span class="v">R</span> = 1 处不为正，则处处不为正。对净收益关于 <span class="v">R</span> 求导并令其为 0 得 <span class="v">R</span>*。<span class="qed">∎</span></div>
+<div class="box"><span class="label">推论 2（最短回本规模）</span>单次维护回本所需的最少交付项数 <span class="v">N</span>* = √(4(<span class="v">m</span>/<span class="v">c</span>₀)/<span class="v">β</span>)；维护 <span class="v">R</span> 次时 <span class="v">N</span>*<sub>R</sub> = √(2(<span class="v">R</span>+1)(<span class="v">m</span>/<span class="v">c</span>₀)/<span class="v">β</span>)。</div>
+<div class="box"><span class="label">推论 3（期限）</span>设每周交付 <span class="v">v</span> 项、每周维护 <span class="v">r</span> 次，则 <span class="v">N</span> = <span class="v">vT</span>、<span class="v">R</span> = <span class="v">rT</span>，
+<div class="math"><span class="v">Q</span>(<span class="v">T</span>) = 2(<span class="v">rT</span>+1)(<span class="v">m</span>/<span class="v">c</span>₀) / (<span class="v">β</span><span class="v">v</span>²<span class="v">T</span>²) ≈ 2<span class="v">r</span>(<span class="v">m</span>/<span class="v">c</span>₀) / (<span class="v">β</span><span class="v">v</span>²<span class="v">T</span>)（<span class="v">T</span> 较大时）</div>
+只要 <span class="v">β</span> &gt; 0，<span class="v">Q</span>(<span class="v">T</span>) 随期限下降并终将小于 1，回本期限 <span class="v">T</span>* 存在；<span class="v">β</span> = 0 时 <span class="v">Q</span> = ∞，不存在回本期限。所以前提 P 的真正问题不是“维护值不值”，而是“<span class="v">β</span> 是否大于 0，以及期限是否超过 <span class="v">T</span>*”。</div>
+<div class="box"><span class="label">推论 4（稳健方向）</span>以下偏离都只会减少维护的收益：维护间隔不均匀（固定 <span class="v">R</span> 时，各段长度平方和在均匀时最小）、维护只部分修复债务、部分成本增长与债务无关而无法被维护消除。因此用“均匀间隔、完全修复、把全部成本增长都算作可修复债务”算出的 <span class="v">Q</span> 是偏向维护的乐观值：据此得到 <span class="v">Q</span> &gt; 1 时，“维护不回本”的结论在这些偏离下依然成立；反过来 <span class="v">Q</span> &lt; 1 时还需要额外证据。</div>
+
+<h3>3.5 失败通道</h3>
+<p>若第 <span class="v">k</span> 项首次通过率为 <span class="v">p</span>(<span class="v">D</span><sub>k</sub>)，每次调试成本约为实现的 <span class="v">λ</span> 倍，则期望成本约为 <span class="v">c</span>₀[1 + <span class="v">λ</span>(1 − <span class="v">p</span>(<span class="v">D</span><sub>k</sub>)) + …]。把 <span class="v">p</span> 在 <span class="v">D</span> = 0 处线性化，失败率随债务上升的部分就成为 <span class="v">β</span> 的一个组成部分，定理形式不变。</p>
+
+<h3>3.6 模型没有包含的</h3>
+<ul>
+<li><b>周颗粒度与作废。</b>每周剩余不足一个上限即结束，约 30% 预算作废。两组的作废比例接近（真实运行：不维护组 {{real.nomaint_unused}}，维护组 {{real.maint_unused}}），对比较的影响是二阶的。</li>
+<li><b>维护占用整周预算的离散效应。</b>一次维护可能让当周少开一项。这使维护在实际调度中比模型中更吃亏，方向同推论 4。</li>
+</ul>
+
+<h2 id="p">4. 从理论到可检验预测</h2>
+<div class="tbl"><table>
+<tr><th>预测</th><th style="text-align:left">检验什么</th><th style="text-align:left">怎么测</th></tr>
+<tr><td>T1</td><td style="text-align:left;white-space:normal">M2（在控制项目大小后）</td><td style="text-align:left;white-space:normal">同一个 backlog 项，比较维护组与不维护组的成本（各次重复取均值后求比值）。若维护降低了债务且 M2 成立，比值应小于 1。</td></tr>
+<tr><td>T2</td><td style="text-align:left;white-space:normal">H1</td><td style="text-align:left;white-space:normal">不维护组单项成本对项编号做回归，斜率除以截距得 <span class="v">β̂</span>。它混有项目大小效应，只能作为可修复 <span class="v">β</span> 的上界。</td></tr>
+<tr><td>T3</td><td style="text-align:left;white-space:normal">定理</td><td style="text-align:left;white-space:normal">用 <span class="v">β̂</span>、实测 <span class="v">m</span>/<span class="v">c</span>₀、<span class="v">R</span>、<span class="v">N</span> 计算 <span class="v">Q</span>。<span class="v">Q</span> &gt; 1 预测维护组交付更少。</td></tr>
+<tr><td>T4</td><td style="text-align:left;white-space:normal">H2</td><td style="text-align:left;white-space:normal">比较两组 8 周累计交付，逐次重复看。</td></tr>
+</table></div>
+<p><b>判定规则（三分类）。</b>前提成立：维护组累计交付在每次重复中都多于不维护组（范围不重叠），且 T1 显示维护组单项更便宜。前提不成立：维护组在每次重复中都更少。其余情况：数据不足以判断。</p>
+<div class="warn">诚实披露：运行前固定的是设计、预算规则、阈值和三分类本身（见 PLAN.md）；上面这条判定规则在写报告时才明确写出。本页的理论模型、<span class="v">Q</span> 和回本期限分析是在看到数据之后写的，属于解释性分析，不是预先登记的检验。理论在模拟数据上的预测（§6.4）可以当作对推导本身的检查，因为模拟的因果结构是已知的。</div>
+
+<h2 id="d">5. 实验设计</h2>
+<ul>
+<li><b>处理变量：</b>分配策略 π₀ / π<sub>M</sub>。</li>
+<li><b>控制不变：</b>同一起点（标签 <code>site-v0</code>，提交 4a0ea0c）；同一 backlog 顺序；同一模型 claude-sonnet-5-5；同一提示；同一周预算和单项上限（来自同一次校准）；每个任务一次全新会话（空 HOME，无记忆）；同一评估流程（验收测试从原始副本恢复）。</li>
+<li><b>重复：</b>每组 3 次，随机性来自模型。</li>
+<li><b>预算规则：</b>6 个校准任务得到单项平均成本 <span class="v">c̄</span> 和 80 分位数；周预算 = 4.5<span class="v">c̄</span>，单项上限 = 1.5 × 80 分位数。剩余不足一个上限时本周结束；会话跑完为止，超过上限记为超支；周超支从下周扣除。验收失败最多调试 2 次，仍失败则回滚。</li>
+<li><b>度量：</b>token 用量从 CLI 输出中逐轮汇总，并与 CLI 的累计值逐一核对；成本按官方价格表计算。指标：代码行数、最大文件行数、重复代码比例、行覆盖率、依赖漏洞数、过期依赖数、构建与测试是否通过、实现任务平均输入 token。</li>
+<li><b>维护触发：</b>相对第 0 周基线的阈值（覆盖率相对下降 &gt; 5%，重复比例相对上升 &gt; 30%，最大文件相对上升 &gt; 50%，平均输入 token 相对上升 &gt; 20%，漏洞数 &gt; 0）。</li>
+<li><b>模拟的作用：</b>在系数已知的模型里运行同一套调度循环，用来检查调度规则和本页的理论推导。模拟结果只反映假设，不能检验前提。</li>
+</ul>
+<p>细节见 <a href="https://github.com/changkun/agent-budget/blob/claude/bold-planck-xa6jxt/PLAN.md">PLAN.md</a>。</p>
+
+<h2 id="e">6. 证据</h2>
+<h3>6.1 M1 与 M3：维护确实改变了指标</h3>
+<p>第 8 周末：覆盖率，不维护组 {{real.nomaint_cov}}，维护组 {{real.maint_cov}}；最大文件行数，不维护组 {{real.nomaint_maxfile}}，维护组 {{real.maint_maxfile}}；代码行数从 {{real.baseline_loc}} 增长到不维护组 {{real.nomaint_loc}}、维护组 {{real.maint_loc}}。不维护时指标变差（<span class="ok">M1 成立</span>），维护把它们拉回阈值附近（<span class="ok">M3 成立</span>）。</p>
+<figure><img src="img/real-metrics.png" alt="真实运行：各指标随周数的变化"><figcaption>真实运行，各指标随周数的变化（橙色虚线：不维护组；蓝色实线：维护组；三角形：触发维护的周）。</figcaption></figure>
+
+<h3>6.2 M2：同一项在维护组并不更便宜（T1）</h3>
+<p>两组都完成的 {{real.paired_n}} 项（{{real.paired_range}}）：维护组成本 ÷ 不维护组成本 = <b>{{real.paired}}</b>，自助法 90% 区间 [{{real.paired_lo}}, {{real.paired_hi}}]（描述性区间，不作显著性判断）。维护组的代码更“健康”，同一项反而略贵约 3%。可被维护消除的 <span class="v">β</span> 估计不大于 0：<span class="bad">M2 不成立</span>。</p>
+<p>失败通道同样没有出现：{{real.sessions}} 个会话中验收失败 {{real.failed}} 次，调试 {{real.debug}} 次。首次通过率不随债务变化。</p>
+
+<h3>6.3 H1：成本上升来自项目大小（T2）</h3>
+<p>不维护组单项成本对项编号回归：<span class="v">c</span>₀ = {{real.c0}} 美元，<span class="v">β̂</span> = {{real.beta}}%/项，90% 区间 [{{real.beta_lo}}, {{real.beta_hi}}]（{{real.n_points}} 个项样本）。成本确实随项编号上升（H1 在描述层面成立），但两组的上升幅度接近，项编号与成本的相关系数为 {{real.corr_index_cost}}。结合 6.2，上升来自后面的项本身更大，不是债务。</p>
+<figure><img src="img/real-cost.png" alt="真实运行：每项实现成本"><figcaption>真实运行，每项实现成本随周数的变化。两组走势接近。</figcaption></figure>
+
+<h3>6.4 代入定理（T3），并用模拟检查理论</h3>
+<p>为了偏向维护，下面把不维护组成本上升的全部都当作可修复债务（推论 4），即用 <span class="v">β̂</span> 作为 <span class="v">β</span>。</p>
+<div class="tbl"><table>
+<tr><th>数据集</th><th>β̂（%/项）</th><th>m/c₀</th><th>R（次/系列）</th><th>N（不维护组）</th><th>Q（实测策略）</th><th>Q（单次维护）</th><th>预测</th><th>实测 Δ 交付</th></tr>
+<tr><td>模拟·技术债影响强</td><td>{{strong.beta}}</td><td>{{strong.mc}}</td><td>{{strong.R}}</td><td>{{strong.N0}}</td><td>{{strong.Q_obs}}</td><td>{{strong.Q_one}}</td><td>接近持平</td><td>{{strong.delta}}</td></tr>
+<tr><td>模拟·技术债影响弱</td><td>{{weak.beta}}</td><td>{{weak.mc}}</td><td>{{weak.R}}</td><td>{{weak.N0}}</td><td>{{weak.Q_obs}}</td><td>{{weak.Q_one}}</td><td>维护组明显更少</td><td>{{weak.delta}}</td></tr>
+<tr><td>真实运行</td><td>{{real.beta}}</td><td>{{real.mc}}</td><td>{{real.R}}</td><td>{{real.N0}}</td><td>{{real.Q_obs}}</td><td>{{real.Q_one}}</td><td>维护组更少</td><td>{{real.delta}}</td></tr>
+</table></div>
+<ul>
+<li><b>模拟“强”</b>：<span class="v">Q</span> ≈ {{strong.Q_obs}}，接近回本线；实测维护组少 {{strong.delta_abs}} 项，接近持平但略输。模型忽略了维护挤占整周预算的离散效应，方向与推论 4 一致。</li>
+<li><b>模拟“弱”</b>：<span class="v">Q</span> = {{weak.Q_obs}}，远大于 1；实测维护组少 {{weak.delta_abs}} 项。</li>
+<li><b>真实运行</b>：即使把全部成本上升算作债务，<span class="v">Q</span> = {{real.Q_obs}} &gt; 1；实测维护组少 {{real.delta_abs}} 项。若改为期限中点只维护一次，<span class="v">Q</span> = {{real.Q_one}}，接近回本线；但 6.2 表明可修复的 <span class="v">β</span> 实际不大于 0，所以这个乐观情形也不成立。</li>
+</ul>
+<p>三组的预测方向都和实测一致，<span class="v">Q</span> 越大输得越多，排序也一致。这支持把定理当作理解这类实验的框架。</p>
+
+<h3>6.5 回本期限</h3>
+<div id="chart-labels" data-label-aria="回本系数 Q 随期限的变化" data-label-horizon="本实验 8 周" data-label-x="期限（周）" data-label-breakeven="Q = 1 回本线" data-label-strong="模拟·强" data-label-weak="模拟·弱" data-label-real="真实（β 上界）"></div>
+<figure>
+{{chart.payback}}
+<figcaption>按推论 3，用各数据集实测的每周交付 <span class="v">v</span>、每周维护次数 <span class="v">r</span>、<span class="v">m</span>/<span class="v">c</span>₀ 和 <span class="v">β̂</span> 画出 <span class="v">Q</span>(<span class="v">T</span>)（对数纵轴）。曲线落到 1 以下的期限即回本期限；圆点是第 8 周的值。真实运行一条用的是 <span class="v">β</span> 的上界，按 6.2 的证据，可修复的 <span class="v">β</span> 不大于 0，对应的曲线在图外（<span class="v">Q</span> = ∞）。</figcaption>
+</figure>
+<p>回本期限（按实测维护频率）：模拟“强”约 {{strong.T_obs}} 周，模拟“弱”约 {{weak.T_obs}} 周；真实运行若把全部成本上升都算作债务约 {{real.T_obs}} 周（取 <span class="v">β</span> 区间上端约 {{real.T_obs_hi}} 周），若只在中点维护一次约 {{real.T_one}} 周。按 6.2 的实测证据，真实运行不存在回本期限。</p>
+
+<h3>6.6 H2 与判定（T4）</h3>
+<p>8 周累计交付，不维护组每次重复为 {{real.cum0}}，维护组为 {{real.cumM}}。维护组在每次重复中都更少，按 §4 的规则判定为 <span class="bad">前提不成立（限于本实验条件）</span>。</p>
+<figure><img src="img/real-cumulative.png" alt="真实运行：累计完成项数"><figcaption>真实运行，累计完成项数。</figcaption></figure>
+
+<h2 id="v">7. 有效性威胁</h2>
+<ul>
+<li><b>内部：项目顺序混杂。</b>backlog 固定顺序使“越往后越大”与“越往后债务越多”同时发生。处理：用同一项的配对比较（6.2）而不是逐周成本来检验 M2。</li>
+<li><b>内部：计量错误。</b>一个会话启动后台任务后产生两个 result 事件，旧解析器少计了成本，影响了一个系列的调度。处理：修正解析器，所有会话与 CLI 累计值核对一致，该系列从头重跑，原日志存档。</li>
+<li><b>内部：验收测试对 agent 可见。</b>降低了需求歧义带来的失败，也可能削弱债务通过失败率起作用的路径。两组条件相同。</li>
+<li><b>构念：指标只是债务的代理。</b>覆盖率、最大文件等不等于“agent 理解代码的难度”。平均输入 token 的基线来自偏大的校准任务，知识提炼从未触发；初始重复比例为 0，加了 2% 的基线下限。</li>
+<li><b>外部：规模与模型。</b>代码从约 {{real.baseline_loc}} 行增长到约 1300 行，backlog 项相互独立，模型能力强，期限 8 周约 30 项。推论 3 表明 <span class="v">β</span> &gt; 0 时更长期限终会回本；本实验无法排除在更大的代码库、更弱的模型或耦合更强的需求下 <span class="v">β</span> &gt; 0。</li>
+<li><b>统计：样本量。</b>每组 3 次重复。文中区间均为自助法描述性区间，不作显著性判断。</li>
+</ul>
+
+<h2 id="c">8. 结论：证明了什么，没有证明什么</h2>
+<ul>
+<li><b>数学上证明了</b>：在 A1–A5 下，维护提高累计交付的充要条件是 <span class="v">Q</span> &lt; 1；最短回本规模和期限分别由推论 2、3 给出；多种现实偏离只会让维护更不划算（推论 4）。</li>
+<li><b>实证上表明了（本实验条件下）</b>：M1、M3 成立，M2 不成立，所以 P 不成立；实测结果与定理的预测一致。</li>
+<li><b>没有证明</b>：在更大、更耦合的代码库，或更弱的模型下 <span class="v">β</span> 是否大于 0；阈值触发是否是好的维护策略。推论 1 指出维护应少而定时，而阈值策略每系列触发约 {{real.R}} 次，过于频繁。</li>
+<li><b>理论给出的下一步实验</b>：
+<ol>
+<li>直接测 <span class="v">β</span>：固定同一批项，在不同债务状态的代码库副本上实现，比较成本。</li>
+<li>延长期限，使 <span class="v">N</span> 超过推论 2 的 <span class="v">N</span>*。</li>
+<li>增加“单次定时维护”对照组，检验推论 1。</li>
+</ol></li>
+</ul>
+
+<h2 id="r">9. 复现</h2>
+<pre>python3 -m harness sim all          # 模拟两种假设
+python3 -m harness real calibrate   # 真实运行：6 个校准任务
+python3 -m harness real run-all     # 真实运行：2 组 × 3 次
+python3 -m harness dashboard        # 看板（中英文）
+python3 -m harness build-report     # REPORT.md
+python3 -m harness methodology      # 本页</pre>
+<p>原始日志：<code>docs/data/&lt;阶段&gt;/&lt;假设&gt;/{tasks,weeks,metrics}.csv</code> 与 <code>run.json</code>。</p>
+
+</div>
+</body>
+</html>

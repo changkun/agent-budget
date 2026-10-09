@@ -239,5 +239,9 @@
     ],
     "inf": "∞（后期无完成项）",
     "na": "–"
+  },
+  "methodology": {
+    "label": "方法论",
+    "href": "methodology.html"
   }
 }

@@ -3,6 +3,7 @@
     python3 -m harness sim [strong|weak|all]   run the simulated phase
     python3 -m harness dashboard               regenerate docs/index.html
     python3 -m harness report                  print summary tables (markdown)
+    python3 -m harness methodology             regenerate docs/methodology.html
     python3 -m harness real calibrate          real phase: run calibration items
     python3 -m harness real run-all            real phase: run or resume all series
     python3 -m harness real run --group G --rep N
@@ -26,6 +27,7 @@ def main(argv: list[str] | None = None) -> int:
     p_sim.add_argument("--no-dashboard", action="store_true")
     sub.add_parser("dashboard")
     sub.add_parser("build-report")
+    sub.add_parser("methodology")
     p_rep = sub.add_parser("report")
     p_rep.add_argument("--phase", default="sim")
     p_real = sub.add_parser("real")
@@ -53,6 +55,9 @@ def main(argv: list[str] | None = None) -> int:
         if not args.no_dashboard:
             from . import dashboard
             print(dashboard.build())
+    elif args.cmd == "methodology":
+        from . import methodology
+        print(methodology.build())
     elif args.cmd == "build-report":
         from . import report
         print(report.build())
