@@ -73,6 +73,51 @@ pre { background: var(--card); border: 1px solid var(--line); border-radius: 8px
 ul, ol { padding-left: 22px; }
 li { margin: 3px 0; }
 @media (max-width: 640px) { body { font-size: 15px; } h1 { font-size: 22px; } .math { font-size: 16px; } }
+
+/* interactive charts; colors validated with the dataviz palette checker */
+:root { --nomaint: #D55E00; --maint: #0072B2; --ds-strong: #4a3aa7; --ds-weak: #eda100; --ds-real: #1baf7a;
+  --zero: #9a9a9f; --good: #0a8f0a; --critical: #c53030; --wash: rgba(0,114,178,0.06); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --nomaint: #d95926; --maint: #3987e5; --ds-strong: #9085e9; --ds-weak: #c98500;
+    --ds-real: #199e70; --zero: #76767c; --good: #0ca30c; --critical: #e66767; --wash: rgba(57,135,229,0.10); }
+}
+:root[data-theme="dark"] { --nomaint: #d95926; --maint: #3987e5; --ds-strong: #9085e9; --ds-weak: #c98500;
+  --ds-real: #199e70; --zero: #76767c; --good: #0ca30c; --critical: #e66767; --wash: rgba(57,135,229,0.10); }
+.viz { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 16px 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: flex-end; margin-bottom: 8px; }
+.ctl { display: flex; flex-direction: column; font-size: 13px; color: var(--muted); min-width: 170px; }
+.ctl .row { display: flex; align-items: center; gap: 8px; }
+.ctl input[type=range] { width: 150px; accent-color: var(--accent); }
+.ctl output { color: var(--fg); font-variant-numeric: tabular-nums; min-width: 44px; font-weight: 600; font-size: 15px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 10px; }
+.chip { font: inherit; font-size: 13px; border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+  border-radius: 999px; padding: 3px 11px; cursor: pointer; }
+.chip:hover { border-color: var(--muted); }
+.chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 6px 0 10px; }
+.tile { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+.t-label { font-size: 12.5px; color: var(--muted); }
+.t-value { font-size: 22px; font-weight: 650; line-height: 1.35; }
+.t-note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.verdict-yes { color: var(--good); font-weight: 650; }
+.verdict-no { color: var(--critical); font-weight: 650; }
+.vlegend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--muted); margin: 2px 0 4px; }
+.vlegend .item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex: none; }
+.vlegend button.item { font: inherit; background: none; border: none; color: inherit; cursor: pointer; padding: 0; }
+.vlegend button.item[aria-pressed="false"] { opacity: 0.4; text-decoration: line-through; }
+.tip { position: fixed; pointer-events: none; z-index: 20; background: var(--card); color: var(--fg);
+  border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font-size: 13px; line-height: 1.5;
+  box-shadow: 0 6px 18px rgba(0,0,0,.16); min-width: 150px; }
+.tip-title { color: var(--muted); font-size: 12px; margin-bottom: 2px; }
+.tip-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; white-space: nowrap; }
+.tip-row b { font-variant-numeric: tabular-nums; }
+svg .crosshair { stroke: var(--muted); stroke-width: 1; }
+svg .overlay { fill: transparent; cursor: crosshair; outline: none; }
+svg .hit { fill: transparent; cursor: pointer; outline: none; }
+svg g.pt-g:hover .pt { stroke: var(--fg); }
+svg .hit:focus { stroke: var(--fg); stroke-width: 1.5; }
+svg .tick { font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ctl input[type=range] { width: 120px; } }
 </style>
 </head>
 <body>
@@ -91,6 +136,7 @@ li { margin: 3px 0; }
 <li><b>机制检验。</b>真实运行中，维护确实把指标拉回了基线（M1、M3 成立）。但同一个 backlog 项在维护组并不更便宜：维护组 ÷ 不维护组 = 1.034，自助法 90% 区间 [1.013, 1.058]。也就是说，能被维护消除的那部分 <span class="v">β</span> 不大于 0（M2 不成立）。</li>
 <li><b>结论。</b>按定理，此时维护在任何期限内都无法回本。实测维护组 8 周累计交付比不维护组少 7.0 项（3 次重复均值），每次重复都更少。前提不成立，限于本实验条件。</li>
 <li><b>什么时候可以不维护。</b>由定理可得跳过维护的阈值 <span class="v">β</span> &lt; <span class="v">β</span>* = 4(<span class="v">m</span>/<span class="v">c</span>₀)/<span class="v">N</span>²（只维护一次、时机最好时）。阈值管的是 <span class="v">β</span> = <span class="v">αδ</span>，即技术债让成本涨了多少，而不是引入了多少技术债；它随剩余工作量的平方下降。由同一模型还可以推出一条现场决策规则：<b>现在维护，当且仅当（当前每项多花的比例）×（剩余项数）&gt; <span class="v">m</span>/<span class="v">c</span>₀</b>。用这条规则回看真实运行中阈值策略触发的 12 次维护，即使把全部成本上涨都算作可修复的技术债，值得做的也只有 0 次（§6.5）。</li>
+<li><b>可交互。</b>§3.8 的回本计算器可以拖动 <span class="v">β</span>、<span class="v">m</span>/<span class="v">c</span>₀、<span class="v">N</span>、<span class="v">R</span>，§6.5 可以改 <span class="v">β</span> 重新判定每一次维护，§6.6 的回本曲线可以悬停和切换。</li>
 <li><b>理论自身的检验。</b>把三组数据（模拟“强”、模拟“弱”、真实运行）代入 <span class="v">Q</span>，预测的输赢方向与实测一致，相对大小的排序也一致（§6.4）。</li>
 </ul>
 </div>
@@ -233,6 +279,37 @@ li { margin: 3px 0; }
 <h3>3.7 线性假设的边界</h3>
 <p>A2、A3 假设技术债线性累积、成本线性响应。现实中可能存在临界点：文件或上下文大到超出 agent 能有效处理的范围；模块纠缠到改一处坏多处，失败率突然上升。越过临界点时 <span class="v">β</span> 会跳变，按线性模型算出的阈值和回本期限都会低估风险。本实验离这种区域很远：单次实现会话只用 7–10 万 token，173 个会话验收失败 0 次，所以无法回答临界点在哪里。</p>
 
+<h3>3.8 交互：回本计算器</h3>
+<p>拖动参数，看两种策略的累计实现成本怎么分开。成本以 <span class="v">c</span>₀（干净代码库上一项的成本）为单位，维护在期限内均匀安排。预设按钮载入本实验三组数据的估计值；滑块上 <span class="v">N</span>、<span class="v">R</span> 取整数，所以 <span class="v">Q</span> 与 §6.4 表中的值略有差别。悬停图表或用方向键查看每个位置的数值。</p>
+<div class="viz" id="calc">
+  <div class="chips" id="calc-presets">
+    <button type="button" class="chip" data-preset="real">真实运行（β 取上界）</button>
+    <button type="button" class="chip" data-preset="real0">真实运行（可修复 β ≈ 0）</button>
+    <button type="button" class="chip" data-preset="strong">模拟·技术债影响强</button>
+    <button type="button" class="chip" data-preset="weak">模拟·技术债影响弱</button>
+  </div>
+  <div class="controls">
+    <label class="ctl">单项成本增幅 β（%/项）<span class="row"><input type="range" id="c-beta" min="0" max="10" step="0.05"><output id="o-beta"></output></span></label>
+    <label class="ctl">一次维护折合 m/c₀（项）<span class="row"><input type="range" id="c-mc" min="0.2" max="6" step="0.1"><output id="o-mc"></output></span></label>
+    <label class="ctl">期限内交付 N（项）<span class="row"><input type="range" id="c-n" min="5" max="200" step="1"><output id="o-n"></output></span></label>
+    <label class="ctl">维护次数 R<span class="row"><input type="range" id="c-r" min="0" max="10" step="1"><output id="o-r"></output></span></label>
+  </div>
+  <div class="tiles">
+    <div class="tile"><div class="t-label">回本系数 Q</div><div class="t-value" id="t-q">–</div><div class="t-note" id="t-verdict"></div></div>
+    <div class="tile"><div class="t-label">维护净收益（项，按定理）</div><div class="t-value" id="t-net">–</div><div class="t-note">正数：维护省下的实现成本多于维护本身</div></div>
+    <div class="tile"><div class="t-label">跳过维护的阈值 β*</div><div class="t-value" id="t-bstar">–</div><div class="t-note">单次、时机最好时；β 低于它就不维护</div></div>
+    <div class="tile"><div class="t-label">最优维护次数 R*</div><div class="t-value" id="t-rstar">–</div><div class="t-note" id="t-nstar"></div></div>
+  </div>
+  <div class="chips" id="calc-view">
+    <button type="button" class="chip" data-view="cum" aria-pressed="true">累计实现成本</button>
+    <button type="button" class="chip" data-view="item" aria-pressed="false">单项成本</button>
+  </div>
+  <div class="vlegend" id="calc-legend"></div>
+  <div id="calc-chart"></div>
+  <details><summary>数据表</summary><div class="tbl" id="calc-table"></div></details>
+  <noscript><p>计算器需要 JavaScript。</p></noscript>
+</div>
+
 <h2 id="p">4. 从理论到可检验预测</h2>
 <div class="tbl"><table>
 <tr><th>预测</th><th style="text-align:left">检验什么</th><th style="text-align:left">怎么测</th></tr>
@@ -286,8 +363,24 @@ li { margin: 3px 0; }
 
 <h3>6.5 用现场规则回看每一次维护</h3>
 <p>按推论 6，对真实运行维护组的每一次维护计算 <span class="v">βk</span>·<span class="v">N</span><sub>rem</sub>，与该次维护的实际 <span class="v">m</span>/<span class="v">c</span>₀ 比较。<span class="v">k</span> 按维护类型分别计（同类维护之间交付的项数），这比把各类维护都当作同一笔技术债的清零更偏向维护；<span class="v">N</span><sub>rem</sub> 取该系列在这次维护之后实际交付的项数；<span class="v">β</span> 取上界 0.95%/项。</p>
+<div class="viz" id="online">
+  <div class="chips" id="online-presets">
+    <button type="button" class="chip" data-beta="0">可修复 β ≈ 0</button>
+    <button type="button" class="chip" data-beta="0.95">β 上界 0.95%</button>
+    <button type="button" class="chip" data-beta="1.61">β 区间上端 1.61%</button>
+  </div>
+  <div class="controls">
+    <label class="ctl">β（%/项）<span class="row"><input type="range" id="on-beta" min="0" max="3" step="0.01"><output id="on-o-beta"></output></span></label>
+    <div class="ctl">k 的计法<span class="chips" id="on-k" style="margin:4px 0 0"><button type="button" class="chip" data-k="type" aria-pressed="true">按维护类型</button><button type="button" class="chip" data-k="single" aria-pressed="false">统一清零</button></span></div>
+    <div class="ctl">值得做的维护<span class="t-value" id="on-count">–</span></div>
+  </div>
+  <div class="vlegend" id="online-legend"></div>
+  <div id="online-chart"></div>
+  <p class="t-note">每个点是一次维护：横轴是它的实际成本，纵轴是按推论 6 现在维护能省下的成本。落在对角线上方才值得做。下表随参数一起更新。</p>
+</div>
 <div class="tbl"><table>
-<tr><th>重复</th><th>周</th><th>维护类型</th><th>k</th><th>N<sub>rem</sub></th><th>βk·N<sub>rem</sub></th><th>m/c₀</th><th>值得做</th></tr>
+<thead><tr><th>重复</th><th>周</th><th>维护类型</th><th>k</th><th>N<sub>rem</sub></th><th>βk·N<sub>rem</sub></th><th>m/c₀</th><th>值得做</th></tr></thead>
+<tbody id="online-tbody">
 <tr><td>1</td><td>3</td><td>补测试</td><td>8</td><td>15</td><td>1.14</td><td>2.44</td><td>否</td></tr>
 <tr><td>1</td><td>3</td><td>代码整理</td><td>8</td><td>15</td><td>1.14</td><td>1.58</td><td>否</td></tr>
 <tr><td>1</td><td>7</td><td>补测试</td><td>11</td><td>4</td><td>0.42</td><td>1.45</td><td>否</td></tr>
@@ -300,12 +393,20 @@ li { margin: 3px 0; }
 <tr><td>3</td><td>4</td><td>代码整理</td><td>10</td><td>13</td><td>1.23</td><td>1.57</td><td>否</td></tr>
 <tr><td>3</td><td>7</td><td>代码整理</td><td>10</td><td>3</td><td>0.28</td><td>2.62</td><td>否</td></tr>
 <tr><td>3</td><td>8</td><td>补测试</td><td>14</td><td>2</td><td>0.27</td><td>1.81</td><td>否</td></tr>
+</tbody>
 </table></div>
 <p>结果：12 次维护中值得做的有 <b>0</b> 次，最大的“收益/成本”比为 0.78。把各类维护视为同一笔技术债的清零时也是 0 次（最大比 0.47）。即使取 <span class="v">β</span> 区间上端 1.61%/项，也只有 2 次勉强值得（最大比 1.33）。而按 6.2 的证据，可修复的 <span class="v">β</span> 约为 0，那么一次都不值得。阈值策略触发维护时，要么积累的溢价还小，要么剩下的工作已经不多。</p>
 
 <h3>6.6 回本期限</h3>
 <div id="chart-labels" data-label-aria="回本系数 Q 随期限的变化" data-label-horizon="本实验 8 周" data-label-x="期限（周）" data-label-breakeven="Q = 1 回本线" data-label-strong="模拟·强" data-label-weak="模拟·弱" data-label-real="真实（β 上界）" data-label-yes="是" data-label-no="否" data-label-maint_tests="补测试" data-label-maint_refactor="代码整理" data-label-maint_security="安全扫描与依赖更新" data-label-maint_knowledge="知识提炼"></div>
 <figure>
+<div class="viz" id="qviz">
+  <div class="chips" id="q-real">
+    <button type="button" class="chip" data-beta="point" aria-pressed="true">真实运行用 β 点估计（上界）</button>
+    <button type="button" class="chip" data-beta="hi" aria-pressed="false">真实运行用 β 区间上端</button>
+  </div>
+  <div class="vlegend" id="q-legend"></div>
+  <div id="q-chart">
 <svg viewBox="0 0 720 320" role="img" aria-label="回本系数 Q 随期限的变化">
 <line class="grid" x1="56" x2="570" y1="280.0" y2="280.0"/>
 <text x="50" y="284.0" text-anchor="end">0.1</text>
@@ -339,20 +440,23 @@ li { margin: 3px 0; }
 <text x="200.2" y="28">本实验 8 周</text>
 <text x="313.0" y="314" text-anchor="middle">期限（周）</text>
 <text x="574" y="169.3">Q = 1 回本线</text>
-<polyline fill="none" stroke="#B8860B" stroke-width="2.2" points="56.0,74.4 61.8,82.7 67.7,90.0 73.5,96.5 79.4,102.3 85.2,107.6 91.0,112.4 96.9,116.9 102.7,121.0 108.6,124.8 114.4,128.4 120.2,131.7 126.1,134.9 131.9,137.9 137.8,140.7 143.6,143.4 149.5,145.9 155.3,148.4 161.1,150.7 167.0,152.9 172.8,155.0 178.7,157.1 184.5,159.1 190.3,161.0 196.2,162.8 202.0,164.6 207.9,166.3 213.7,168.0 219.5,169.6 225.4,171.1 231.2,172.6 237.1,174.1 242.9,175.5 248.8,176.9 254.6,178.3 260.4,179.6 266.3,180.9 272.1,182.1 278.0,183.4 283.8,184.5 289.6,185.7 295.5,186.9 301.3,188.0 307.2,189.1 313.0,190.1 318.8,191.2 324.7,192.2 330.5,193.2 336.4,194.2 342.2,195.2 348.0,196.1 353.9,197.0 359.7,198.0 365.6,198.8 371.4,199.7 377.2,200.6 383.1,201.4 388.9,202.3 394.8,203.1 400.6,203.9 406.5,204.7 412.3,205.5 418.1,206.3 424.0,207.0 429.8,207.8 435.7,208.5 441.5,209.3 447.3,210.0 453.2,210.7 459.0,211.4 464.9,212.1 470.7,212.8 476.5,213.4 482.4,214.1 488.2,214.7 494.1,215.4 499.9,216.0 505.8,216.7 511.6,217.3 517.4,217.9 523.3,218.5 529.1,219.1 535.0,219.7 540.8,220.3 546.6,220.8 552.5,221.4 558.3,222.0 564.2,222.5 570.0,223.1"/>
-<circle cx="196.2" cy="162.8" r="4" fill="#B8860B"/>
-<line x1="578" x2="600" y1="56" y2="56" stroke="#B8860B" stroke-width="2.2"/>
+<polyline fill="none" stroke="#4a3aa7" stroke-width="2.2" points="56.0,74.4 61.8,82.7 67.7,90.0 73.5,96.5 79.4,102.3 85.2,107.6 91.0,112.4 96.9,116.9 102.7,121.0 108.6,124.8 114.4,128.4 120.2,131.7 126.1,134.9 131.9,137.9 137.8,140.7 143.6,143.4 149.5,145.9 155.3,148.4 161.1,150.7 167.0,152.9 172.8,155.0 178.7,157.1 184.5,159.1 190.3,161.0 196.2,162.8 202.0,164.6 207.9,166.3 213.7,168.0 219.5,169.6 225.4,171.1 231.2,172.6 237.1,174.1 242.9,175.5 248.8,176.9 254.6,178.3 260.4,179.6 266.3,180.9 272.1,182.1 278.0,183.4 283.8,184.5 289.6,185.7 295.5,186.9 301.3,188.0 307.2,189.1 313.0,190.1 318.8,191.2 324.7,192.2 330.5,193.2 336.4,194.2 342.2,195.2 348.0,196.1 353.9,197.0 359.7,198.0 365.6,198.8 371.4,199.7 377.2,200.6 383.1,201.4 388.9,202.3 394.8,203.1 400.6,203.9 406.5,204.7 412.3,205.5 418.1,206.3 424.0,207.0 429.8,207.8 435.7,208.5 441.5,209.3 447.3,210.0 453.2,210.7 459.0,211.4 464.9,212.1 470.7,212.8 476.5,213.4 482.4,214.1 488.2,214.7 494.1,215.4 499.9,216.0 505.8,216.7 511.6,217.3 517.4,217.9 523.3,218.5 529.1,219.1 535.0,219.7 540.8,220.3 546.6,220.8 552.5,221.4 558.3,222.0 564.2,222.5 570.0,223.1"/>
+<circle cx="196.2" cy="162.8" r="4" fill="#4a3aa7"/>
+<line x1="578" x2="600" y1="56" y2="56" stroke="#4a3aa7" stroke-width="2.2"/>
 <text x="604" y="60">模拟·强</text>
-<polyline fill="none" stroke="#8E8E93" stroke-width="2.2" points="73.5,17.7 79.4,23.4 85.2,28.5 91.0,33.2 96.9,37.6 102.7,41.6 108.6,45.3 114.4,48.8 120.2,52.0 126.1,55.1 131.9,58.0 137.8,60.8 143.6,63.4 149.5,65.9 155.3,68.3 161.1,70.6 167.0,72.8 172.8,74.9 178.7,76.9 184.5,78.8 190.3,80.7 196.2,82.5 202.0,84.2 207.9,85.9 213.7,87.5 219.5,89.1 225.4,90.6 231.2,92.1 237.1,93.6 242.9,95.0 248.8,96.3 254.6,97.7 260.4,99.0 266.3,100.2 272.1,101.5 278.0,102.7 283.8,103.8 289.6,105.0 295.5,106.1 301.3,107.2 307.2,108.3 313.0,109.3 318.8,110.4 324.7,111.4 330.5,112.4 336.4,113.3 342.2,114.3 348.0,115.2 353.9,116.2 359.7,117.1 365.6,117.9 371.4,118.8 377.2,119.7 383.1,120.5 388.9,121.3 394.8,122.2 400.6,123.0 406.5,123.8 412.3,124.5 418.1,125.3 424.0,126.1 429.8,126.8 435.7,127.5 441.5,128.3 447.3,129.0 453.2,129.7 459.0,130.4 464.9,131.0 470.7,131.7 476.5,132.4 482.4,133.0 488.2,133.7 494.1,134.3 499.9,134.9 505.8,135.6 511.6,136.2 517.4,136.8 523.3,137.4 529.1,138.0 535.0,138.6 540.8,139.2 546.6,139.7 552.5,140.3 558.3,140.9 564.2,141.4 570.0,142.0"/>
-<circle cx="196.2" cy="82.5" r="4" fill="#8E8E93"/>
-<line x1="578" x2="600" y1="76" y2="76" stroke="#8E8E93" stroke-width="2.2"/>
+<polyline fill="none" stroke="#eda100" stroke-width="2.2" points="73.5,17.7 79.4,23.4 85.2,28.5 91.0,33.2 96.9,37.6 102.7,41.6 108.6,45.3 114.4,48.8 120.2,52.0 126.1,55.1 131.9,58.0 137.8,60.8 143.6,63.4 149.5,65.9 155.3,68.3 161.1,70.6 167.0,72.8 172.8,74.9 178.7,76.9 184.5,78.8 190.3,80.7 196.2,82.5 202.0,84.2 207.9,85.9 213.7,87.5 219.5,89.1 225.4,90.6 231.2,92.1 237.1,93.6 242.9,95.0 248.8,96.3 254.6,97.7 260.4,99.0 266.3,100.2 272.1,101.5 278.0,102.7 283.8,103.8 289.6,105.0 295.5,106.1 301.3,107.2 307.2,108.3 313.0,109.3 318.8,110.4 324.7,111.4 330.5,112.4 336.4,113.3 342.2,114.3 348.0,115.2 353.9,116.2 359.7,117.1 365.6,117.9 371.4,118.8 377.2,119.7 383.1,120.5 388.9,121.3 394.8,122.2 400.6,123.0 406.5,123.8 412.3,124.5 418.1,125.3 424.0,126.1 429.8,126.8 435.7,127.5 441.5,128.3 447.3,129.0 453.2,129.7 459.0,130.4 464.9,131.0 470.7,131.7 476.5,132.4 482.4,133.0 488.2,133.7 494.1,134.3 499.9,134.9 505.8,135.6 511.6,136.2 517.4,136.8 523.3,137.4 529.1,138.0 535.0,138.6 540.8,139.2 546.6,139.7 552.5,140.3 558.3,140.9 564.2,141.4 570.0,142.0"/>
+<circle cx="196.2" cy="82.5" r="4" fill="#eda100"/>
+<line x1="578" x2="600" y1="76" y2="76" stroke="#eda100" stroke-width="2.2"/>
 <text x="604" y="80">模拟·弱</text>
-<polyline fill="none" stroke="#2E8B57" stroke-width="2.2" stroke-dasharray="6 4" points="56.0,31.6 61.8,40.3 67.7,48.0 73.5,54.8 79.4,60.9 85.2,66.4 91.0,71.5 96.9,76.1 102.7,80.5 108.6,84.5 114.4,88.2 120.2,91.7 126.1,95.0 131.9,98.1 137.8,101.1 143.6,103.9 149.5,106.5 155.3,109.1 161.1,111.5 167.0,113.8 172.8,116.0 178.7,118.2 184.5,120.2 190.3,122.2 196.2,124.1 202.0,125.9 207.9,127.7 213.7,129.4 219.5,131.1 225.4,132.7 231.2,134.2 237.1,135.8 242.9,137.2 248.8,138.7 254.6,140.1 260.4,141.4 266.3,142.7 272.1,144.0 278.0,145.3 283.8,146.5 289.6,147.7 295.5,148.9 301.3,150.0 307.2,151.2 313.0,152.3 318.8,153.3 324.7,154.4 330.5,155.4 336.4,156.4 342.2,157.4 348.0,158.4 353.9,159.3 359.7,160.3 365.6,161.2 371.4,162.1 377.2,163.0 383.1,163.9 388.9,164.7 394.8,165.6 400.6,166.4 406.5,167.2 412.3,168.0 418.1,168.8 424.0,169.6 429.8,170.4 435.7,171.1 441.5,171.9 447.3,172.6 453.2,173.3 459.0,174.0 464.9,174.7 470.7,175.4 476.5,176.1 482.4,176.8 488.2,177.4 494.1,178.1 499.9,178.8 505.8,179.4 511.6,180.0 517.4,180.6 523.3,181.3 529.1,181.9 535.0,182.5 540.8,183.1 546.6,183.7 552.5,184.2 558.3,184.8 564.2,185.4 570.0,185.9"/>
-<circle cx="196.2" cy="124.1" r="4" fill="#2E8B57"/>
-<line x1="578" x2="600" y1="96" y2="96" stroke="#2E8B57" stroke-width="2.2" stroke-dasharray="6 4"/>
+<polyline fill="none" stroke="#1baf7a" stroke-width="2.2" stroke-dasharray="6 4" points="56.0,31.6 61.8,40.3 67.7,48.0 73.5,54.8 79.4,60.9 85.2,66.4 91.0,71.5 96.9,76.1 102.7,80.5 108.6,84.5 114.4,88.2 120.2,91.7 126.1,95.0 131.9,98.1 137.8,101.1 143.6,103.9 149.5,106.5 155.3,109.1 161.1,111.5 167.0,113.8 172.8,116.0 178.7,118.2 184.5,120.2 190.3,122.2 196.2,124.1 202.0,125.9 207.9,127.7 213.7,129.4 219.5,131.1 225.4,132.7 231.2,134.2 237.1,135.8 242.9,137.2 248.8,138.7 254.6,140.1 260.4,141.4 266.3,142.7 272.1,144.0 278.0,145.3 283.8,146.5 289.6,147.7 295.5,148.9 301.3,150.0 307.2,151.2 313.0,152.3 318.8,153.3 324.7,154.4 330.5,155.4 336.4,156.4 342.2,157.4 348.0,158.4 353.9,159.3 359.7,160.3 365.6,161.2 371.4,162.1 377.2,163.0 383.1,163.9 388.9,164.7 394.8,165.6 400.6,166.4 406.5,167.2 412.3,168.0 418.1,168.8 424.0,169.6 429.8,170.4 435.7,171.1 441.5,171.9 447.3,172.6 453.2,173.3 459.0,174.0 464.9,174.7 470.7,175.4 476.5,176.1 482.4,176.8 488.2,177.4 494.1,178.1 499.9,178.8 505.8,179.4 511.6,180.0 517.4,180.6 523.3,181.3 529.1,181.9 535.0,182.5 540.8,183.1 546.6,183.7 552.5,184.2 558.3,184.8 564.2,185.4 570.0,185.9"/>
+<circle cx="196.2" cy="124.1" r="4" fill="#1baf7a"/>
+<line x1="578" x2="600" y1="96" y2="96" stroke="#1baf7a" stroke-width="2.2" stroke-dasharray="6 4"/>
 <text x="604" y="100">真实（β 上界）</text>
 </svg>
-<figcaption>按推论 3，用各数据集实测的每周交付 <span class="v">v</span>、每周维护次数 <span class="v">r</span>、<span class="v">m</span>/<span class="v">c</span>₀ 和 <span class="v">β̂</span> 画出 <span class="v">Q</span>(<span class="v">T</span>)（对数纵轴）。曲线落到 1 以下的期限即回本期限；圆点是第 8 周的值。真实运行一条用的是 <span class="v">β</span> 的上界，按 6.2 的证据，可修复的 <span class="v">β</span> 不大于 0，对应的曲线在图外（<span class="v">Q</span> = ∞）。</figcaption>
+  </div>
+  <details><summary>数据表</summary><div class="tbl" id="q-table"></div></details>
+</div>
+<figcaption>按推论 3，用各数据集实测的每周交付 <span class="v">v</span>、每周维护次数 <span class="v">r</span>、<span class="v">m</span>/<span class="v">c</span>₀ 和 <span class="v">β̂</span> 画出 <span class="v">Q</span>(<span class="v">T</span>)（对数纵轴）。曲线落到 1 以下的期限即回本期限，图中标出了各曲线的回本点 <span class="v">T</span>*。悬停查看任一期限的 <span class="v">Q</span>，点击图例显示或隐藏曲线。真实运行一条用的是 <span class="v">β</span> 的上界，按 6.2 的证据，可修复的 <span class="v">β</span> 不大于 0，对应的曲线在图外（<span class="v">Q</span> = ∞）。</figcaption>
 </figure>
 <p>回本期限（按实测维护频率）：模拟“强”约 8.3 周，模拟“弱”约 37.6 周；真实运行若把全部成本上升都算作债务约 16.4 周（取 <span class="v">β</span> 区间上端约 10.3 周），若只在中点维护一次约 7.6 周。按 6.2 的实测证据，真实运行不存在回本期限。</p>
 
@@ -396,5 +500,544 @@ python3 -m harness methodology      # 本页</pre>
 <p>原始日志：<code>docs/data/&lt;阶段&gt;/&lt;假设&gt;/{tasks,weeks,metrics}.csv</code> 与 <code>run.json</code>。</p>
 
 </div>
+<script type="application/json" id="meth-data">{"datasets":{"strong":{"beta":0.062128,"beta_lo":0.022191,"beta_hi":0.144594,"mc":1.319029,"R":5.333333,"N0":16.0,"NM":13.666667,"v":2.0,"r":0.666667,"c0":0.468551},"weak":{"beta":0.010255,"beta_lo":-0.007593,"beta_hi":0.038109,"mc":1.523202,"R":6.333333,"N0":20.333333,"NM":13.666667,"v":2.541667,"r":0.791667,"c0":0.492229},"real":{"beta":0.00949,"beta_lo":0.003864,"beta_hi":0.016115,"mc":1.995857,"R":4.0,"N0":30.333333,"NM":23.333333,"v":3.791667,"r":0.5,"c0":0.051738}},"events":[{"rep":1,"week":3,"type":"maint_tests","k_type":8,"k_single":8,"n_rem":15,"mc":2.4441},{"rep":1,"week":3,"type":"maint_refactor","k_type":8,"k_single":0,"n_rem":15,"mc":1.579},{"rep":1,"week":7,"type":"maint_tests","k_type":11,"k_single":11,"n_rem":4,"mc":1.4478},{"rep":1,"week":8,"type":"maint_refactor","k_type":13,"k_single":2,"n_rem":2,"mc":1.6369},{"rep":2,"week":3,"type":"maint_tests","k_type":8,"k_single":8,"n_rem":16,"mc":2.5819},{"rep":2,"week":7,"type":"maint_refactor","k_type":20,"k_single":12,"n_rem":4,"mc":3.6532},{"rep":2,"week":8,"type":"maint_tests","k_type":13,"k_single":1,"n_rem":3,"mc":1.3625},{"rep":3,"week":2,"type":"maint_tests","k_type":5,"k_single":5,"n_rem":18,"mc":1.9474},{"rep":3,"week":3,"type":"maint_tests","k_type":2,"k_single":2,"n_rem":16,"mc":1.3033},{"rep":3,"week":4,"type":"maint_refactor","k_type":10,"k_single":3,"n_rem":13,"mc":1.5726},{"rep":3,"week":7,"type":"maint_refactor","k_type":10,"k_single":10,"n_rem":3,"mc":2.6157},{"rep":3,"week":8,"type":"maint_tests","k_type":14,"k_single":1,"n_rem":2,"mc":1.806}]}</script>
+<script type="application/json" id="meth-labels">
+{
+  "series": {"nomaint": "不维护", "maint": "维护 {R} 次", "zero": "β = 0 参考", "strong": "模拟·强", "weak": "模拟·弱", "real": "真实运行"},
+  "axis": {"k": "已交付项数 k", "cum": "累计实现成本（c₀）", "item": "单项成本（c₀）", "T": "期限（周）", "Q": "回本系数 Q", "cost": "这次维护的成本 m/c₀（项）", "benefit": "现在维护能省下 βk·N_rem（项）"},
+  "tip": {"k_at": "已交付 {k} 项", "T": "期限 {T} 周", "paid": "回本", "unpaid": "未回本", "maint_at": "此处维护", "event": "第 {rep} 次重复 · 第 {week} 周", "k": "k", "n_rem": "N_rem", "benefit": "能省下", "cost": "成本", "worth": "值得做", "not_worth": "不值得"},
+  "verdict": {"yes": "✓ 维护划算", "no": "✗ 维护不划算", "na": "R = 0，即不维护"},
+  "units": {"items": "项", "weeks": "周", "inf": "∞", "pctItem": "%/项"},
+  "nstar": "单次维护至少交付 {n} 项才回本",
+  "nstar_inf": "β = 0：任何期限都不回本",
+  "rstar_note": "净收益 {net} 项",
+  "ref": {"breakeven": "Q = 1 回本线", "horizon": "本实验 8 周", "diag": "收益 = 成本", "above": "上方：值得做"},
+  "tstar": "T* ≈ {t} 周",
+  "types": {"maint_tests": "补测试", "maint_refactor": "代码整理", "maint_security": "安全扫描与依赖更新", "maint_knowledge": "知识提炼"},
+  "table": {"k": "k", "dataset": "数据集", "tstar": "回本期限 T*（周）", "q8": "第 8 周的 Q", "beyond": "超过 {t} 周"},
+  "yes": "是",
+  "no": "否"
+}
+</script>
+<script>
+// Interactive charts for docs/methodology.html. Inlined into the page by harness/methodology.py.
+// Data comes from #meth-data (computed from the logs); all visible text from #meth-labels.
+(() => {
+  "use strict";
+  const DATA = JSON.parse(document.getElementById("meth-data").textContent);
+  const L = JSON.parse(document.getElementById("meth-labels").textContent);
+  const NS = "http://www.w3.org/2000/svg";
+  const DS = DATA.datasets;
+
+  // ---------- helpers ----------
+  const tpl = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (k in o ? o[k] : ""));
+  const fmt = (v, nd = 2) => (v === Infinity ? L.units.inf : Number.isFinite(v) ? v.toFixed(nd) : "–");
+  function S(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs || {})) if (v !== null && v !== undefined) e.setAttribute(k, v);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function H(tag, attrs, text) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) if (v !== null && v !== undefined) e.setAttribute(k, v);
+    if (text !== undefined && text !== null) e.textContent = text;
+    return e;
+  }
+  function T(parent, attrs, text) {
+    const t = S("text", attrs, parent);
+    t.textContent = text;
+    return t;
+  }
+  function niceTicks(lo, hi, n) {
+    if (!(hi > lo)) hi = lo + 1;
+    const raw = (hi - lo) / (n || 5);
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const r = raw / mag;
+    const step = (r >= 7.5 ? 10 : r >= 3.5 ? 5 : r >= 1.5 ? 2 : 1) * mag;
+    const out = [];
+    for (let v = Math.ceil(lo / step - 1e-9) * step; v <= hi + 1e-9; v += step) out.push(+v.toPrecision(12));
+    return out;
+  }
+  const css = (name) => `var(--${name})`;
+  // Charts are drawn at the container's real width so text stays at its CSS size on phones.
+  const widthOf = (el) => Math.max(320, Math.min(760, Math.round(el.clientWidth || 760)));
+  const renderers = [];
+  let resizeTimer = null;
+  let lastWidth = window.innerWidth;
+  window.addEventListener("resize", () => {
+    if (Math.abs(window.innerWidth - lastWidth) < 8) return;
+    lastWidth = window.innerWidth;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => renderers.forEach((f) => f()), 150);
+  });
+
+  // ---------- tooltip (one for the page) ----------
+  const tip = H("div", { class: "tip", role: "status" });
+  tip.hidden = true;
+  document.body.appendChild(tip);
+  function lineKey(color, dash, shape) {
+    const k = S("svg", { width: 20, height: 10, viewBox: "0 0 20 10", "aria-hidden": "true" });
+    if (shape === "circle") S("circle", { cx: 10, cy: 5, r: 4, style: `fill:${color}` }, k);
+    else if (shape === "square") S("rect", { x: 6, y: 1, width: 8, height: 8, rx: 1.5, style: `fill:${color}` }, k);
+    else S("line", { x1: 0, x2: 20, y1: 5, y2: 5, style: `stroke:${color};stroke-width:2;stroke-linecap:round;${dash ? "stroke-dasharray:5 3" : ""}` }, k);
+    return k;
+  }
+  function showTip(clientX, clientY, title, rows) {
+    tip.replaceChildren(H("div", { class: "tip-title" }, title));
+    for (const r of rows) {
+      const row = H("div", { class: "tip-row" });
+      const left = H("span", { style: "display:inline-flex;align-items:center;gap:6px" });
+      if (r.color) left.appendChild(lineKey(r.color, r.dash, r.shape));
+      left.appendChild(document.createTextNode(r.label));
+      row.append(left, H("b", {}, r.value));
+      tip.appendChild(row);
+    }
+    tip.hidden = false;
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = clientX + 14, y = clientY + 14;
+    if (x + w > innerWidth - 8) x = clientX - w - 14;
+    if (y + h > innerHeight - 8) y = clientY - h - 14;
+    tip.style.left = Math.max(8, x) + "px";
+    tip.style.top = Math.max(8, y) + "px";
+  }
+  const hideTip = () => { tip.hidden = true; };
+  window.addEventListener("scroll", hideTip, { passive: true });
+
+  function legend(container, items, onToggle) {
+    container.replaceChildren();
+    for (const it of items) {
+      const el = onToggle ? H("button", { type: "button", class: "item", "aria-pressed": it.hidden ? "false" : "true" })
+        : H("span", { class: "item" });
+      el.append(lineKey(it.color, it.dash, it.shape), document.createTextNode(it.label));
+      if (onToggle) el.addEventListener("click", () => onToggle(it.key));
+      container.appendChild(el);
+    }
+  }
+
+  function table(container, head, rows) {
+    const t = H("table");
+    const tr = H("tr");
+    for (const h of head) tr.appendChild(H("th", {}, h));
+    t.appendChild(H("thead")).appendChild(tr);
+    const tb = t.appendChild(H("tbody"));
+    for (const r of rows) {
+      const row = H("tr");
+      for (const c of r) row.appendChild(H("td", {}, c));
+      tb.appendChild(row);
+    }
+    container.replaceChildren(t);
+  }
+
+  // ---------- line chart with crosshair ----------
+  // o: {aria, height, x:{min,max,ticks,format,label}, y:{min,max,log,ticks,format,label,emph,emphLabel},
+  //     series:[{key,color,dash,points:[[x,y]...]}], vlines:[{x,label}], markers:[{x,y,color,label,anchor}],
+  //     snap(x)->x, title(x)->string, rows(x)->[{label,value,color,dash}], marks:[x...]}
+  function lineChart(el, o) {
+    const W = widthOf(el), Hh = o.height || 320, m = { l: 48, r: 14, t: 16, b: 46 };
+    const pw = W - m.l - m.r, ph = Hh - m.t - m.b;
+    const X = (v) => m.l + (v - o.x.min) / (o.x.max - o.x.min) * pw;
+    const lg = (v) => Math.log10(Math.min(Math.max(v, o.y.min), o.y.max));
+    const Y = o.y.log
+      ? (v) => m.t + (Math.log10(o.y.max) - lg(v)) / (Math.log10(o.y.max) - Math.log10(o.y.min)) * ph
+      : (v) => m.t + (o.y.max - v) / (o.y.max - o.y.min) * ph;
+    const svg = S("svg", { viewBox: `0 0 ${W} ${Hh}`, role: "img", "aria-label": o.aria });
+    for (const t of o.y.ticks) {
+      S("line", { class: t === o.y.emph ? "axis-strong" : "grid", x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t) }, svg);
+      T(svg, { class: "tick", x: m.l - 6, y: Y(t) + 4, "text-anchor": "end" }, o.y.format(t));
+    }
+    if (o.y.emph !== undefined && o.y.emphLabel) T(svg, { x: W - m.r - 4, y: Y(o.y.emph) - 5, "text-anchor": "end" }, o.y.emphLabel);
+    const xStride = pw < 420 ? 2 : 1;
+    o.x.ticks.forEach((t, i) => {
+      if (i % xStride === 0) T(svg, { class: "tick", x: X(t), y: Hh - m.b + 16, "text-anchor": "middle" }, o.x.format(t));
+    });
+    T(svg, { x: m.l + pw / 2, y: Hh - 6, "text-anchor": "middle" }, o.x.label);
+    T(svg, { x: m.l, y: m.t - 4 }, o.y.label);
+    for (const v of o.vlines || []) {
+      S("line", { class: "mark", x1: X(v.x), x2: X(v.x), y1: m.t, y2: m.t + ph }, svg);
+      T(svg, { x: X(v.x) + 4, y: m.t + 12 }, v.label);
+    }
+    for (const xm of o.marks || []) {
+      S("line", { x1: X(xm), x2: X(xm), y1: m.t + ph, y2: m.t + ph + 6, style: `stroke:${css("maint")};stroke-width:2` }, svg);
+    }
+    const clip = `clip${Math.random().toString(36).slice(2, 8)}`;
+    S("rect", { x: m.l, y: m.t, width: pw, height: ph }, S("clipPath", { id: clip }, S("defs", {}, svg)));
+    const g = S("g", { "clip-path": `url(#${clip})` }, svg);
+    for (const se of o.series) {
+      if (se.hidden) continue;
+      let d = "";
+      let pen = false;
+      for (const [x, y] of se.points) {
+        if (!Number.isFinite(y)) { pen = false; continue; }
+        d += `${pen ? "L" : "M"}${X(x).toFixed(1)},${Y(y).toFixed(1)}`;
+        pen = true;
+      }
+      S("path", { d, fill: "none", style: `stroke:${se.color};stroke-width:${se.width || 2};stroke-linejoin:round;stroke-linecap:round;${se.dash ? "stroke-dasharray:6 4" : ""}` }, g);
+    }
+    // Marker labels that would collide are left out; the tooltip and table still carry them.
+    const textWidth = (str) => [...str].reduce((w, ch) => w + (ch.codePointAt(0) > 0x2e80 ? 12 : 6.6), 0);
+    const taken = [];
+    for (const mk of o.markers || []) {
+      if (!Number.isFinite(mk.y) || mk.x < o.x.min || mk.x > o.x.max) continue;
+      S("circle", { cx: X(mk.x), cy: Y(mk.y), r: 4.5, style: `fill:${mk.color};stroke:${css("card")};stroke-width:2` }, svg);
+      if (!mk.label) continue;
+      const x = X(mk.x) + (mk.anchor === "end" ? -8 : 8);
+      const w = textWidth(mk.label);
+      const x0 = mk.anchor === "end" ? x - w : x, x1 = x0 + w;
+      if (x0 < m.l || x1 > W - 2 || taken.some(([a, b]) => x0 < b + 6 && x1 > a - 6)) continue;
+      taken.push([x0, x1]);
+      T(svg, { x, y: Y(mk.y) + (mk.dy || 16), "text-anchor": mk.anchor || "start" }, mk.label);
+    }
+    S("line", { class: "axis", x1: m.l, x2: W - m.r, y1: m.t + ph, y2: m.t + ph, style: `stroke:${css("line")}` }, svg);
+    // crosshair
+    const hair = S("line", { class: "crosshair", y1: m.t, y2: m.t + ph, visibility: "hidden" }, svg);
+    const ov = S("rect", { class: "overlay", x: m.l, y: m.t, width: pw, height: ph, tabindex: 0, "aria-label": o.aria }, svg);
+    let cur = null;
+    const place = (xv, cx, cy) => {
+      cur = xv;
+      hair.setAttribute("x1", X(xv));
+      hair.setAttribute("x2", X(xv));
+      hair.setAttribute("visibility", "visible");
+      showTip(cx, cy, o.title(xv), o.rows(xv));
+    };
+    const fromEvent = (ev) => {
+      const r = svg.getBoundingClientRect();
+      const vx = (ev.clientX - r.left) / r.width * W;
+      return o.snap(o.x.min + (vx - m.l) / pw * (o.x.max - o.x.min));
+    };
+    ov.addEventListener("pointermove", (ev) => place(fromEvent(ev), ev.clientX, ev.clientY));
+    ov.addEventListener("pointerleave", () => { hair.setAttribute("visibility", "hidden"); hideTip(); });
+    ov.addEventListener("focus", () => {
+      const r = svg.getBoundingClientRect();
+      const xv = o.snap((o.x.min + o.x.max) / 2);
+      place(xv, r.left + r.width / 2, r.top + r.height / 3);
+    });
+    ov.addEventListener("blur", () => { hair.setAttribute("visibility", "hidden"); hideTip(); });
+    ov.addEventListener("keydown", (ev) => {
+      if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
+      ev.preventDefault();
+      const step = o.keyStep || (o.x.max - o.x.min) / 40;
+      const xv = o.snap(Math.min(o.x.max, Math.max(o.x.min, (cur ?? o.x.min) + (ev.key === "ArrowRight" ? step : -step))));
+      const r = svg.getBoundingClientRect();
+      place(xv, r.left + (X(xv) / W) * r.width, r.top + r.height / 3);
+    });
+    el.replaceChildren(svg);
+  }
+
+  // ---------- 1. payback calculator ----------
+  function calcSeries(betaPct, mc, N, R) {
+    const b = betaPct / 100;
+    const bounds = [];
+    for (let i = 1; i <= R; i++) {
+      const k = Math.round((i * N) / (R + 1));
+      if (k > 0 && k < N && !bounds.includes(k)) bounds.push(k);
+    }
+    const s = { zero: [[0, 0]], no: [[0, 0]], ma: [[0, 0]], iZero: [], iNo: [], iMa: [], bounds, at: {} };
+    let cNo = 0, cMa = 0, j = 0;
+    for (let k = 1; k <= N; k++) {
+      j += 1;
+      const pNo = 1 + b * k, pMa = 1 + b * j;
+      cNo += pNo;
+      cMa += pMa;
+      s.zero.push([k, k]);
+      s.no.push([k, cNo]);
+      s.ma.push([k, cMa]);
+      s.iZero.push([k, 1]);
+      s.iNo.push([k, pNo]);
+      s.iMa.push([k, pMa]);
+      const before = cMa;
+      if (bounds.includes(k)) { cMa += mc; s.ma.push([k, cMa]); j = 0; }
+      s.at[k] = { zero: k, no: cNo, maBefore: before, ma: cMa, pNo, pMa, maint: bounds.includes(k) };
+    }
+    return s;
+  }
+  function theory(betaPct, mc, N, R) {
+    const b = betaPct / 100;
+    const net = (r) => (r > 0 ? (b * N * N * r) / (2 * (r + 1)) - r * mc : 0);
+    const Q = R > 0 ? (b > 0 ? (2 * (R + 1) * mc) / (b * N * N) : Infinity) : NaN;
+    let rStar = 0, best = 0;
+    if (b > 0) {
+      const cont = N * Math.sqrt(b / (2 * mc)) - 1;
+      for (const r of [Math.floor(cont), Math.ceil(cont), 1]) {
+        if (r >= 1 && net(r) > best) { best = net(r); rStar = r; }
+      }
+    }
+    return {
+      Q, net: net(R), bStar: (400 * mc) / (N * N), nStar: b > 0 ? Math.sqrt((4 * mc) / b) : Infinity,
+      rStar, rStarNet: best,
+    };
+  }
+  function initCalc() {
+    const root = document.getElementById("calc");
+    if (!root) return;
+    const $ = (id) => document.getElementById(id);
+    const inputs = { beta: $("c-beta"), mc: $("c-mc"), N: $("c-n"), R: $("c-r") };
+    const outs = { beta: $("o-beta"), mc: $("o-mc"), N: $("o-n"), R: $("o-r") };
+    const state = { view: "cum" };
+    const presets = {
+      real: { beta: DS.real.beta * 100, mc: DS.real.mc, N: Math.round(DS.real.N0), R: Math.round(DS.real.R) },
+      real0: { beta: 0, mc: DS.real.mc, N: Math.round(DS.real.N0), R: Math.round(DS.real.R) },
+      strong: { beta: DS.strong.beta * 100, mc: DS.strong.mc, N: Math.round(DS.strong.N0), R: Math.round(DS.strong.R) },
+      weak: { beta: DS.weak.beta * 100, mc: DS.weak.mc, N: Math.round(DS.weak.N0), R: Math.round(DS.weak.R) },
+    };
+    const presetButtons = root.querySelectorAll("[data-preset]");
+    function setPreset(key) {
+      const p = presets[key];
+      inputs.beta.value = p.beta.toFixed(2);
+      inputs.mc.value = p.mc.toFixed(1);
+      inputs.N.value = p.N;
+      inputs.R.value = p.R;
+      presetButtons.forEach((b) => b.setAttribute("aria-pressed", b.dataset.preset === key ? "true" : "false"));
+      render();
+    }
+    function read() {
+      return { beta: +inputs.beta.value, mc: +inputs.mc.value, N: +inputs.N.value, R: +inputs.R.value };
+    }
+    function render() {
+      const v = read();
+      outs.beta.textContent = v.beta.toFixed(2);
+      outs.mc.textContent = v.mc.toFixed(1);
+      outs.N.textContent = v.N;
+      outs.R.textContent = v.R;
+      const th = theory(v.beta, v.mc, v.N, v.R);
+      $("t-q").textContent = v.R > 0 ? fmt(th.Q, 2) : "–";
+      const verdict = $("t-verdict");
+      verdict.className = "t-note " + (v.R === 0 ? "" : th.Q < 1 ? "verdict-yes" : "verdict-no");
+      verdict.textContent = v.R === 0 ? L.verdict.na : th.Q < 1 ? L.verdict.yes : L.verdict.no;
+      $("t-net").textContent = (th.net >= 0 ? "+" : "") + th.net.toFixed(2);
+      $("t-bstar").textContent = th.bStar.toFixed(2) + " " + L.units.pctItem;
+      $("t-rstar").textContent = String(th.rStar);
+      $("t-nstar").textContent = (th.nStar === Infinity ? L.nstar_inf : tpl(L.nstar, { n: th.nStar.toFixed(0) }))
+        + (th.rStar > 0 ? " · " + tpl(L.rstar_note, { net: "+" + th.rStarNet.toFixed(2) }) : "");
+      const s = calcSeries(v.beta, v.mc, v.N, v.R);
+      const maintLabel = tpl(L.series.maint, { R: v.R });
+      const items = [
+        { key: "no", label: L.series.nomaint, color: css("nomaint"), dash: true },
+        { key: "ma", label: maintLabel, color: css("maint") },
+        { key: "zero", label: L.series.zero, color: css("zero"), width: 1.5 },
+      ];
+      legend(document.getElementById("calc-legend"), items);
+      const cum = state.view === "cum";
+      const series = cum
+        ? [{ ...items[2], points: s.zero }, { ...items[0], points: s.no }, { ...items[1], points: s.ma }]
+        : [{ ...items[2], points: s.iZero }, { ...items[0], points: s.iNo }, { ...items[1], points: s.iMa }];
+      const ymax = cum ? Math.max(s.at[v.N].no, s.at[v.N].ma, v.N) * 1.04 : (1 + (v.beta / 100) * v.N) * 1.06;
+      const ymin = cum ? 0 : Math.max(0, 1 - (ymax - 1) * 0.3);
+      lineChart(document.getElementById("calc-chart"), {
+        aria: cum ? L.axis.cum : L.axis.item,
+        x: { min: 0, max: v.N, ticks: niceTicks(0, v.N, 8), format: String, label: L.axis.k },
+        y: { min: ymin, max: ymax, ticks: niceTicks(ymin, ymax, 5), format: (t) => String(+t.toFixed(2)), label: cum ? L.axis.cum : L.axis.item },
+        series,
+        marks: s.bounds,
+        snap: (x) => Math.min(v.N, Math.max(1, Math.round(x))),
+        keyStep: 1,
+        title: (k) => tpl(L.tip.k_at, { k }) + (s.at[k] && s.at[k].maint ? " · " + L.tip.maint_at : ""),
+        rows: (k) => {
+          const a = s.at[k];
+          return cum
+            ? [{ label: L.series.nomaint, value: a.no.toFixed(2), color: css("nomaint"), dash: true },
+              { label: maintLabel, value: a.ma.toFixed(2), color: css("maint") },
+              { label: L.series.zero, value: a.zero.toFixed(2), color: css("zero") }]
+            : [{ label: L.series.nomaint, value: a.pNo.toFixed(3), color: css("nomaint"), dash: true },
+              { label: maintLabel, value: a.pMa.toFixed(3), color: css("maint") },
+              { label: L.series.zero, value: "1.000", color: css("zero") }];
+        },
+      });
+      const stride = Math.max(1, Math.ceil(v.N / 20));
+      const rows = [];
+      for (let k = stride; k <= v.N; k += stride) {
+        const a = s.at[k];
+        rows.push(cum ? [k, a.no.toFixed(2), a.ma.toFixed(2), a.zero.toFixed(2)] : [k, a.pNo.toFixed(3), a.pMa.toFixed(3), "1.000"]);
+      }
+      table(document.getElementById("calc-table"), [L.table.k, L.series.nomaint, maintLabel, L.series.zero], rows);
+    }
+    Object.values(inputs).forEach((i) => i.addEventListener("input", () => {
+      presetButtons.forEach((b) => b.setAttribute("aria-pressed", "false"));
+      render();
+    }));
+    presetButtons.forEach((b) => b.addEventListener("click", () => setPreset(b.dataset.preset)));
+    root.querySelectorAll("[data-view]").forEach((b) => b.addEventListener("click", () => {
+      state.view = b.dataset.view;
+      root.querySelectorAll("[data-view]").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+      render();
+    }));
+    renderers.push(render);
+    setPreset("real");
+  }
+
+  // ---------- 2. payback horizon Q(T) ----------
+  const qOfT = (d, beta, t) => (beta > 0 ? (2 * (d.r * t + 1) * d.mc) / (beta * (d.v * t) ** 2) : Infinity);
+  function tStar(d, beta) {
+    if (beta <= 0) return Infinity;
+    const a = beta * d.v * d.v, b = -2 * d.r * d.mc, c = -2 * d.mc;
+    return (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
+  }
+  function initQ() {
+    const root = document.getElementById("qviz");
+    if (!root) return;
+    const TMAX = 40;
+    const state = { hidden: {}, realBeta: "point" };
+    const colors = { strong: css("ds-strong"), weak: css("ds-weak"), real: css("ds-real") };
+    const betaOf = (k) => (k === "real" && state.realBeta === "hi" ? DS.real.beta_hi : DS[k].beta);
+    function render() {
+      const keys = ["strong", "weak", "real"];
+      const items = keys.map((k) => ({ key: k, label: L.series[k], color: colors[k], dash: k === "real", hidden: !!state.hidden[k] }));
+      legend(document.getElementById("q-legend"), items, (k) => { state.hidden[k] = !state.hidden[k]; render(); });
+      const series = items.map((it) => {
+        const pts = [];
+        for (let t = 1; t <= TMAX + 1e-9; t += 0.25) pts.push([t, qOfT(DS[it.key], betaOf(it.key), t)]);
+        return { ...it, points: pts };
+      });
+      const markers = [];
+      for (const it of items) {
+        if (it.hidden) continue;
+        const ts = tStar(DS[it.key], betaOf(it.key));
+        if (ts <= TMAX) {
+          markers.push({ x: ts, y: 1, color: it.color, label: tpl(L.tstar, { t: ts.toFixed(1) }), dy: 18,
+            anchor: ts > TMAX * 0.8 ? "end" : "start" });
+        }
+      }
+      lineChart(document.getElementById("q-chart"), {
+        aria: L.axis.Q,
+        height: 340,
+        x: { min: 1, max: TMAX, ticks: [1, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40], format: String, label: L.axis.T },
+        y: { min: 0.1, max: 20, log: true, ticks: [0.1, 0.2, 0.5, 1, 2, 5, 10, 20], format: String, label: L.axis.Q, emph: 1, emphLabel: L.ref.breakeven },
+        series,
+        vlines: [{ x: 8, label: L.ref.horizon }],
+        markers,
+        snap: (x) => Math.min(TMAX, Math.max(1, Math.round(x * 2) / 2)),
+        keyStep: 0.5,
+        title: (t) => tpl(L.tip.T, { T: t }),
+        rows: (t) => items.filter((it) => !it.hidden).map((it) => {
+          const q = qOfT(DS[it.key], betaOf(it.key), t);
+          return { label: it.label, value: `${fmt(q, 2)} · ${q < 1 ? L.tip.paid : L.tip.unpaid}`, color: it.color, dash: it.dash };
+        }),
+      });
+      table(document.getElementById("q-table"), [L.table.dataset, L.table.tstar, L.table.q8], keys.map((k) => {
+        const ts = tStar(DS[k], betaOf(k));
+        return [L.series[k], ts === Infinity ? L.units.inf : ts.toFixed(1), fmt(qOfT(DS[k], betaOf(k), 8), 2)];
+      }));
+    }
+    root.querySelectorAll("[data-beta]").forEach((b) => b.addEventListener("click", () => {
+      state.realBeta = b.dataset.beta;
+      root.querySelectorAll("[data-beta]").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+      render();
+    }));
+    renderers.push(render);
+    render();
+  }
+
+  // ---------- 3. on-the-spot rule, every maintenance run ----------
+  function initOnline() {
+    const root = document.getElementById("online");
+    if (!root) return;
+    const slider = document.getElementById("on-beta");
+    const out = document.getElementById("on-o-beta");
+    const state = { k: "type" };
+    const shapes = { maint_tests: "circle", maint_refactor: "square", maint_security: "diamond", maint_knowledge: "triangle" };
+    slider.value = (DS.real.beta * 100).toFixed(2);
+    const presetButtons = root.querySelectorAll("[data-beta]");
+    function syncPresets() {
+      presetButtons.forEach((b) => b.setAttribute("aria-pressed", Math.abs(+b.dataset.beta - +slider.value) < 0.005 ? "true" : "false"));
+    }
+    function evaluate() {
+      const b = +slider.value / 100;
+      return DATA.events.map((e) => {
+        const k = state.k === "type" ? e.k_type : e.k_single;
+        const score = b * k * e.n_rem;
+        return { ...e, k, score, worth: score > e.mc };
+      });
+    }
+    function drawShape(g, shape, cx, cy, color) {
+      const st = `fill:${color};stroke:${css("card")};stroke-width:2`;
+      if (shape === "square") return S("rect", { class: "pt", x: cx - 5, y: cy - 5, width: 10, height: 10, rx: 1.5, style: st }, g);
+      if (shape === "diamond") return S("path", { class: "pt", d: `M${cx},${cy - 6}L${cx + 6},${cy}L${cx},${cy + 6}L${cx - 6},${cy}Z`, style: st }, g);
+      if (shape === "triangle") return S("path", { class: "pt", d: `M${cx},${cy - 6}L${cx + 6},${cy + 5}L${cx - 6},${cy + 5}Z`, style: st }, g);
+      return S("circle", { class: "pt", cx, cy, r: 5.5, style: st }, g);
+    }
+    function render() {
+      out.textContent = (+slider.value).toFixed(2);
+      syncPresets();
+      const ev = evaluate();
+      const worth = ev.filter((e) => e.worth).length;
+      document.getElementById("on-count").textContent = `${worth} / ${ev.length}`;
+      const present = [...new Set(ev.map((e) => e.type))];
+      legend(document.getElementById("online-legend"), [
+        ...present.map((t) => ({ label: L.types[t] || t, color: css("maint"), shape: shapes[t] || "circle" })),
+        { label: L.ref.diag, color: css("muted"), dash: true },
+      ]);
+      // scatter
+      const chartEl = document.getElementById("online-chart");
+      const W = widthOf(chartEl), Hh = Math.min(360, Math.max(280, W * 0.55)), m = { l: 48, r: 14, t: 18, b: 46 };
+      const pw = W - m.l - m.r, ph = Hh - m.t - m.b;
+      const maxv = Math.max(4, ...ev.map((e) => e.score), ...ev.map((e) => e.mc)) * 1.08;
+      const X = (v) => m.l + (v / maxv) * pw;
+      const Y = (v) => m.t + ph - (v / maxv) * ph;
+      const svg = S("svg", { viewBox: `0 0 ${W} ${Hh}`, role: "img", "aria-label": L.axis.benefit });
+      S("path", { d: `M${X(0)},${Y(0)}L${X(maxv)},${Y(maxv)}L${X(0)},${Y(maxv)}Z`, style: `fill:${css("wash")}` }, svg);
+      const ticks = niceTicks(0, maxv, 5);
+      for (const t of ticks) {
+        S("line", { class: "grid", x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t) }, svg);
+        T(svg, { class: "tick", x: m.l - 6, y: Y(t) + 4, "text-anchor": "end" }, String(t));
+        T(svg, { class: "tick", x: X(t), y: Hh - m.b + 16, "text-anchor": "middle" }, String(t));
+      }
+      S("line", { x1: m.l, x2: W - m.r, y1: m.t + ph, y2: m.t + ph, style: `stroke:${css("line")}` }, svg);
+      S("line", { x1: X(0), y1: Y(0), x2: X(maxv), y2: Y(maxv), style: `stroke:${css("muted")};stroke-width:1.2;stroke-dasharray:5 4` }, svg);
+      T(svg, { x: X(maxv * 0.06), y: Y(maxv * 0.93) }, L.ref.above);
+      T(svg, { x: X(maxv) - 4, y: Y(maxv) + 26, "text-anchor": "end" }, L.ref.diag);
+      T(svg, { x: m.l + pw / 2, y: Hh - 6, "text-anchor": "middle" }, L.axis.cost);
+      T(svg, { x: m.l, y: m.t - 5 }, L.axis.benefit);
+      // jitter identical positions slightly so every point stays reachable
+      const seen = {};
+      ev.forEach((e, i) => {
+        const key = `${e.mc.toFixed(2)}|${e.score.toFixed(2)}`;
+        const n = (seen[key] = (seen[key] || 0) + 1) - 1;
+        const cx = X(e.mc) + n * 7, cy = Y(e.score) - n * 7;
+        const g = S("g", { class: "pt-g" }, svg);
+        drawShape(g, shapes[e.type] || "circle", cx, cy, css("maint"));
+        const hit = S("circle", { class: "hit", cx, cy, r: 12, tabindex: 0, "aria-label": `${tpl(L.tip.event, e)} ${L.types[e.type] || e.type}` }, g);
+        const rows = () => [
+          { label: L.tip.benefit, value: e.score.toFixed(2) },
+          { label: L.tip.cost, value: e.mc.toFixed(2) },
+          { label: L.tip.k, value: String(e.k) },
+          { label: L.tip.n_rem, value: String(e.n_rem) },
+          { label: e.worth ? L.tip.worth : L.tip.not_worth, value: e.worth ? "✓" : "✗" },
+        ];
+        const title = () => `${tpl(L.tip.event, e)} · ${L.types[e.type] || e.type}`;
+        hit.addEventListener("pointermove", (p) => showTip(p.clientX, p.clientY, title(), rows()));
+        hit.addEventListener("pointerleave", hideTip);
+        hit.addEventListener("focus", () => {
+          const r = hit.getBoundingClientRect();
+          showTip(r.right, r.top, title(), rows());
+        });
+        hit.addEventListener("blur", hideTip);
+      });
+      chartEl.replaceChildren(svg);
+      const tb = document.getElementById("online-tbody");
+      tb.replaceChildren(...ev.map((e) => {
+        const tr = H("tr");
+        for (const c of [e.rep, e.week, L.types[e.type] || e.type, e.k, e.n_rem, e.score.toFixed(2), e.mc.toFixed(2), e.worth ? L.yes : L.no]) {
+          tr.appendChild(H("td", {}, String(c)));
+        }
+        return tr;
+      }));
+    }
+    slider.addEventListener("input", render);
+    presetButtons.forEach((b) => b.addEventListener("click", () => { slider.value = (+b.dataset.beta).toFixed(2); render(); }));
+    root.querySelectorAll("[data-k]").forEach((b) => b.addEventListener("click", () => {
+      state.k = b.dataset.k;
+      root.querySelectorAll("[data-k]").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+      render();
+    }));
+    renderers.push(render);
+    render();
+  }
+
+  initCalc();
+  initQ();
+  initOnline();
+})();
+
+</script>
 </body>
 </html>

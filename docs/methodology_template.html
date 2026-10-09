@@ -73,6 +73,51 @@ pre { background: var(--card); border: 1px solid var(--line); border-radius: 8px
 ul, ol { padding-left: 22px; }
 li { margin: 3px 0; }
 @media (max-width: 640px) { body { font-size: 15px; } h1 { font-size: 22px; } .math { font-size: 16px; } }
+
+/* interactive charts; colors validated with the dataviz palette checker */
+:root { --nomaint: #D55E00; --maint: #0072B2; --ds-strong: #4a3aa7; --ds-weak: #eda100; --ds-real: #1baf7a;
+  --zero: #9a9a9f; --good: #0a8f0a; --critical: #c53030; --wash: rgba(0,114,178,0.06); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --nomaint: #d95926; --maint: #3987e5; --ds-strong: #9085e9; --ds-weak: #c98500;
+    --ds-real: #199e70; --zero: #76767c; --good: #0ca30c; --critical: #e66767; --wash: rgba(57,135,229,0.10); }
+}
+:root[data-theme="dark"] { --nomaint: #d95926; --maint: #3987e5; --ds-strong: #9085e9; --ds-weak: #c98500;
+  --ds-real: #199e70; --zero: #76767c; --good: #0ca30c; --critical: #e66767; --wash: rgba(57,135,229,0.10); }
+.viz { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 16px 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: flex-end; margin-bottom: 8px; }
+.ctl { display: flex; flex-direction: column; font-size: 13px; color: var(--muted); min-width: 170px; }
+.ctl .row { display: flex; align-items: center; gap: 8px; }
+.ctl input[type=range] { width: 150px; accent-color: var(--accent); }
+.ctl output { color: var(--fg); font-variant-numeric: tabular-nums; min-width: 44px; font-weight: 600; font-size: 15px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 10px; }
+.chip { font: inherit; font-size: 13px; border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+  border-radius: 999px; padding: 3px 11px; cursor: pointer; }
+.chip:hover { border-color: var(--muted); }
+.chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 6px 0 10px; }
+.tile { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+.t-label { font-size: 12.5px; color: var(--muted); }
+.t-value { font-size: 22px; font-weight: 650; line-height: 1.35; }
+.t-note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.verdict-yes { color: var(--good); font-weight: 650; }
+.verdict-no { color: var(--critical); font-weight: 650; }
+.vlegend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--muted); margin: 2px 0 4px; }
+.vlegend .item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex: none; }
+.vlegend button.item { font: inherit; background: none; border: none; color: inherit; cursor: pointer; padding: 0; }
+.vlegend button.item[aria-pressed="false"] { opacity: 0.4; text-decoration: line-through; }
+.tip { position: fixed; pointer-events: none; z-index: 20; background: var(--card); color: var(--fg);
+  border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font-size: 13px; line-height: 1.5;
+  box-shadow: 0 6px 18px rgba(0,0,0,.16); min-width: 150px; }
+.tip-title { color: var(--muted); font-size: 12px; margin-bottom: 2px; }
+.tip-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; white-space: nowrap; }
+.tip-row b { font-variant-numeric: tabular-nums; }
+svg .crosshair { stroke: var(--muted); stroke-width: 1; }
+svg .overlay { fill: transparent; cursor: crosshair; outline: none; }
+svg .hit { fill: transparent; cursor: pointer; outline: none; }
+svg g.pt-g:hover .pt { stroke: var(--fg); }
+svg .hit:focus { stroke: var(--fg); stroke-width: 1.5; }
+svg .tick { font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ctl input[type=range] { width: 120px; } }
 </style>
 </head>
 <body>
@@ -91,6 +136,7 @@ li { margin: 3px 0; }
 <li><b>机制检验。</b>真实运行中，维护确实把指标拉回了基线（M1、M3 成立）。但同一个 backlog 项在维护组并不更便宜：维护组 ÷ 不维护组 = {{real.paired}}，自助法 90% 区间 [{{real.paired_lo}}, {{real.paired_hi}}]。也就是说，能被维护消除的那部分 <span class="v">β</span> 不大于 0（M2 不成立）。</li>
 <li><b>结论。</b>按定理，此时维护在任何期限内都无法回本。实测维护组 8 周累计交付比不维护组少 {{real.delta_abs}} 项（3 次重复均值），每次重复都更少。前提不成立，限于本实验条件。</li>
 <li><b>什么时候可以不维护。</b>由定理可得跳过维护的阈值 <span class="v">β</span> &lt; <span class="v">β</span>* = 4(<span class="v">m</span>/<span class="v">c</span>₀)/<span class="v">N</span>²（只维护一次、时机最好时）。阈值管的是 <span class="v">β</span> = <span class="v">αδ</span>，即技术债让成本涨了多少，而不是引入了多少技术债；它随剩余工作量的平方下降。由同一模型还可以推出一条现场决策规则：<b>现在维护，当且仅当（当前每项多花的比例）×（剩余项数）&gt; <span class="v">m</span>/<span class="v">c</span>₀</b>。用这条规则回看真实运行中阈值策略触发的 {{real.online_type_n}} 次维护，即使把全部成本上涨都算作可修复的技术债，值得做的也只有 {{real.online_type_worth}} 次（§6.5）。</li>
+<li><b>可交互。</b>§3.8 的回本计算器可以拖动 <span class="v">β</span>、<span class="v">m</span>/<span class="v">c</span>₀、<span class="v">N</span>、<span class="v">R</span>，§6.5 可以改 <span class="v">β</span> 重新判定每一次维护，§6.6 的回本曲线可以悬停和切换。</li>
 <li><b>理论自身的检验。</b>把三组数据（模拟“强”、模拟“弱”、真实运行）代入 <span class="v">Q</span>，预测的输赢方向与实测一致，相对大小的排序也一致（§6.4）。</li>
 </ul>
 </div>
@@ -233,6 +279,37 @@ li { margin: 3px 0; }
 <h3>3.7 线性假设的边界</h3>
 <p>A2、A3 假设技术债线性累积、成本线性响应。现实中可能存在临界点：文件或上下文大到超出 agent 能有效处理的范围；模块纠缠到改一处坏多处，失败率突然上升。越过临界点时 <span class="v">β</span> 会跳变，按线性模型算出的阈值和回本期限都会低估风险。本实验离这种区域很远：单次实现会话只用 7–10 万 token，{{real.sessions}} 个会话验收失败 {{real.failed}} 次，所以无法回答临界点在哪里。</p>
 
+<h3>3.8 交互：回本计算器</h3>
+<p>拖动参数，看两种策略的累计实现成本怎么分开。成本以 <span class="v">c</span>₀（干净代码库上一项的成本）为单位，维护在期限内均匀安排。预设按钮载入本实验三组数据的估计值；滑块上 <span class="v">N</span>、<span class="v">R</span> 取整数，所以 <span class="v">Q</span> 与 §6.4 表中的值略有差别。悬停图表或用方向键查看每个位置的数值。</p>
+<div class="viz" id="calc">
+  <div class="chips" id="calc-presets">
+    <button type="button" class="chip" data-preset="real">真实运行（β 取上界）</button>
+    <button type="button" class="chip" data-preset="real0">真实运行（可修复 β ≈ 0）</button>
+    <button type="button" class="chip" data-preset="strong">模拟·技术债影响强</button>
+    <button type="button" class="chip" data-preset="weak">模拟·技术债影响弱</button>
+  </div>
+  <div class="controls">
+    <label class="ctl">单项成本增幅 β（%/项）<span class="row"><input type="range" id="c-beta" min="0" max="10" step="0.05"><output id="o-beta"></output></span></label>
+    <label class="ctl">一次维护折合 m/c₀（项）<span class="row"><input type="range" id="c-mc" min="0.2" max="6" step="0.1"><output id="o-mc"></output></span></label>
+    <label class="ctl">期限内交付 N（项）<span class="row"><input type="range" id="c-n" min="5" max="200" step="1"><output id="o-n"></output></span></label>
+    <label class="ctl">维护次数 R<span class="row"><input type="range" id="c-r" min="0" max="10" step="1"><output id="o-r"></output></span></label>
+  </div>
+  <div class="tiles">
+    <div class="tile"><div class="t-label">回本系数 Q</div><div class="t-value" id="t-q">–</div><div class="t-note" id="t-verdict"></div></div>
+    <div class="tile"><div class="t-label">维护净收益（项，按定理）</div><div class="t-value" id="t-net">–</div><div class="t-note">正数：维护省下的实现成本多于维护本身</div></div>
+    <div class="tile"><div class="t-label">跳过维护的阈值 β*</div><div class="t-value" id="t-bstar">–</div><div class="t-note">单次、时机最好时；β 低于它就不维护</div></div>
+    <div class="tile"><div class="t-label">最优维护次数 R*</div><div class="t-value" id="t-rstar">–</div><div class="t-note" id="t-nstar"></div></div>
+  </div>
+  <div class="chips" id="calc-view">
+    <button type="button" class="chip" data-view="cum" aria-pressed="true">累计实现成本</button>
+    <button type="button" class="chip" data-view="item" aria-pressed="false">单项成本</button>
+  </div>
+  <div class="vlegend" id="calc-legend"></div>
+  <div id="calc-chart"></div>
+  <details><summary>数据表</summary><div class="tbl" id="calc-table"></div></details>
+  <noscript><p>计算器需要 JavaScript。</p></noscript>
+</div>
+
 <h2 id="p">4. 从理论到可检验预测</h2>
 <div class="tbl"><table>
 <tr><th>预测</th><th style="text-align:left">检验什么</th><th style="text-align:left">怎么测</th></tr>
@@ -286,17 +363,44 @@ li { margin: 3px 0; }
 
 <h3>6.5 用现场规则回看每一次维护</h3>
 <p>按推论 6，对真实运行维护组的每一次维护计算 <span class="v">βk</span>·<span class="v">N</span><sub>rem</sub>，与该次维护的实际 <span class="v">m</span>/<span class="v">c</span>₀ 比较。<span class="v">k</span> 按维护类型分别计（同类维护之间交付的项数），这比把各类维护都当作同一笔技术债的清零更偏向维护；<span class="v">N</span><sub>rem</sub> 取该系列在这次维护之后实际交付的项数；<span class="v">β</span> 取上界 {{real.beta}}%/项。</p>
+<div class="viz" id="online">
+  <div class="chips" id="online-presets">
+    <button type="button" class="chip" data-beta="0">可修复 β ≈ 0</button>
+    <button type="button" class="chip" data-beta="{{real.beta}}">β 上界 {{real.beta}}%</button>
+    <button type="button" class="chip" data-beta="{{real.beta_hi}}">β 区间上端 {{real.beta_hi}}%</button>
+  </div>
+  <div class="controls">
+    <label class="ctl">β（%/项）<span class="row"><input type="range" id="on-beta" min="0" max="3" step="0.01"><output id="on-o-beta"></output></span></label>
+    <div class="ctl">k 的计法<span class="chips" id="on-k" style="margin:4px 0 0"><button type="button" class="chip" data-k="type" aria-pressed="true">按维护类型</button><button type="button" class="chip" data-k="single" aria-pressed="false">统一清零</button></span></div>
+    <div class="ctl">值得做的维护<span class="t-value" id="on-count">–</span></div>
+  </div>
+  <div class="vlegend" id="online-legend"></div>
+  <div id="online-chart"></div>
+  <p class="t-note">每个点是一次维护：横轴是它的实际成本，纵轴是按推论 6 现在维护能省下的成本。落在对角线上方才值得做。下表随参数一起更新。</p>
+</div>
 <div class="tbl"><table>
-<tr><th>重复</th><th>周</th><th>维护类型</th><th>k</th><th>N<sub>rem</sub></th><th>βk·N<sub>rem</sub></th><th>m/c₀</th><th>值得做</th></tr>
+<thead><tr><th>重复</th><th>周</th><th>维护类型</th><th>k</th><th>N<sub>rem</sub></th><th>βk·N<sub>rem</sub></th><th>m/c₀</th><th>值得做</th></tr></thead>
+<tbody id="online-tbody">
 {{real.online_rows}}
+</tbody>
 </table></div>
 <p>结果：{{real.online_type_n}} 次维护中值得做的有 <b>{{real.online_type_worth}}</b> 次，最大的“收益/成本”比为 {{real.online_type_max}}。把各类维护视为同一笔技术债的清零时也是 {{real.online_single_worth}} 次（最大比 {{real.online_single_max}}）。即使取 <span class="v">β</span> 区间上端 {{real.beta_hi}}%/项，也只有 {{real.online_type_hi_worth}} 次勉强值得（最大比 {{real.online_type_hi_max}}）。而按 6.2 的证据，可修复的 <span class="v">β</span> 约为 0，那么一次都不值得。阈值策略触发维护时，要么积累的溢价还小，要么剩下的工作已经不多。</p>
 
 <h3>6.6 回本期限</h3>
 <div id="chart-labels" data-label-aria="回本系数 Q 随期限的变化" data-label-horizon="本实验 8 周" data-label-x="期限（周）" data-label-breakeven="Q = 1 回本线" data-label-strong="模拟·强" data-label-weak="模拟·弱" data-label-real="真实（β 上界）" data-label-yes="是" data-label-no="否" data-label-maint_tests="补测试" data-label-maint_refactor="代码整理" data-label-maint_security="安全扫描与依赖更新" data-label-maint_knowledge="知识提炼"></div>
 <figure>
+<div class="viz" id="qviz">
+  <div class="chips" id="q-real">
+    <button type="button" class="chip" data-beta="point" aria-pressed="true">真实运行用 β 点估计（上界）</button>
+    <button type="button" class="chip" data-beta="hi" aria-pressed="false">真实运行用 β 区间上端</button>
+  </div>
+  <div class="vlegend" id="q-legend"></div>
+  <div id="q-chart">
 {{chart.payback}}
-<figcaption>按推论 3，用各数据集实测的每周交付 <span class="v">v</span>、每周维护次数 <span class="v">r</span>、<span class="v">m</span>/<span class="v">c</span>₀ 和 <span class="v">β̂</span> 画出 <span class="v">Q</span>(<span class="v">T</span>)（对数纵轴）。曲线落到 1 以下的期限即回本期限；圆点是第 8 周的值。真实运行一条用的是 <span class="v">β</span> 的上界，按 6.2 的证据，可修复的 <span class="v">β</span> 不大于 0，对应的曲线在图外（<span class="v">Q</span> = ∞）。</figcaption>
+  </div>
+  <details><summary>数据表</summary><div class="tbl" id="q-table"></div></details>
+</div>
+<figcaption>按推论 3，用各数据集实测的每周交付 <span class="v">v</span>、每周维护次数 <span class="v">r</span>、<span class="v">m</span>/<span class="v">c</span>₀ 和 <span class="v">β̂</span> 画出 <span class="v">Q</span>(<span class="v">T</span>)（对数纵轴）。曲线落到 1 以下的期限即回本期限，图中标出了各曲线的回本点 <span class="v">T</span>*。悬停查看任一期限的 <span class="v">Q</span>，点击图例显示或隐藏曲线。真实运行一条用的是 <span class="v">β</span> 的上界，按 6.2 的证据，可修复的 <span class="v">β</span> 不大于 0，对应的曲线在图外（<span class="v">Q</span> = ∞）。</figcaption>
 </figure>
 <p>回本期限（按实测维护频率）：模拟“强”约 {{strong.T_obs}} 周，模拟“弱”约 {{weak.T_obs}} 周；真实运行若把全部成本上升都算作债务约 {{real.T_obs}} 周（取 <span class="v">β</span> 区间上端约 {{real.T_obs_hi}} 周），若只在中点维护一次约 {{real.T_one}} 周。按 6.2 的实测证据，真实运行不存在回本期限。</p>
 
@@ -340,5 +444,27 @@ python3 -m harness methodology      # 本页</pre>
 <p>原始日志：<code>docs/data/&lt;阶段&gt;/&lt;假设&gt;/{tasks,weeks,metrics}.csv</code> 与 <code>run.json</code>。</p>
 
 </div>
+<script type="application/json" id="meth-data">{{data.json}}</script>
+<script type="application/json" id="meth-labels">
+{
+  "series": {"nomaint": "不维护", "maint": "维护 {R} 次", "zero": "β = 0 参考", "strong": "模拟·强", "weak": "模拟·弱", "real": "真实运行"},
+  "axis": {"k": "已交付项数 k", "cum": "累计实现成本（c₀）", "item": "单项成本（c₀）", "T": "期限（周）", "Q": "回本系数 Q", "cost": "这次维护的成本 m/c₀（项）", "benefit": "现在维护能省下 βk·N_rem（项）"},
+  "tip": {"k_at": "已交付 {k} 项", "T": "期限 {T} 周", "paid": "回本", "unpaid": "未回本", "maint_at": "此处维护", "event": "第 {rep} 次重复 · 第 {week} 周", "k": "k", "n_rem": "N_rem", "benefit": "能省下", "cost": "成本", "worth": "值得做", "not_worth": "不值得"},
+  "verdict": {"yes": "✓ 维护划算", "no": "✗ 维护不划算", "na": "R = 0，即不维护"},
+  "units": {"items": "项", "weeks": "周", "inf": "∞", "pctItem": "%/项"},
+  "nstar": "单次维护至少交付 {n} 项才回本",
+  "nstar_inf": "β = 0：任何期限都不回本",
+  "rstar_note": "净收益 {net} 项",
+  "ref": {"breakeven": "Q = 1 回本线", "horizon": "本实验 8 周", "diag": "收益 = 成本", "above": "上方：值得做"},
+  "tstar": "T* ≈ {t} 周",
+  "types": {"maint_tests": "补测试", "maint_refactor": "代码整理", "maint_security": "安全扫描与依赖更新", "maint_knowledge": "知识提炼"},
+  "table": {"k": "k", "dataset": "数据集", "tstar": "回本期限 T*（周）", "q8": "第 8 周的 Q", "beyond": "超过 {t} 周"},
+  "yes": "是",
+  "no": "否"
+}
+</script>
+<script>
+{{script.js}}
+</script>
 </body>
 </html>

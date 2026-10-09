@@ -5,6 +5,7 @@ rebuilt after any run. The template holds the text; placeholders look like {{nam
 """
 from __future__ import annotations
 
+import json
 import math
 import random
 import re
@@ -15,8 +16,10 @@ from . import config, stats
 
 TEMPLATE = config.ROOT / "docs" / "methodology_template.html"
 OUTPUT = config.ROOT / "docs" / "methodology.html"
+SCRIPT = config.ROOT / "harness" / "methodology_page.js"  # inlined so the page stays one file
 DATASETS = {"strong": ("sim", "strong"), "weak": ("sim", "weak"), "real": ("real", "real")}
-COLORS = {"strong": "#B8860B", "weak": "#8E8E93", "real": "#2E8B57"}
+# Validated with the dataviz palette checker (all pairs, light); the page swaps in dark steps.
+COLORS = {"strong": "#4a3aa7", "weak": "#eda100", "real": "#1baf7a"}
 BOOT = 2000
 
 
@@ -163,6 +166,19 @@ def online_rule(beta: float, c0: float, per_type: bool) -> list[dict]:
     return events
 
 
+def page_data(est: dict) -> str:
+    """JSON embedded in the page for the interactive charts."""
+    keys = ("beta", "beta_lo", "beta_hi", "mc", "R", "N0", "NM", "v", "r", "c0")
+    datasets = {k: {f: round(e[f], 6) for f in keys} for k, e in est.items()}
+    r = est["real"]
+    by_type = online_rule(r["beta"], r["c0"], per_type=True)
+    single = online_rule(r["beta"], r["c0"], per_type=False)
+    events = [{"rep": a["rep"], "week": a["week"], "type": a["type"], "k_type": a["k"],
+               "k_single": b["k"], "n_rem": a["n_rem"], "mc": round(a["mc"], 4)}
+              for a, b in zip(by_type, single)]
+    return json.dumps({"datasets": datasets, "events": events}, separators=(",", ":"))
+
+
 def payback_chart(est: dict, labels: dict) -> str:
     """Inline SVG: Q(T) per dataset for the observed policy, log scale, Q = 1 is break-even."""
     W, H = 720, 320
@@ -270,6 +286,8 @@ def build() -> str:
     chart_labels = dict(re.findall(r'data-label-(\w+)="([^"]*)"',
                                    re.search(r'<div id="chart-labels"[^>]*>', text).group(0)))
     vals["chart.payback"] = payback_chart(est, chart_labels)
+    vals["data.json"] = page_data(est)
+    vals["script.js"] = SCRIPT.read_text(encoding="utf-8")
     rows = []
     for e_ in vals.pop("_online_rows"):  # type: ignore[union-attr]
         verdict = chart_labels["yes"] if e_["worth"] else chart_labels["no"]

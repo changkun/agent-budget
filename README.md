@@ -18,7 +18,7 @@ The plan (in Chinese) is in [PLAN.md](PLAN.md); the final report (in Chinese) is
 ## Results
 
 Full report (in Chinese): [REPORT.md](REPORT.md). Methodology from premise to theory to
-evidence, including the payback theorem (in Chinese): [docs/methodology.html](docs/methodology.html). Dashboard:
+evidence, including the payback theorem and interactive charts (in Chinese): [docs/methodology.html](docs/methodology.html). Dashboard:
 [docs/index.en.html](docs/index.en.html) (English) and [docs/index.html](docs/index.html)
 (Chinese), both built from the same data. Screenshots below are taken from the English
 dashboard with `node harness/screenshots.mjs`.
