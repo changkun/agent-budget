@@ -206,8 +206,8 @@ def summarize() -> dict:
     K = s["producer_k"]
     out["E3_producer_fixed_consumer"] = [x for x in (premium(d, ref, p, K, ref)
                                                     for p in producers if p != ref) if x]
-    out["E3_debt_growth"] = [x for x in (debt_growth(d, p, K) for p in producers) if x] + \
-        [x for x in (debt_growth(d, ref, k) for k in s["sonnet_k"]) if x]
+    out["E3_debt_growth"] = [x for x in (debt_growth(d, p, K) for p in producers if p != ref)
+                             if x] + [x for x in (debt_growth(d, ref, k) for k in s["sonnet_k"]) if x]
     diag = [x for x in (premium(d, p, p, K, p) for p in producers if p != ref) if x]
     sonnet_self = premium(d, ref, ref, 29, ref)
     out["E4_diagonal"] = ([sonnet_self] if sonnet_self else []) + diag

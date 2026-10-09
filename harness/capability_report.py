@@ -133,6 +133,7 @@ def tables(summary: dict) -> dict[str, str]:
                          key=lambda m: (ORDER.index(m["maintainer"]), ORDER.index(m["producer"]), m["k"]))])
     t["states"] = states_table()
     t["figure"] = f"![接手 Sonnet 代码（k = 29）时的成本溢价]({figure_premium(summary)})"
+    figure_premium(summary, lang="en")
     t["mechanism"] = mechanism_table()
     return t
 
@@ -262,8 +263,22 @@ text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,san
 """
 
 
-def figure_premium(summary: dict, k: int = 29) -> str:
+FIG_TEXT = {
+    "zh": {"title": "接手 Sonnet 代码（k = {k}）时的成本溢价 π，90% 区间",
+           "fixed": "对照：Sonnet 维护后", "self": "对照：该模型自己维护后",
+           "note": "π &gt; 0：不维护的代码更贵；π &lt; 0：维护后的代码更贵",
+           "tip_fixed": "对照 Sonnet 维护", "tip_self": "对照自己维护", "suffix": "", "gap": 171},
+    "en": {"title": "Cost premium π on Sonnet's code at k = {k}, 90% interval",
+           "fixed": "vs. maintained by Sonnet", "self": "vs. maintained by the model itself",
+           "note": "π &gt; 0: unmaintained code costs more; π &lt; 0: maintained code costs more",
+           "tip_fixed": "vs. Sonnet-maintained", "tip_self": "vs. self-maintained",
+           "suffix": ".en", "gap": 190},
+}
+
+
+def figure_premium(summary: dict, k: int = 29, lang: str = "zh") -> str:
     """Premium at k items per consumer: fixed maintainer (circle) and self-maintained (square)."""
+    tx = FIG_TEXT[lang]
     fixed = {e["consumer"]: e for e in summary["E1_consumer_fixed_maintainer"] if e["k"] == k}
     own = {e["consumer"]: e for e in summary["E2_consumer_self_maintained"] if e["k"] == k}
     models = [m for m in ORDER if m in fixed or m in own]
@@ -280,12 +295,13 @@ def figure_premium(summary: dict, k: int = 29) -> str:
            f'height="{H}" role="img" aria-label="Premium at k={k} by consumer model">',
            f"<style>{FIG_CSS}</style>"]
     out.append(f'<text class="t1" x="{left}" y="20" font-size="14" font-weight="600">'
-               f'接手 Sonnet 代码（k = {k}）时的成本溢价 π，90% 区间</text>')
+               f'{tx["title"].format(k=k)}</text>')
     # legend
+    g = tx["gap"]
     out.append(f'<circle class="s1" cx="{left + 6}" cy="38" r="5"/>'
-               f'<text class="t2" x="{left + 16}" y="42" font-size="12">对照：Sonnet 维护后</text>'
-               f'<rect class="s2" x="{left + 171}" y="33" width="10" height="10"/>'
-               f'<text class="t2" x="{left + 187}" y="42" font-size="12">对照：该模型自己维护后</text>')
+               f'<text class="t2" x="{left + 16}" y="42" font-size="12">{tx["fixed"]}</text>'
+               f'<rect class="s2" x="{left + g}" y="33" width="10" height="10"/>'
+               f'<text class="t2" x="{left + g + 16}" y="42" font-size="12">{tx["self"]}</text>')
     n = int(round((hi - lo) / step))
     for i in range(n + 1):
         v = lo + i * step
@@ -308,15 +324,15 @@ def figure_premium(summary: dict, k: int = 29) -> str:
                        f'y1="{yy:.1f}" y2="{yy:.1f}" stroke-width="2"/>')
             if shape == "circle":
                 out.append(f'<circle class="{cls}" cx="{x(e["pi"]):.1f}" cy="{yy:.1f}" r="5">'
-                           f'<title>{LABEL[m]}，对照 Sonnet 维护：{_ci_pct(e, "pi")}</title></circle>')
+                           f'<title>{LABEL[m]}, {tx["tip_fixed"]}: {_ci_pct(e, "pi")}</title></circle>')
             else:
                 out.append(f'<rect class="{cls}" x="{x(e["pi"]) - 5:.1f}" y="{yy - 5:.1f}" '
-                           f'width="10" height="10"><title>{LABEL[m]}，对照自己维护：'
+                           f'width="10" height="10"><title>{LABEL[m]}, {tx["tip_self"]}: '
                            f'{_ci_pct(e, "pi")}</title></rect>')
     out.append(f'<text class="t2" x="{(left + W - right) / 2:.1f}" y="{H - 6}" font-size="12" '
-               f'text-anchor="middle">π &gt; 0：不维护的代码更贵；π &lt; 0：维护后的代码更贵</text>')
+               f'text-anchor="middle">{tx["note"]}</text>')
     out.append("</svg>")
     FIG_DIR.mkdir(parents=True, exist_ok=True)
-    path = FIG_DIR / f"premium-k{k}.svg"
+    path = FIG_DIR / f"premium-k{k}{tx['suffix']}.svg"
     path.write_text("\n".join(out) + "\n", encoding="utf-8")
     return str(path.relative_to(ROOT))

@@ -482,7 +482,7 @@ svg .tick { font-variant-numeric: tabular-nums; }
 <li><b>可直接使用的决策规则</b>：不按指标阈值触发维护，而是在同类任务上测当前单项成本相对干净状态的溢价 <span class="v">βk</span>，当 <span class="v">βk</span> × 剩余项数 &gt; 一次维护折合的项数时才维护（推论 6）；若 <span class="v">β</span> 稳定，维护间隔取 <span class="v">L</span>* = √(2(<span class="v">m</span>/<span class="v">c</span>₀)/<span class="v">β</span>)（推论 7）。</li>
 <li><b>理论给出的下一步实验</b>：
 <ol>
-<li>直接测 <span class="v">β</span>：固定同一批项，在不同债务状态的代码库副本上实现，比较成本。</li>
+<li>直接测 <span class="v">β</span>：固定同一批项，在不同债务状态的代码库副本上实现，比较成本。已在后续实验中完成（<a href="../REPORT-capability.md">REPORT-capability.md</a>）：Haiku、Sonnet、Opus、Fable 四个模型，同一个模型写、维护、接手时，<span class="v">β</span> 都不明显大于 0，单次维护回本至少要剩约 90–110 项；Opus 和 Fable 在维护后的代码上反而更贵，因为它们跟随补齐的测试多写测试。</li>
 <li>延长期限，使 <span class="v">N</span> 超过推论 2 的 <span class="v">N</span>*。</li>
 <li>增加“单次定时维护”对照组，检验推论 1。</li>
 <li>增加“按推论 6 现场决策”的维护组，与阈值策略对比。</li>

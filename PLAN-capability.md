@@ -1,6 +1,6 @@
-# 后续实验计划：模型能力与技术债（草案，未运行）
+# 后续实验计划：模型能力与技术债
 
-你确认之前，不发起任何消耗模型用量的运行。文中 Sonnet 的数字都来自已完成的实验（`docs/data/real/`、`snapshots/`）。
+已于 2026-10-09 运行，结果见 [REPORT-capability.md](REPORT-capability.md)。第 13 节记录了运行前和阶段 1 后确定的实施决定。文中 Sonnet 的数字都来自已完成的实验（`docs/data/real/`、`snapshots/`）。
 
 ## 1. 问题
 

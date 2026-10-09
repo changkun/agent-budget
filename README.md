@@ -52,6 +52,29 @@ while `maint` stays flat, yet `maint` still delivers about 2 fewer items in 8 we
 |---|---|
 | ![Simulation strong: cumulative items](docs/img/en/sim-strong-cumulative.png) | ![Simulation weak: cumulative items](docs/img/en/sim-weak-cumulative.png) |
 
+### Follow-up: does the need for maintenance depend on the model?
+
+Plan: [PLAN-capability.md](PLAN-capability.md); report: [REPORT-capability.md](REPORT-capability.md)
+(both in Chinese). Haiku 5.5, Sonnet 5.5, Opus 5.5 and Fable 5.1 took over code states from
+the archived snapshots (and Haiku and Opus wrote their own) and did six fixed probe tasks on
+each state, before and after maintenance; 828 sessions, 140.60 USD at API list prices.
+
+- All models passed all 600 probe tasks and all 174 production items on the first try, so an
+  eval's success rate carries no information at this scale; only cost differs.
+- With one model writing, maintaining and taking over the code, no model's cost premium on
+  unmaintained code is clearly above zero, and one maintenance costs 4.6-10.4 items of
+  implementation. A single maintenance would pay off only with roughly 90-110 or more items
+  left; each series here had 29.
+- On the same Sonnet-written code, the premium falls with capability: Haiku +5.0%,
+  Sonnet +5.7% (both intervals include 0), Opus -11.4%, Fable -11.5%. The strongest models
+  cost more on maintained code because they follow its test conventions and write more tests.
+- Who wrote the code mattered more than who took it over: for Sonnet, code written by Haiku
+  or Opus (largest files about 277 and 240 lines) carried +10.9% and +12.5%, against +5.7%
+  for its own code.
+- Capability rank alone did not predict whether a model's output needs maintenance.
+
+![Premium on Sonnet's code at k = 29 by consumer model](docs/img/capability/premium-k29.en.svg)
+
 ## Phases
 
 1. **Simulation** (no model calls). A seeded model of codebase state and task cost, run under
@@ -76,8 +99,10 @@ docs/img/          dashboard screenshots: Chinese for REPORT.md, docs/img/en/ En
 site/              website used in the real run
 backlog/           backlog items and calibration items for the real run
 acceptance/        acceptance tests, kept outside the working copies
-snapshots/         archived real-run working copies (git bundles), session transcripts, spend ledger
-PLAN-capability.md follow-up plan (Chinese, not run): does the need for maintenance depend on model capability?
+snapshots/         archived real-run working copies (git bundles), session transcripts, spend ledger;
+                   snapshots/capability/ holds the follow-up experiment's code states and logs
+PLAN-capability.md, REPORT-capability.md   follow-up experiment: plan and report (Chinese)
+docs/data/capability/  follow-up experiment logs: sessions.csv, states.csv, plan.json, run.json
 ```
 
 Working copies for the real run live outside the repository (`/home/user/agent-work`, see
@@ -100,6 +125,7 @@ python3 -m harness real run-all   # real phase: all series (resumable at week bo
 python3 -m harness real status
 python3 -m harness snapshot archive                       # bundle working copies and logs into snapshots/
 python3 -m harness snapshot restore nomaint-r1 --items 20 --dest /tmp/n1-k20
+python3 -m harness capability prepare|feasibility|plan|run|status|report|archive   # follow-up
 python3 -m harness build-report   # regenerate REPORT.md tables from docs/report_template.md
 python3 -m harness methodology    # regenerate docs/methodology.html from docs/methodology_template.html
 node harness/screenshots.mjs      # refresh docs/img/ (needs Playwright with Chromium)

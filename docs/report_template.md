@@ -1,6 +1,6 @@
 # 最终报告：固定周预算下 coding agent 的维护与实现分配
 
-看板：[docs/index.html](docs/index.html)（英文版 [docs/index.en.html](docs/index.en.html)；GitHub Pages 开启后为 https://changkun.github.io/agent-budget/ ）。原始日志在 `docs/data/`。计划与规则见 [PLAN.md](PLAN.md)。从前提、理论模型到证据的完整推导见方法论页面 [docs/methodology.html](docs/methodology.html)。
+看板：[docs/index.html](docs/index.html)（英文版 [docs/index.en.html](docs/index.en.html)；GitHub Pages 开启后为 https://changkun.github.io/agent-budget/ ）。原始日志在 `docs/data/`。计划与规则见 [PLAN.md](PLAN.md)。从前提、理论模型到证据的完整推导见方法论页面 [docs/methodology.html](docs/methodology.html)。后续实验（维护的必要性是否随模型能力变化）见 [REPORT-capability.md](REPORT-capability.md)。
 
 ## 结论摘要
 
