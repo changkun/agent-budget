@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import math
 import re
+from pathlib import Path
 from collections import defaultdict
 from statistics import fmean
 
@@ -131,7 +132,67 @@ def tables(summary: dict) -> dict[str, str]:
          for m in sorted(summary["maintenance"],
                          key=lambda m: (ORDER.index(m["maintainer"]), ORDER.index(m["producer"]), m["k"]))])
     t["states"] = states_table()
+    t["figure"] = f"![接手 Sonnet 代码（k = 29）时的成本溢价]({figure_premium(summary)})"
+    t["mechanism"] = mechanism_table()
     return t
+
+
+def mechanism_table() -> str:
+    """Per consumer at k = 29 on Sonnet's code: tokens, turns and test writing, R vs MS."""
+    import glob
+    import re
+    from .capability import root
+    rows = [r for r in read_csv(DATA / "sessions.csv") if r["kind"] == "probe"
+            and r["producer"] == "sonnet55" and r["k"] == "29" and r["state_kind"] in ("R", "M")]
+    writes = re.compile(r"(cat\s*>|cat\s*<<|tee |>>?\s*test/|sed -i|perl -i|python3?|node -e)")
+    tests: dict = defaultdict(list)
+    cache = DATA / "probe_test_writes.csv"
+    files = glob.glob(str(root() / "transcripts" / "probe_*_sonnet55-r*-k29-*.jsonl"))
+    counted = []
+    if not files and cache.exists():  # transcripts archived: use the counts saved last time
+        for r in read_csv(cache):
+            tests[(r["model"], r["state"])].append(int(r["test_writes"]))
+    for f in files:
+        m = re.search(r"probe_(\w+?)_sonnet55-r\d-k29-(R|Msonnet55)_C\d", f)
+        if not m:
+            continue
+        n = 0
+        for line in open(f, encoding="utf-8"):
+            e = json.loads(line)
+            if e.get("type") != "assistant":
+                continue
+            for c in e["message"].get("content", []):
+                if c.get("type") != "tool_use":
+                    continue
+                inp = c.get("input", {})
+                cmd, path = str(inp.get("command", "")), str(inp.get("file_path", ""))
+                if (c["name"] in ("Write", "Edit") and "/test/" in path) or (
+                        c["name"].lower() == "bash" and "test/" in cmd and writes.search(cmd)):
+                    n += 1
+        tests[(m.group(1), "R" if m.group(2) == "R" else "MS")].append(n)
+        counted.append({"transcript": Path(f).name, "model": m.group(1),
+                        "state": "R" if m.group(2) == "R" else "MS", "test_writes": n})
+    if counted:
+        import csv
+        with open(cache, "w", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=["transcript", "model", "state", "test_writes"])
+            w.writeheader()
+            w.writerows(sorted(counted, key=lambda r: r["transcript"]))
+    out = []
+    for model in ORDER:
+        for kind, cond in (("R", lambda r: r["state_kind"] == "R"),
+                           ("MS", lambda r: r["maintainer"] == "sonnet55")):
+            rs = [r for r in rows if r["model"] == model and cond(r)]
+            if not rs:
+                continue
+            f = lambda k: fmean(float(r[k] or 0) for r in rs)  # noqa: E731
+            tw = tests.get((model, kind))
+            out.append([LABEL[model], kind, str(len(rs)), _usd(f("cost_usd")),
+                        f"{f('cache_read_tokens') / 1000:.0f}k", f"{f('cache_write_tokens') / 1000:.1f}k",
+                        f"{f('output_tokens') / 1000:.1f}k", f"{f('num_turns'):.1f}",
+                        f"{fmean(tw):.2f}" if tw else "–"])
+    return _table(["接手模型", "状态", "会话", "每会话成本", "缓存读取", "缓存写入", "输出", "轮数",
+                   "每会话写测试文件次数"], out)
 
 
 BLOCK_TEXT = {"core2": "Haiku / Sonnet / Opus 接手 Sonnet 的代码",
