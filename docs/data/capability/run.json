@@ -1,0 +1,136 @@
+{
+  "cli_version": "2.1.295 (Claude Code)",
+  "experiment_rules": {
+    "max_debug": 2
+  },
+  "git_commit": "0d4859c8e655c8120b96dee6040bbdcde2825afb",
+  "prices": {
+    "claude-fable-5-1": {
+      "cache_read": 0.25,
+      "cache_write_1h": 20.0,
+      "cache_write_5m": 12.5,
+      "input": 10.0,
+      "output": 50.0
+    },
+    "claude-haiku-5-5": {
+      "above_tier": {
+        "cache_read": 0.05,
+        "cache_write_1h": 1.0,
+        "cache_write_5m": 0.625,
+        "input": 0.5,
+        "output": 2.5
+      },
+      "cache_read": 0.01,
+      "cache_write_1h": 0.2,
+      "cache_write_5m": 0.125,
+      "input": 0.1,
+      "output": 0.5,
+      "tier_prompt_tokens": 100000
+    },
+    "claude-opus-5-5": {
+      "cache_read": 0.2,
+      "cache_write_1h": 8.0,
+      "cache_write_5m": 5.0,
+      "input": 4.0,
+      "output": 20.0
+    },
+    "claude-sonnet-5-5": {
+      "cache_read": 0.1,
+      "cache_write_1h": 4.0,
+      "cache_write_5m": 2.5,
+      "input": 2.0,
+      "output": 10.0
+    }
+  },
+  "prices_source": "config/prices.toml",
+  "runs": [
+    {
+      "command": "feasibility",
+      "models": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5",
+        "claude-opus-5-5",
+        "claude-fable-5-1"
+      ],
+      "t": "2026-10-09T16:49:39+00:00"
+    }
+  ],
+  "settings": {
+    "blocks": {
+      "core_consumers": [
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5",
+        "claude-opus-5-5"
+      ],
+      "core_producers": [
+        "claude-haiku-5-5",
+        "claude-opus-5-5"
+      ],
+      "option_a": "claude-fable-5-1",
+      "order": [
+        "core2",
+        "core3",
+        "A2",
+        "A3",
+        "D"
+      ]
+    },
+    "effort": "high",
+    "guard_usd": {
+      "claude-fable-5-1": 1.9,
+      "claude-haiku-5-5": 0.1,
+      "claude-opus-5-5": 0.8,
+      "claude-sonnet-5-5": 0.4
+    },
+    "maint_agents": [
+      "tests",
+      "refactor"
+    ],
+    "models": {
+      "claude-fable-5-1": "fable51",
+      "claude-haiku-5-5": "haiku55",
+      "claude-opus-5-5": "opus55",
+      "claude-sonnet-5-5": "sonnet55"
+    },
+    "parallel": 6,
+    "probes": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6"
+    ],
+    "producer_k": 29,
+    "reference": "claude-sonnet-5-5",
+    "reps": [
+      1,
+      2,
+      3
+    ],
+    "seed": 20261009,
+    "session_timeout_s": 1800,
+    "sonnet_k": [
+      15,
+      29
+    ],
+    "total_cap_usd": 200.0,
+    "work_root": "/home/user/agent-work/capability"
+  },
+  "thresholds": {
+    "knowledge": {
+      "avg_input_tokens_rel_rise_gt": 0.2
+    },
+    "refactor": {
+      "dup_baseline_floor": 0.02,
+      "dup_rel_rise_gt": 0.3,
+      "max_file_rel_rise_gt": 0.5
+    },
+    "security": {
+      "vulns_gt": 0
+    },
+    "tests": {
+      "coverage_rel_drop_gt": 0.05
+    }
+  }
+}

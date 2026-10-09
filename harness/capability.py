@@ -522,6 +522,16 @@ def main_jobs(blocks: list[str]) -> list[Job]:
         consumer_on_sonnet(b["option_a"], "A2")
     if "A3" in blocks:
         producer(b["option_a"], "A3")
+    if "A2s" in blocks and "A2" not in blocks:
+        # reduced option A: the top model as consumer at k = 29 only, against the fixed
+        # maintainer (v0, R and MS states; no self-maintenance)
+        fable = b["option_a"]
+        probe(fable, "v0", "A2s", [])
+        for rep in reps:
+            base = state_id("sonnet55", rep, 29)
+            ms = maint(ref, base, "core2")
+            probe(fable, base, "A2s", [ms])
+            probe(fable, maintained(base, ref), "A2s", [ms])
     if "D" in blocks:
         # Sonnet as the fixed maintainer: every non-reference consumer on every
         # non-reference producer's R and MS states (diagonal R probes exist in core3).
@@ -779,6 +789,28 @@ def cmd_status() -> str:
     return "\n".join(lines)
 
 
+def cmd_archive() -> str:
+    """Bundle every state repository and pack transcripts, ledger and job log."""
+    import tarfile
+    out = config.ROOT / "snapshots" / "capability"
+    out.mkdir(parents=True, exist_ok=True)
+    names = []
+    for repo in sorted((root() / "store").glob("*.git")):
+        bundle = out / (repo.name[:-4] + ".bundle")
+        subprocess.run(["git", "bundle", "create", str(bundle), "--all"], cwd=repo,
+                       capture_output=True, check=True)
+        subprocess.run(["git", "bundle", "verify", str(bundle)], cwd=repo, capture_output=True,
+                       check=True)
+        names.append(bundle.name)
+    with tarfile.open(out / "logs.tar.xz", "w:xz") as tar:
+        for f in sorted((root() / "transcripts").glob("*.jsonl")):
+            tar.add(f, arcname=f"transcripts/{f.name}")
+        for name in ("ledger.jsonl", "jobs.jsonl", "run.log"):
+            if (root() / name).exists():
+                tar.add(root() / name, arcname=name)
+    return f"{len(names)} bundles and logs.tar.xz in {out.relative_to(config.ROOT)}/"
+
+
 def main(argv: list[str]) -> int:
     import argparse
     ap = argparse.ArgumentParser(prog="harness capability")
@@ -791,6 +823,8 @@ def main(argv: list[str]) -> int:
     p_r.add_argument("--parallel", type=int, default=None)
     p_r.add_argument("--deadline-h", type=float, default=10.0)
     sub.add_parser("status")
+    sub.add_parser("archive")
+    sub.add_parser("report")
     args = ap.parse_args(argv)
     root().mkdir(parents=True, exist_ok=True)
     parallel = getattr(args, "parallel", None) or settings()["parallel"]
@@ -804,6 +838,11 @@ def main(argv: list[str]) -> int:
         print(cmd_run(parallel, args.deadline_h))
     elif args.cmd == "status":
         print(cmd_status())
+    elif args.cmd == "archive":
+        print(cmd_archive())
+    elif args.cmd == "report":
+        from . import capability_report
+        print(capability_report.build())
     return 0
 
 

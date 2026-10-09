@@ -20,18 +20,18 @@ reference = "claude-sonnet-5-5"       # fixed maintainer and fixed consumer
 "claude-opus-5-5" = "opus55"
 "claude-fable-5-1" = "fable51"
 
-# Runaway guard per session (USD, passed to --max-budget-usd): about 5x a typical
-# session at the model's price, as in the original experiment (0.38 USD for Sonnet).
+# Runaway guard per session (USD, passed to --max-budget-usd). Set after the feasibility
+# phase to about 3x the measured maintenance session and 5x or more the probe session.
 [guard_usd]
-"claude-haiku-5-5" = 0.10
-"claude-sonnet-5-5" = 0.40
-"claude-opus-5-5" = 0.80
-"claude-fable-5-1" = 1.90
+"claude-haiku-5-5" = 0.15
+"claude-sonnet-5-5" = 0.60
+"claude-opus-5-5" = 1.50
+"claude-fable-5-1" = 4.00
 
 # Blocks in priority order. A block runs only if the re-estimate after the feasibility
 # phase keeps the projected total within total_cap_usd (PLAN-capability.md section 8).
 [blocks]
-order = ["core2", "core3", "A2", "A3", "D"]
+order = ["core2", "core3", "A2", "A3", "A2s", "D"]
 core_consumers = ["claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5"]
 core_producers = ["claude-haiku-5-5", "claude-opus-5-5"]
 option_a = "claude-fable-5-1"

@@ -1,0 +1,11 @@
+job,block,kind,model,producer,rep,k,state,state_kind,maintainer,item,task_type,debug_index,input_tokens,cache_write_tokens,cache_read_tokens,output_tokens,cost_usd,cli_cost_usd,accepted,rolled_back,forced_stop,num_turns,duration_s,session_id,model_reported,effort,attempt,started_at
+feas:sonnet55:C1:1,feas,feas_probe,sonnet55,,,0,v0,V0,,C1,impl,0,12,15635,105139,2089,0.093968,0.104482,1,0,0,8,21.6,17fc7a7c-45d4-4797-9fab-3bd1248e78cb,claude-sonnet-5-5,high,0,2026-10-09T16:49:41+00:00
+feas:sonnet55:C1:2,feas,feas_probe,sonnet55,,,0,v0,V0,,C1,impl,0,14,15581,125854,2225,0.097187,0.109773,1,0,0,7,24.2,229c310e-0e5f-45f3-aa0b-d87432a6cf13,claude-sonnet-5-5,high,0,2026-10-09T16:49:41+00:00
+feas:haiku55:C1:1,feas,feas_probe,haiku55,,,0,v0,V0,,C1,impl,0,18,24985,214413,7486,0.010886,0.010886,1,0,0,17,38.5,d7362d62-a5b6-48db-b8c5-3ff3edc8cc56,claude-haiku-5-5,high,0,2026-10-09T16:49:41+00:00
+feas:opus55:C1:1,feas,feas_probe,opus55,,,0,v0,V0,,C1,impl,0,14,13826,122249,2382,0.182754,0.182754,1,0,0,7,30.6,18645301-ab65-47cb-8e2d-0c146cf03594,claude-opus-5-5,high,0,2026-10-09T16:50:04+00:00
+feas:opus55:C1:2,feas,feas_probe,opus55,,,0,v0,V0,,C1,impl,0,18,16496,174731,3177,0.230526,0.230526,1,0,0,9,34.4,8c1568d2-b92f-4119-8591-9b7add7c33f2,claude-opus-5-5,high,0,2026-10-09T16:50:07+00:00
+feas:haiku55:C1:2,feas,feas_probe,haiku55,,,0,v0,V0,,C1,impl,0,16,30742,205751,11247,0.013831,0.013831,1,0,0,16,61.7,9d6c8783-6b04-481f-b2a5-d6b05649fc91,claude-haiku-5-5,high,0,2026-10-09T16:49:41+00:00
+feas:fable51:C1:1,feas,feas_probe,fable51,,,0,v0,V0,,C1,impl,0,194,25803,156329,5348,0.824482,0.824482,1,0,0,7,65.8,a9d2cb4a-a7e8-418e-9f6b-47e198181319,claude-fable-5-1,high,0,2026-10-09T16:50:36+00:00
+feas:opus55:maint_tests,feas,feas_maint,opus55,sonnet55,1,29,sonnet55-r1-k29-R,R,,,maint_tests,0,14,30801,178399,9439,0.470924,0.470924,1,0,0,8,84.3,d3cacdef-f658-406d-847f-939ecc11c72d,claude-opus-5-5,high,0,2026-10-09T16:50:21+00:00
+feas:fable51:C1:2,feas,feas_probe,fable51,,,0,v0,V0,,C1,impl,0,258,27146,211269,5667,0.881667,0.881667,1,0,0,9,71.2,a88f72f7-5f17-4816-acdf-b4fbf42e34e9,claude-fable-5-1,high,0,2026-10-09T16:50:43+00:00
+feas:fable51:maint_tests,feas,feas_maint,fable51,sonnet55,1,29,sonnet55-r1-k29-R,R,,,maint_tests,0,162,45520,127954,137,0.950859,,1,0,0,,50.5,,claude-fable-5-1,high,1,2026-10-09T16:53:49+00:00

@@ -256,8 +256,22 @@ def usage_by_model(session: dict, default_model: str) -> dict[str, dict]:
                 got = (summed["input"], summed["read"], summed["cw5"] + summed["cw1"],
                        summed["output"])
                 if expected != got:
-                    raise UsageUnavailable(f"per-turn usage {got} does not add up to the "
-                                           f"cumulative modelUsage {expected}")
+                    # A session stopped by the budget guard reports only part of its last
+                    # turn in `usage`. Use the cumulative modelUsage when the per-request
+                    # usage in the stream confirms its input-side counts exactly.
+                    stream = {"input": 0, "cw5": 0, "cw1": 0, "read": 0, "output": 0}
+                    for mname, usage in session.get("per_message", {}).values():
+                        if mname == name:
+                            for k, v in _split(usage).items():
+                                stream[k] += v
+                    if (stream["input"], stream["read"], stream["cw5"] + stream["cw1"]) != expected[:3]:
+                        raise UsageUnavailable(f"per-turn usage {got} does not add up to the "
+                                               f"cumulative modelUsage {expected}")
+                    cw = expected[2]
+                    cw5 = round(cw * summed["cw5"] / (summed["cw5"] + summed["cw1"])) if (
+                        summed["cw5"] + summed["cw1"]) else 0
+                    return {name: {"input": expected[0], "cw5": cw5, "cw1": cw - cw5,
+                                   "read": expected[1], "output": expected[3]}}
             return {name: summed}
         out = {}
         for name, mu in models.items():
@@ -311,14 +325,26 @@ def _tiered_cost(name: str, t: dict, p: dict, per_message: dict | None) -> float
 
 
 def price(tokens_by_model: dict[str, dict], price_table: dict,
-          per_message: dict | None = None) -> float:
+          per_message: dict | None = None, cli_costs: dict | None = None) -> float:
+    """USD for the session. For a model priced by prompt length, the CLI's own per-model
+    cost is used when available: it prices each request with its exact output count, which
+    the stream does not report. Otherwise output is split between tiers by _tiered_cost."""
     cost = 0.0
     for name, t in tokens_by_model.items():
         if name not in price_table:
             raise UsageUnavailable(f"no price for model {name!r}; add it to config/prices.toml")
         p = price_table[name]
-        cost += _tiered_cost(name, t, p, per_message) if "tier_prompt_tokens" in p else _cost(t, p)
+        if "tier_prompt_tokens" in p:
+            cli = (cli_costs or {}).get(name)
+            cost += float(cli) if cli is not None else _tiered_cost(name, t, p, per_message)
+        else:
+            cost += _cost(t, p)
     return cost
+
+
+def cli_model_costs(session: dict) -> dict:
+    res = session.get("result") or {}
+    return {m: v.get("costUSD") for m, v in (res.get("modelUsage") or {}).items()}
 
 
 class RealExecutor:
@@ -422,16 +448,25 @@ class RealExecutor:
         if reason:
             try:
                 tokens = usage_by_model(session, self.model)
-                cost = price(tokens, self.price_table, session["per_message"]) if tokens else 0.0
+                cost = price(tokens, self.price_table, session["per_message"],
+                             cli_model_costs(session)) if tokens else 0.0
             except UsageUnavailable:
                 cost = 0.0
             self.ledger.add(cost, label=self.label, week=week, task_type=task_type, item=item,
                             session_id=res.get("session_id"), infra=reason, **self.ledger_meta)
             raise InfraError(reason)
-        tokens = usage_by_model(session, self.model)
-        if not tokens:
-            raise UsageUnavailable(f"session produced no usage data: {session['stderr']}")
-        cost = price(tokens, self.price_table, session["per_message"])
+        try:
+            tokens = usage_by_model(session, self.model)
+            if not tokens:
+                raise UsageUnavailable(f"session produced no usage data: {session['stderr']}")
+        except UsageUnavailable as e:
+            # the session was paid for: record the CLI's own cost before giving up
+            self.ledger.add(float(res.get("total_cost_usd") or 0.0), label=self.label,
+                            week=week, task_type=task_type, item=item,
+                            session_id=res.get("session_id"), usage_error=str(e)[:300],
+                            **self.ledger_meta)
+            raise
+        cost = price(tokens, self.price_table, session["per_message"], cli_model_costs(session))
         self.ledger.add(cost, label=self.label, week=week, task_type=task_type, item=item,
                         session_id=res.get("session_id"), **self.ledger_meta)
         accepted, output = self._evaluate(check_items)

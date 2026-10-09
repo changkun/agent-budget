@@ -34,6 +34,17 @@ class Usage(unittest.TestCase):
         self.assertEqual(t["m"]["output"], 5415)
         self.assertAlmostEqual(price(t, PRICES), 0.1719469, places=6)
 
+    def test_budget_stop_uses_cumulative_usage_confirmed_by_stream(self):
+        # stopped by --max-budget-usd: the result's usage covers only part of the last turn
+        r = result(162, 46138, 136794, 16298, (194, 63300, 192087, 16706))
+        per = {"a": ("m", {"input_tokens": 100, "cache_creation_input_tokens": 40000,
+                           "cache_read_input_tokens": 100000, "output_tokens": 50}),
+               "b": ("m", {"input_tokens": 94, "cache_creation_input_tokens": 23300,
+                           "cache_read_input_tokens": 92087, "output_tokens": 30})}
+        t = usage_by_model({"results": [r], "per_message": per}, "m")
+        self.assertEqual(t["m"], {"input": 194, "cw5": 0, "cw1": 63300, "read": 192087,
+                                  "output": 16706})
+
     def test_mismatch_is_an_error(self):
         s = {"results": [result(2, 100, 1000, 10, (2, 100, 999, 10))], "per_message": {}}
         with self.assertRaises(UsageUnavailable):
